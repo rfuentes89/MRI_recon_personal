@@ -1,0 +1,16 @@
+*.asv
+dependencies/NIFTI_REG/Temps/
+NIFTY_REF/Temps/
+ABSTRACT_DATA/
+dataNRP/
+HDP_NONRIGID_TEST/
+ISMRM2023/
+nifty_call.m
+nonrigid_hdprost_batch.m
+recon_NRP_batch.m
+intra_bin_correction.m
+main_DF.m
+._*
+*.dcm
+bart-*
+imagine-master
