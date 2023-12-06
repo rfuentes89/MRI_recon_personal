@@ -34,7 +34,7 @@ function displacement_fields = register_bins(k_spaces, sampling_masks, csm)
         % TODO: this is what the original code does, but `nifty_reg`
         % clearly says it wants the arguments the other way around
         %Normalize(abs(nav_rfm(:,:,:,mmm)),0,1)
-        [~, displacement_field] = nifty_reg(Normalize(abs(bin_images{bin}),0,1), Normalize(abs(reference_image),0,1), ' --nmi -be 0.0005 -sx 14', strcat(getenv('WORKSPACE'), '/.nifty-tmp'));
+        [~, displacement_field] = nifty_reg(Normalize(abs(bin_images{bin}),0,1), Normalize(abs(reference_image),0,1), ' --nmi -be 0.0005 -sx 14', strcat(getenv('WORKSPACE'), '/.nifty-tmp/'));
         displacement_fields(:,:,:,:,bin) = displacement_field;
 
     end
