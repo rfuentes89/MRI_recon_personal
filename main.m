@@ -109,6 +109,13 @@ if isempty(selected.coils)
 end
 
 
+%% Compress coils
+disp("compressing coils")
+    n_coils = size(data.k_spaces{1}, 4);
+    if parameters.n_compressed_coils < n_coils
+        data = compress_coils(data, parameters.n_compressed_coils);
+    end
+
 %% STEP 4: CSM Estimation
 
 disp("step 4: estimating coil maps")
