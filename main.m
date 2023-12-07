@@ -30,6 +30,7 @@ selected.coils = [];
 selected.echoes = [];
 selected.sets = [];
 selected.repetitions = [];
+selected.n_compressed_coils = 0; % Set to 0 to not compress
 
 % for rating coils, and also for coil map estimation
 % TODO: choose a better name
@@ -45,8 +46,6 @@ selected_for_rating.repetition = 1;
 % TODO: make this less confusing
 selected_navigators = selected;
 selected_navigators.echoes = 1;
-
-n_compressed_coils = 8;
 
 coil_sensitivity_mapping_algorithm = "ESPIRiT";
 % Options:
@@ -110,11 +109,11 @@ end
 
 
 %% Compress coils
-disp("compressing coils")
-    n_coils = size(data.k_spaces{1}, 4);
-    if parameters.n_compressed_coils < n_coils
-        data = compress_coils(data, parameters.n_compressed_coils);
-    end
+n_coils = size(data.k_spaces{1}, 4);
+if selected.n_compressed_coils ~= 0 & selected.n_compressed_coils < n_coils
+    disp("compressing coils")
+    data = compress_coils(data, selected.n_compressed_coils);
+end
 
 %% STEP 4: CSM Estimation
 
