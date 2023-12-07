@@ -108,9 +108,9 @@ if isempty(selected.coils)
 end
 
 
-%% Compress coils
+%% STEP 3.1: Compress coils
 n_coils = size(data.k_spaces{1}, 4);
-if selected.n_compressed_coils ~= 0 & selected.n_compressed_coils < n_coils
+if selected.n_compressed_coils ~= 0 && selected.n_compressed_coils < n_coils
     disp("compressing coils")
     data = compress_coils(data, selected.n_compressed_coils);
 end
@@ -193,7 +193,6 @@ disp("Done")
 %% Save variable for Non rigid detach mode
 save('ISMRM2023/GCR/csm_diatole.mat', 'csm','-v7.3');
 save('ISMRM2023/GCR/motion_corrected_data_diatole.mat', 'motion_corrected_data','-v7.3');
-save('ISMRM2023/GCR/At_bins_diatole.mat', 'At_bins','-v7.3');
 disp("SAVED")
 
 %% STEP 7: Reconstructions + Denoising (ADMM + HDPROST)
