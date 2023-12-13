@@ -22,7 +22,8 @@ function displacement_fields = register_bins(k_spaces, sampling_masks, csm)
 
 
     % NiftiReg likes to run in its own folder
-    main_directory = cd(getenv("NIFTY_PATH"));
+    assert(~isempty(getenv('NIFTY_PATH')), 'You must set NIFTY_PATH environment variable first')
+    main_directory = cd(getenv('NIFTY_PATH'));
     go_back = onCleanup(@() cd(main_directory));
 
     % TODO: it would be nice to structure `displacement_fields` properly,
