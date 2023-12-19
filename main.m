@@ -161,6 +161,8 @@ end
 if motion_correction_type ~= "none"
     disp("step 6: correcting motion")
     motion_corrected_data = correct_motion(data, motion_curves, csm, motion_correction_type);
+else
+    motion_corrected_data = data;
 end
 
 %% STEP 7: Reconstructions:
@@ -171,10 +173,7 @@ end
 
 disp("step 7: reconstructing images")
 
-%images = reconstruct_images(data, csm, reconstruction_type);
-if motion_correction_type ~= "none"
-    images_moco = reconstruct_images(motion_corrected_data, csm, reconstruction_type);
-end
+images_moco = reconstruct_images(motion_corrected_data, csm, reconstruction_type);
 
 %% Black Blood
 disp("Black Blood")
@@ -204,10 +203,14 @@ E_CSbins = cell(size(motion_corrected_data.sampling_masks));
 for repetition = 1:n_repetitions
     for set = 1:n_sets
         for echo = 1:n_echoes
-            E_CSbins{echo,set,repetition} = Cruz_E_3D_CART_BATCH(motion_corrected_data.interpolation_matrix{echo,set,repetition}, motion_corrected_data.binned_sampling_masks{echo,set,repetition}, csm.coil_sensitivity_maps, size(motion_corrected_data.k_spaces_corrected{echo,set,repetition},4), size(motion_corrected_data.k_spaces_corrected{echo, ...
-                            set,repetition}, 1:3), ...
-                            size(motion_corrected_data.k_spaces_corrected{echo,set,repetition}), ...
-                            csm.coil_sensitivity_sum);
+            E_CSbins{echo,set,repetition} = Cruz_E_3D_CART_BATCH(...
+                motion_corrected_data.interpolation_matrix{echo,set,repetition}, ...
+                motion_corrected_data.binned_sampling_masks{echo,set,repetition}, ...
+                csm.coil_sensitivity_maps, ...
+                size(motion_corrected_data.k_spaces_corrected{echo,set,repetition},4), ...
+                size(motion_corrected_data.k_spaces_corrected{echo,set,repetition},1:3), ...
+                size(motion_corrected_data.k_spaces_corrected{echo,set,repetition}), ...
+                csm.coil_sensitivity_sum);
         end
     end
 end
