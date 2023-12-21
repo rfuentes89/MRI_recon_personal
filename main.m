@@ -175,6 +175,15 @@ disp("step 7: reconstructing images")
 
 images_moco = reconstruct_images(motion_corrected_data, csm, reconstruction_type);
 
+%%
+if (0)
+    % Save variable for 
+    save('Bruno_data/bruno_csm.mat', 'csm','-v7.3');
+    save('Bruno_data/bruno_moco_info.mat', 'motion_corrected_data','-v7.3');
+    save('Bruno_data/bruno_recon.mat', 'images_moco','-v7.3');
+    disp("SAVED")
+end
+
 %% Black Blood
 disp("Black Blood")
 black_blood = abs(images_moco{2}) - abs(images_moco{1});

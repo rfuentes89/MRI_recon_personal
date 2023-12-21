@@ -40,10 +40,9 @@ function write_dicom_volume(image, filename, info, volscale)
     % Remove filename extention
     pl=find(filename=='.'); if(~isempty(pl)), filename=filename(1:pl-1); end
     % Write volume
-    min_im = prctile(image(:), 10);
-    max_im = prctile(image(:), 100);
-    disp(max_im)
-    image_norm = uint16( double(max_value) * (image - min_im) / (max_im - min_im) ); 
+    min_im = min(image(:));
+    max_im = max(image(:));
+    image_norm = uint16( double(max_value) * (image - min_im) / (max_im - min_im) );
     sz = size(image);
     image_gray = reshape(image_norm,sz(1),sz(2),1,sz(3));
     dicomwrite(image_gray, [filename '.dcm'], info, 'CreateMode', 'copy')
