@@ -5,7 +5,7 @@
 
 **All requirements are already installed in iHEALTH servers** (e.g. ih-condor, nyquist, fourier). Simply load them by running:
 ```bash
-module load bart imagine nifty gsl/2.3
+module load bart imagine nifty gsl/2.3 mapVBVD
 ```
 
 You must run them before running MATLAB.
@@ -50,6 +50,11 @@ echo "export MATLABPATH=/path/to/install/imagine:$MATLABPATH" >> ~/.bash_aliases
 ### Manual installation: [NIFTY](https://github.com/RCiHealthGroup/NIFTY_REG)
 
 Follow instructions in [their README](https://github.com/RCiHealthGroup/NIFTY_REG/tree/main#readme).
+
+### Manual installation: [mapVBVD](https://github.com/RCiHealthGroup/mapVBVD)
+
+Follow instructions in [their README](https://github.com/RCiHealthGroup/mapVBVD).
+
 
   
 </details>
