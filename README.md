@@ -5,7 +5,7 @@
 
 **All requirements are already installed in iHEALTH servers** (e.g. ih-condor, nyquist, fourier). Simply load them by running:
 ```bash
-module load bart imagine nifty gsl/2.3 mapVBVD
+module load bart imagine nifty gsl/2.3 mapVBVD prost
 ```
 
 You must run them before running MATLAB.
@@ -55,6 +55,10 @@ Follow instructions in [their README](https://github.com/RCiHealthGroup/NIFTY_RE
 
 Follow instructions in [their README](https://github.com/RCiHealthGroup/mapVBVD).
 
+
+### Manual installation: PROST
+
+Request the PROST binary to @pdpino.
 
   
 </details>
