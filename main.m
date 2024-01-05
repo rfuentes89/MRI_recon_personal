@@ -193,7 +193,7 @@ black_blood = abs(images_moco{2}) - abs(images_moco{1});
 if denoising_type ~= "none"
     disp("step 8: denoising")
     %denoised_images = denoise(images_moco, denoising_type);
-    denoised_images = denosing_HD_PROST_MULTICONTRAST(images_moco);
+    denoised_images = denoising_HD_PROST(images_moco);
 end
 disp("Done")
 

@@ -58,7 +58,7 @@ Follow instructions in [their README](https://github.com/RCiHealthGroup/mapVBVD)
 
 ### Manual installation: PROST
 
-Request the PROST binary to @pdpino.
+Follow instructions in [their README](https://github.com/RCiHealthGroup/HD_PROST_MATLAB)
 
   
 </details>
