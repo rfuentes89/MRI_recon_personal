@@ -1,11 +1,15 @@
-function write_dicom_volume(image, filename, info, volscale)
+function write_dicom_volume(image, filename, info, options)
     % Based on  
     %     - DICOM Toolbox: https://uk.mathworks.com/matlabcentral/fileexchange/27941-dicom-toolbox
     %     - https://uk.mathworks.com/matlabcentral/fileexchange/23237-read-and-write-single-file-dicom-volumes
     % Check inputs
-    if(exist('filename','var')==0), filename=[]; end
-    if(exist('info','var')==0), info=[]; end
-    if(exist('volscale','var')==0), volscale=[1 1 1]; end
+    if ~exist('filename','var'), filename=""; end
+    if ~exist('info','var'), info=[]; end
+    if ~exist('options', 'var'), options = struct(); end
+    if ~isfield(options, 'min_perc'), options.min_perc = 10; end
+    if ~isfield(options, 'max_perc'), options.max_perc = 100; end
+    %if(exist('volscale','var')==0), volscale=[1 1 1]; end
+
     % Add dicom tags to info structure
     if(~isstruct(info))
         info=struct;
@@ -34,17 +38,24 @@ function write_dicom_volume(image, filename, info, volscale)
         info.Width=size(image,1);
         info.Height=size(image,2);
     end
-    disp(filename)
+
+    % Compute min and max percentiles
     if isfield(info, 'LargestImagePixelValue') max_value = info.LargestImagePixelValue; else max_value = (2^16 - 1); end
-    
-    % Remove filename extention
-    pl=find(filename=='.'); if(~isempty(pl)), filename=filename(1:pl-1); end
-    % Write volume
-    min_im = min(image(:));
-    max_im = max(image(:));
+    if ~isnumeric(options.min_perc)
+        % Remove zeros
+        options.min_perc = (sum(image(:)==0) / numel(image) * 100);
+    end
+    min_im = prctile(image(:), options.min_perc);
+    max_im = prctile(image(:), options.max_perc);
+
+    % Normalize
     image_norm = uint16( double(max_value) * (image - min_im) / (max_im - min_im) );
     sz = size(image);
     image_gray = reshape(image_norm,sz(1),sz(2),1,sz(3));
-    dicomwrite(image_gray, [filename '.dcm'], info, 'CreateMode', 'copy')
-    %dicomwrite(image_gray, [filename '.dcm'], info)
+
+    % Write volume
+    filename = string(filename);
+    if ~endsWith(filename, ".dcm"), filename = filename + ".dcm"; end
+    dicomwrite(image_gray, filename, info, 'CreateMode', 'copy')
+    disp("Dicom written to " + filename)
 end
