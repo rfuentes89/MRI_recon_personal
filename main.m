@@ -53,13 +53,8 @@ coil_sensitivity_mapping_algorithm = "ESPIRiT";
 % "ESPIRiT"
 % "WASLH"
 
-if coil_sensitivity_mapping_algorithm == "BART"
-    % can use `what("bart-0.3.01")` to find
-    bart_path = "";
-    setenv('TOOLBOX_PATH', bart_path);
-end
-
-motion_correction_type = "non_rigid";
+motion_correction_params.type = moco; % translational / non_rigid / none
+motion_correction_params.nr_ref_bin = bin; % 1: inspiration, 4: expiration
 
 reconstruction_type = "it_SENSE"; % it_SENSE / admm
 
@@ -142,10 +137,6 @@ csm = estimate_coil_sensitivity_maps(data, coil_sensitivity_mapping_algorithm, s
 % WASLH
 % The one from the scanner (that reads files)
 
-% filename = ['bruno_data/coil_sensitivity_maps.mat'];
-% csm_output = csm.coil_sensitivity_maps;
-% save(filename,"csm_output",'-v7.3');
-
 %% STEP 5: Reading iNavs
 
 % TODO: only use coils that weren't rejected?
@@ -155,7 +146,7 @@ if (0)
     load('AORTA_data/motion_curves.mat','motion_curves'); % Variable is csm_load.csm
 
 else   
-    if motion_correction_type ~= "none"
+    if motion_correction_params.type ~= "none"
         disp("step 5: estimating motion")
         motion_curves = estimate_motion_curves(twix, selected_navigators);
     end
@@ -171,9 +162,9 @@ end
 %   - Image-bin reconstruction
 %   - NR Image registration
 
-if motion_correction_type ~= "none"
+if motion_correction_params.type ~= "none"
     disp("step 6: correcting motion")
-    motion_corrected_data = correct_motion(data, motion_curves, csm, motion_correction_type);
+    motion_corrected_data = correct_motion(data, motion_curves, csm, motion_correction_params);
 else
     motion_corrected_data = data;
 end

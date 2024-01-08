@@ -1,6 +1,8 @@
-function displacement_fields = register_bins(k_spaces, sampling_masks, csm)
+function displacement_fields = register_bins(k_spaces, sampling_masks, csm, ref_bin_idx)
 
     n_bins = numel(k_spaces);
+
+    assert(ref_bin_idx <= n_bins);
 
     filter_dims = size(k_spaces{1}, 1:3);
     filter_std = 40;
@@ -17,7 +19,7 @@ function displacement_fields = register_bins(k_spaces, sampling_masks, csm)
 
     end
 
-    reference_image = bin_images{4};
+    reference_image = bin_images{ref_bin_idx};
 
 
 
@@ -31,11 +33,11 @@ function displacement_fields = register_bins(k_spaces, sampling_masks, csm)
     % it for now
     displacement_fields = nan([size(bin_images{1}, 1:3), 3, numel(bin_images)]);
     for bin = 1:n_bins
-
-        % TODO: this is what the original code does, but `nifty_reg`
-        % clearly says it wants the arguments the other way around
-        %Normalize(abs(nav_rfm(:,:,:,mmm)),0,1)
-        [~, displacement_field] = nifty_reg(Normalize(abs(reference_image),0,1), Normalize(abs(bin_images{bin}),0,1), ' --nmi -be 0.0005 -sx 14', strcat(getenv('WORKSPACE'), '/.nifty-tmp/'));
+        [~, displacement_field] = nifty_reg( ...
+            Normalize(abs(reference_image),0,1), ...
+            Normalize(abs(bin_images{bin}),0,1), ...
+            ' --nmi -be 0.0005 -sx 14', ...
+            fullfile(getenv("WORKSPACE"), ".nifty-tmp"));
         displacement_fields(:,:,:,:,bin) = displacement_field;
 
     end
