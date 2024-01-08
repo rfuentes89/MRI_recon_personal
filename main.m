@@ -61,18 +61,31 @@ end
 
 motion_correction_type = "non_rigid";
 
-reconstruction_type = "it_SENSE";
+reconstruction_type = "it_SENSE"; % it_SENSE / admm
 
 denoising_type = "HD_PROST";
 
 water_fat_algorithm = "none";
 
-if water_fat_algorithm ~= "none"
-    CREAM_PDFF_path = "C:\src\CREAM_PDFF";
-    include_CREAM_PDFF(CREAM_PDFF_path)    
-end
-
 mapping = false;
+
+% PROST parameters
+params_PROST.sig         =  0.055;
+params_PROST.patch_sz    =  5;
+params_PROST.max_patch   =  20;
+params_PROST.win         =  20;
+params_PROST.offset      =  4;
+params_PROST.debug       =  1;
+params_PROST.recon_mode  =  6;
+params_PROST.sharpness   =  0;
+params_PROST.type        =  0;
+
+% ADMM parameters (if used)
+params_CG.ADMM_maxit    = 3;
+params_CG.CG_minres     = 1e-10;
+params_CG.CG_maxit_ini  = 5;
+params_CG.CG_maxit      = 5;
+params_CG.CG_lambda     = 0.01;
 
 %% STEP 0.1: Read Twix
 
@@ -172,117 +185,56 @@ end
 % HD-PROST
 
 disp("step 7: reconstructing images")
-
-images_moco = reconstruct_images(motion_corrected_data, csm, reconstruction_type);
+images = reconstruct_images(motion_corrected_data, csm, reconstruction_type, params_CG, params_PROST);
 
 %%
 if (0)
     % Save variable for 
     save('Bruno_data/bruno_csm.mat', 'csm','-v7.3');
     save('Bruno_data/bruno_moco_info.mat', 'motion_corrected_data','-v7.3');
-    save('Bruno_data/bruno_recon.mat', 'images_moco','-v7.3');
+    save('Bruno_data/bruno_recon.mat', 'images','-v7.3');
     disp("SAVED")
 end
 
 %% Black Blood
-disp("Black Blood")
-black_blood = abs(images_moco{2}) - abs(images_moco{1});
+% if (length(images) == 2)
+%     disp("Black Blood")
+%     black_blood = abs(images{2}) - abs(images{1});
+% end
 
 %% STEP 8: PROST Denoising
 
 if denoising_type ~= "none"
     disp("step 8: denoising")
-    %denoised_images = denoise(images_moco, denoising_type);
-    denoised_images = denoising_HD_PROST(images_moco);
+    denoised_images = denoising_HD_PROST(images, params_PROST);
+else
+    denoised_images = images;
 end
 disp("Done")
 
 
 %% Save variable for Non rigid detach mode
-save('ISMRM2023/GCR/csm_diatole.mat', 'csm','-v7.3');
-save('ISMRM2023/GCR/motion_corrected_data_diatole.mat', 'motion_corrected_data','-v7.3');
-disp("SAVED")
-
-%% STEP 7: Reconstructions + Denoising (ADMM + HDPROST)
+%save('ISMRM2023/GCR/csm_diatole.mat', 'csm','-v7.3');
+%save('ISMRM2023/GCR/motion_corrected_data_diatole.mat', 'motion_corrected_data','-v7.3');
+%disp("SAVED")
 
 
-[n_echoes, n_sets, n_repetitions] = size(motion_corrected_data.k_spaces);
-E_CSbins = cell(size(motion_corrected_data.sampling_masks));
+%% Remove borders
+% for image_i = 1:length(denoised_images)
+%     denoised_images{image_i} = denoised_images{image_i}(10:200,40:247,9:96);
+% end
 
-for repetition = 1:n_repetitions
-    for set = 1:n_sets
-        for echo = 1:n_echoes
-            E_CSbins{echo,set,repetition} = Cruz_E_3D_CART_BATCH(...
-                motion_corrected_data.interpolation_matrix{echo,set,repetition}, ...
-                motion_corrected_data.binned_sampling_masks{echo,set,repetition}, ...
-                csm.coil_sensitivity_maps, ...
-                size(motion_corrected_data.k_spaces_corrected{echo,set,repetition},4), ...
-                size(motion_corrected_data.k_spaces_corrected{echo,set,repetition},1:3), ...
-                size(motion_corrected_data.k_spaces_corrected{echo,set,repetition}), ...
-                csm.coil_sensitivity_sum);
-        end
-    end
+%% Black blood
+if (length(denoised_images) == 2)
+    deno_blackblood = abs(denoised_images{2}) - abs(denoised_images{1});
 end
-%%
-% NON-RIGID HD-PROST GMD %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% This is the final non-rigid motion correction reconstruction
-% algorithms can be found in /code
-% 
 
-Params_acqui.kdata_OUT = data.k_spaces_corrected;
-Params_MR.E_CSbins      = E_CSbins;
-
-% New Parameters:
-% Parameters: PROST
-Params_PROST.sig         =  0.055;
-Params_PROST.patch_sz    =  5;
-Params_PROST.max_patch   =  20;
-Params_PROST.win         =  20;
-Params_PROST.offset      =  4;
-Params_PROST.debug       =  1;
-Params_PROST.recon_mode  =  6;% 3: 2D / 4: 3D
-Params_PROST.sharpness   =  0;
-
-Params_PROST.type        =  0;% 3: 2D / 4: 3D
-
-% Parameters: MR
-
-Params_MR.ADMM_maxit    = 5;
-Params_MR.CG_minres     = 1e-10;
-Params_MR.CG_maxit_ini  = 5;
-Params_MR.CG_maxit      = 5;
-Params_MR.CG_lambda     = 0.01;
-
-%%
-disp('************ MC reconstruction with 3D HD-PROST **************');
-tic();
-[x, Rx_it, y_it, x_it] = HDPROST_NON_RIGID(Params_acqui, Params_MR, Params_PROST);
-toc();
-
-
-%%
-for repetition = 1:n_repetitions
-    for set = 1:n_sets
-        for echo = 1:n_echoes
-            recon_mc_hdprost{echo,set,repetition} = flip(flip(flip(x(:,:,:,set),1),2),3);
-        end
-    end
-end
-disp("******** NON RIGID HD-PROST Reconstruction DONE ********")
-           
-%%
-bright_blood_HB1 = recon_mc_hdprost{1}(10:200,40:247,9:96);
-bright_blood_HB2 = recon_mc_hdprost{2}(10:200,40:247,9:96);
-
-%%
-denoised_images{1} = denoised_images{1}(10:200,40:247,9:96);
-denoised_images{2} = denoised_images{2}(10:200,40:247,9:96);
-%%
-deno_blackblood = abs(denoised_images{2}) - abs(denoised_images{1});
-
-%%
-imagine(abs(denoised_images{1}),'w',[0 max(abs(denoised_images{1}),[],'all')],abs(denoised_images{2}),'w',[0 max(abs(denoised_images{2}),[],'all')], ...
-    abs(deno_blackblood),'w',[0 max(abs(deno_blackblood),[],'all')])
+% %%
+% imagine(...
+%     abs(denoised_images{1}),'w',[0 max(abs(denoised_images{1}),[],'all')],...
+%     abs(denoised_images{2}),'w',[0 max(abs(denoised_images{2}),[],'all')], ...
+%     abs(deno_blackblood),'w',[0 max(abs(deno_blackblood),[],'all')]...
+%     )
 
 %% DICOM WRITE
 file_dir_out = "ISMRM2023/RDLS/";
