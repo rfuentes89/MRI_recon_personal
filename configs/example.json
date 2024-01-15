@@ -1,12 +1,14 @@
 {
-    "twix_fname": "meas_MID00067_FID16673_GR_DIAS_BOOST_BOOST_T2p60_TI85_1_5mm3_NoScout.dat",
-    // "meas_MID00020_FID16030_FANTOMA_SYS_BOOST_T2MLEV8_T2p60_TI85_1_5mm3_NoScout.dat"
+    "twix_fname": "example_twix.dat",
 
+    // Base folders
+    "folder_input": "$WORKSPACE/input", // will look here for twix and base DICOMs
+    "folder_output": "$WORKSPACE/output", // will store DICOM under dcm/
     // Use $WORKSPACE to replace by your workspace folder
     // Use ~ to replace by your home
-    "folder_input": "$WORKSPACE/input", // will look for twix here and base DICOM info
-    "folder_output": "$WORKSPACE/output", // will store DICOM under dcm/
 
+
+    // Whether or not to save to file
     "save_dcm": true, // whether or not to store resulting dicom file
     "save_dcm_intrabin": false, // whether or not to store intrabin reconstruction
     "save_csm": false, // whether or not to save .mat file with csm
@@ -16,6 +18,7 @@
     "load_motion_curves": true, // whether or not to load curves from file
     // if false, requires UI to select iNAV
 
+    // Output DICOM params
     "dicom_params": {
         // clamp image values by a percentage before saving to DICOM
         "min_perc": 10,
