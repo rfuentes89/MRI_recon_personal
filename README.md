@@ -71,6 +71,6 @@ Follow instructions in [their README](https://github.com/RCiHealthGroup/HD_PROST
 
 2. Run the `main.m` script either from the MATLAB editor or from the terminal:
     1. Option 1, MATLAB Editor: open the script, set the `config_fname` variable to the name of your configuration file,
-       then run the script.
+       then run the script (e.g. section by section, or whole file at once)
     2. Option 2, from the terminal: run in a terminal
-       `matlab -nodisplay -batch "config_fname='/path/to/your/config.json'; main;`
+       `matlab -nodisplay -batch "config_fname='/path/to/your/config.json'; main;"`
