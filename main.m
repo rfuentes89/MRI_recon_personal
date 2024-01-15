@@ -10,89 +10,32 @@
 
 addpath(genpath("./"))
 
-%% STEP 0: Parameters
-% This section defines the parameters
+assert(~isempty(getenv('NIFTY_PATH')))
 
-file_dir_out = "ISMRM2023/RDLS/";
-twix_pattern = file_dir_out + 'meas_MID00020_FID16030_FANTOMA_SYS_BOOST_T2MLEV8_T2p60_TI85_1_5mm3_NoScout.dat';
-%twix_pattern = file_dir_out + 'meas_MID00066_FID15619_parameters_v1_NoScout.dat';
+%% STEP 0: Read parameters from file
+% Choose your config file here
+%config_fname = "configs/example.json";
 
-% Path to data
-% Path to save outputs
-% Outputs to save (debugging)
-% Dimensions of data (x, y, z, coils, echoes, set, repetitions)
-% Compressed dimensions (coil compression etc.)
-% Motion correction scheme
+assert(exist("config_fname", "var"), "config_fname variable must exist");
 
-% raw data to include
-% [] => use all
-selected.coils = [];
-selected.echoes = [];
-selected.sets = [];
-selected.repetitions = [];
-selected.n_compressed_coils = 0; % Set to 0 to not compress
+CONFIG = readstruct(config_fname);
+[~, RUN_NAME, ~] = fileparts(config_fname);
 
-% for rating coils, and also for coil map estimation
-% TODO: choose a better name
-% TODO: should this be two variables?
-% TODO: currently these have to be specified relative to the selected
-%       indices i.e. as only set four has been selected, set one below
-%       actually refers to set four. This should probably be fixed.
-selected_for_rating.echo = 1;
-selected_for_rating.set = 1;
-selected_for_rating.repetition = 1;
+CONFIG.folder_input = strrep(CONFIG.folder_input, "$WORKSPACE", getenv("WORKSPACE"));
+CONFIG.folder_output = strrep(CONFIG.folder_output, "$WORKSPACE", getenv("WORKSPACE"));
 
-% probably only need one echo of the navigator
-% TODO: make this less confusing
-selected_navigators = selected;
-selected_navigators.echoes = 1;
-
-coil_sensitivity_mapping_algorithm = "ESPIRiT";
-% Options:
-% "SOS"
-% "ESPIRiT"
-% "WASLH"
-
-motion_correction_params.type = moco; % translational / non_rigid / none
-motion_correction_params.nr_ref_bin = bin; % 1: inspiration, 4: expiration
-
-reconstruction_type = "it_SENSE"; % it_SENSE / admm
-
-denoising_type = "HD_PROST";
-
-water_fat_algorithm = "none";
-
-mapping = false;
-
-% PROST parameters
-params_PROST.sig         =  0.055;
-params_PROST.patch_sz    =  5;
-params_PROST.max_patch   =  20;
-params_PROST.win         =  20;
-params_PROST.offset      =  4;
-params_PROST.debug       =  1;
-params_PROST.recon_mode  =  6;
-params_PROST.sharpness   =  0;
-params_PROST.type        =  0;
-
-% ADMM parameters (if used)
-params_CG.ADMM_maxit    = 3;
-params_CG.CG_minres     = 1e-10;
-params_CG.CG_maxit_ini  = 5;
-params_CG.CG_maxit      = 5;
-params_CG.CG_lambda     = 0.01;
+disp("Running reconstruction with config file " + string(config_fname));
 
 %% STEP 0.1: Read Twix
 
 disp("step 0.1: reading twix")
-path_to_twix = find_twix_file(twix_pattern);
+path_to_twix = find_twix_file(fullfile(CONFIG.folder_input, CONFIG.twix_fname));
 twix = read_twix(path_to_twix);
 
 %% STEP 1: Unpack raw data
 
 disp("step 1: unpacking raw data")
-% TODO: use more cell arrays like in read_navigators
-data = read_raw_data(twix, selected);
+data = read_raw_data(twix, CONFIG.selected_contrasts, CONFIG.coil_params.use_only);
 
 %% STEP 2: Remove Oversampling
 
@@ -105,50 +48,47 @@ data = remove_readout_oversampling(data);
 
 disp("step 3: rejecting coils")
 
-if any(structfun(@isempty, selected_for_rating))
+if CONFIG.coil_params.reject_ui && any(structfun(@isempty, CONFIG.selected_contrasts_for_rating))
     % TODO: allow partial selection
-    selected_for_rating = select_for_coil_rating(data);
+    CONFIG.selected_contrasts_for_rating = select_for_coil_rating(data);
 end
 
-if isempty(selected.coils)
-    [yes_indices, maybe_indices, no_indices] = rate_coils(data, selected_for_rating);
+if CONFIG.coil_params.reject_ui && isempty(CONFIG.coil_params.use_only)
+    [yes_indices, maybe_indices, no_indices] = rate_coils(data, CONFIG.selected_contrasts_for_rating);
     data = reject_coils(data, vertcat(maybe_indices, no_indices)); % TODO include variable if use maybe or not?
 end
 
 
 %% STEP 3.1: Compress coils
 n_coils = size(data.k_spaces{1}, 4);
-if selected.n_compressed_coils ~= 0 && selected.n_compressed_coils < n_coils
-    disp("compressing coils")
-    data = compress_coils(data, selected.n_compressed_coils);
+if CONFIG.coil_params.n_compressed_coils > 0 && CONFIG.coil_params.n_compressed_coils < n_coils
+    disp("step 3.1: compressing coils")
+    data = compress_coils(data, CONFIG.coil_params.n_compressed_coils);
 end
 
 %% STEP 4: CSM Estimation
 
 disp("step 4: estimating coil maps")
+csm = estimate_coil_sensitivity_maps(data, CONFIG.coil_params.csm_algorithm, CONFIG.selected_contrasts_for_rating);
 
-% TODO: should the echo/set/repetition used for csm estimation be (allowed to
-% be) different to those used for rating the coils? (I think the desired
-% characteristics are the same for both cases)
-csm = estimate_coil_sensitivity_maps(data, coil_sensitivity_mapping_algorithm, selected_for_rating);
-
-% SOS
-% ESPIRIT
-% WASLH
-% The one from the scanner (that reads files)
+save_variable_if_config(CONFIG.save_csm, "csm")
 
 %% STEP 5: Reading iNavs
 
 % TODO: only use coils that weren't rejected?
 % TODO: use iNavs from DICOM if available (not necessary)
 
-if (0)
-    load('AORTA_data/motion_curves.mat','motion_curves'); % Variable is csm_load.csm
-
-else   
-    if motion_correction_params.type ~= "none"
+if CONFIG.motion_correction_params.type ~= "none"
+    motion_curves_folder = fullfile(CONFIG.folder_output, "motion_curves");
+    motion_curves_file = fullfile(motion_curves_folder, strrep(CONFIG.twix_fname, ".dat", ".mat"));
+    if (CONFIG.load_motion_curves && isfile(motion_curves_file))
+        disp("step 5: loading motion_curves")
+        load(motion_curves_file, 'motion_curves');  
+    else
         disp("step 5: estimating motion")
-        motion_curves = estimate_motion_curves(twix, selected_navigators);
+        motion_curves = estimate_motion_curves(twix, CONFIG.selected_contrasts);
+        if ~exist(motion_curves_folder, 'dir'), mkdir(motion_curves_folder), end
+        save(motion_curves_file, 'motion_curves')
     end
 end
 
@@ -162,52 +102,42 @@ end
 %   - Image-bin reconstruction
 %   - NR Image registration
 
-if motion_correction_params.type ~= "none"
+if CONFIG.motion_correction_params.type ~= "none"
     disp("step 6: correcting motion")
-    motion_corrected_data = correct_motion(data, motion_curves, csm, motion_correction_params);
+    motion_corrected_data = correct_motion(data, motion_curves, csm, CONFIG.motion_correction_params);
 else
     motion_corrected_data = data;
 end
 
+save_variable_if_config(CONFIG.save_data, "motion_corrected_data");
+
 %% STEP 7: Reconstructions:
-% Zero/filled
-% itSENSE
-% CS reco
-% HD-PROST
-
 disp("step 7: reconstructing images")
-images = reconstruct_images(motion_corrected_data, csm, reconstruction_type, params_CG, params_PROST);
+images = reconstruct_images( ...
+    motion_corrected_data, csm, CONFIG.reconstruction_type, CONFIG.cg_params, CONFIG.prost_params);
 
-%%
-if (0)
-    % Save variable for 
-    save('Bruno_data/bruno_csm.mat', 'csm','-v7.3');
-    save('Bruno_data/bruno_moco_info.mat', 'motion_corrected_data','-v7.3');
-    save('Bruno_data/bruno_recon.mat', 'images','-v7.3');
-    disp("SAVED")
-end
-
-%% Black Blood
-% if (length(images) == 2)
-%     disp("Black Blood")
-%     black_blood = abs(images{2}) - abs(images{1});
-% end
+save_variable_if_config(CONFIG.save_images, "images");
 
 %% STEP 8: PROST Denoising
 
-if denoising_type ~= "none"
-    disp("step 8: denoising")
-    denoised_images = denoising_HD_PROST(images, params_PROST);
+if CONFIG.denoising_type ~= "none"
+    disp("step 8: PROST denoising")
+    denoised_images = denoising_HD_PROST(images, CONFIG.prost_params);
+
+    if CONFIG.save_dcm_intrabin
+        disp("   denoising intrabin images")
+        for i_contrast = 1:numel(motion_corrected_data.bin_images)
+            for i_bin = 1:numel(motion_corrected_data.bin_images{i_contrast})
+                motion_corrected_data.bin_images{i_contrast}{i_bin} = denoising_HD_PROST( ...
+                    motion_corrected_data.bin_images{i_contrast}{i_bin}, ...
+                    CONFIG.prost_params);
+            end
+        end
+    end
+    disp("PROST done")
 else
     denoised_images = images;
 end
-disp("Done")
-
-
-%% Save variable for Non rigid detach mode
-%save('ISMRM2023/GCR/csm_diatole.mat', 'csm','-v7.3');
-%save('ISMRM2023/GCR/motion_corrected_data_diatole.mat', 'motion_corrected_data','-v7.3');
-%disp("SAVED")
 
 
 %% Remove borders
@@ -220,28 +150,58 @@ if (length(denoised_images) == 2)
     deno_blackblood = abs(denoised_images{2}) - abs(denoised_images{1});
 end
 
-% %%
+%% Display with Imagine
 % imagine(...
 %     abs(denoised_images{1}),'w',[0 max(abs(denoised_images{1}),[],'all')],...
 %     abs(denoised_images{2}),'w',[0 max(abs(denoised_images{2}),[],'all')], ...
 %     abs(deno_blackblood),'w',[0 max(abs(deno_blackblood),[],'all')]...
 %     )
 
-%% DICOM WRITE
-file_dir_out = "ISMRM2023/RDLS/";
-%%
-filename_1 = file_dir_out + "RDLS_SYS_T2MLEV8_TI85_HB1.dcm";
-disp(filename_1)
-image_scanner_1 = squeeze(dicomread(filename_1));
-info_1 = dicominfo(filename_1);
-filename_2 = file_dir_out + "RDLS_T2MLEV860_TI85_HB2.dcm";
-image_scanner_2 = squeeze(dicomread(filename_2));
-info_2 = dicominfo(filename_2);
-filename_3 = file_dir_out + "RDLS_SYS_T2_MLEV860_TI85_BB.dcm";
-info_3 = dicominfo(filename_3);
+%% Write main DICOM
+if CONFIG.save_dcm
+    save_dicom(denoised_images{1}, "HB1", "HB1")
+    
+    if (length(denoised_images) == 2)
+        save_dicom(denoised_images{2}, "HB2", "HB2")
+        save_dicom(deno_blackblood, "BB", "BB")
+    end
+end
 
-%%
-write_dicom_volume(abs(denoised_images{1}),'HB1',info_1,[]);
-write_dicom_volume(abs(denoised_images{2}),'HB2',info_2,[]);
-write_dicom_volume(abs(deno_blackblood),'BB',info_3,[]);
-disp("Dicom over-writed")
+%% Write Bin images
+if CONFIG.save_dcm_intrabin
+    for i_contrast = 1:numel(motion_corrected_data.bin_images)
+        for i_bin = 1:numel(motion_corrected_data.bin_images{i_contrast})
+            save_dicom( ...
+                motion_corrected_data.bin_images{i_contrast}{i_bin}, ...
+                "HB" + string(i_contrast) + "-bin" + string(i_bin), ...
+                "HB" + string(i_contrast))
+        end
+    end
+end
+
+%% Small util functions
+function save_dicom(image, contrast_name, input_info_name)
+    folder = fullfile(CONFIG.folder_output, "dcm", RUN_NAME);
+    if ~exist(folder, "dir"), mkdir(folder), end
+
+    contrast_name = string(contrast_name);
+
+    info_base = dicominfo(fullfile(folder_input, string(input_info_name) + ".dcm"));
+    info_base.SeriesDescription = convertStringsToChars(contrast_name + "-" + RUN_NAME);
+
+    filename = fullfile(folder, contrast_name + ".dcm");
+    write_dicom_volume(abs(image), filename, info_base, CONFIG.dicom_params);
+end
+
+
+function save_variable_if_config(config, var_name)
+    if config
+        folder = fullfile(CONFIG.folder_output, var_name);
+        if ~exist(folder, "dir"), mkdir(folder), end
+        filename = fullfile(folder, RUN_NAME + ".mat");
+    
+        save(filename, var_name);
+        disp("Saved " + var_name + " to " + filename);
+    end
+end
+

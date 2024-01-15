@@ -66,4 +66,11 @@ Follow instructions in [their README](https://github.com/RCiHealthGroup/HD_PROST
 
 ## Usage
 
-TODO(maparegal)
+1. Create a JSON configuration file to specify the parameters for the reconstruction.
+   See an example in [`configs/example.json`](configs/example.json), it has comments on each parameter.
+
+2. Run the `main.m` script either from the MATLAB editor or from the terminal:
+    1. Option 1, MATLAB Editor: open the script, set the `config_fname` variable to the name of your configuration file,
+       then run the script.
+    2. Option 2, from the terminal: run in a terminal
+       `matlab -nodisplay -batch "config_fname='/path/to/your/config.json'; main;`

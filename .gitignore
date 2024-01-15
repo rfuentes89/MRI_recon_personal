@@ -1,17 +1,29 @@
+# Tmp files
 *.asv
+._*
+
+# Dependencies
 dependencies/NIFTI_REG/Temps/
 NIFTY_REF/Temps/
+imagine-master
+bart-*
+
+# Data
 ABSTRACT_DATA/
 dataNRP/
 HDP_NONRIGID_TEST/
 ISMRM2023/
+*.dcm
+Bruno_data
+*.mat
+
+# Personal scripts
 nifty_call.m
 nonrigid_hdprost_batch.m
 recon_NRP_batch.m
 intra_bin_correction.m
 main_DF.m
-._*
-*.dcm
-bart-*
-imagine-master
-Bruno_data
+
+# Config files
+**/*.json
+!configs/example.json

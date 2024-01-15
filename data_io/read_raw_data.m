@@ -1,4 +1,4 @@
-function data = read_raw_data(twix, selected)
+function data = read_raw_data(twix, selected_contrasts, selected_coils)
 
     coil_IDs = get_coil_IDs(twix);
 
@@ -40,23 +40,23 @@ function data = read_raw_data(twix, selected)
     echo_at_readout = double(twix.image.Eco);
     repetition_at_readout = double(twix.image.Rep);
 
-    if isempty(selected.sets)
-        selected.sets = 1:n_sets;
+    if isempty(selected_contrasts.sets)
+        selected_contrasts.sets = 1:n_sets;
     end
-    if isempty(selected.echoes)
-        selected.echoes = 1:n_echoes;
+    if isempty(selected_contrasts.echoes)
+        selected_contrasts.echoes = 1:n_echoes;
     end
-    if isempty(selected.repetitions)
-        selected.repetitions = 1:n_repetitions;
+    if isempty(selected_contrasts.repetitions)
+        selected_contrasts.repetitions = 1:n_repetitions;
     end
-    if isempty(selected.coils)
-        selected.coils = 1:n_coils;
+    if isempty(selected_coils)
+        selected_coils = 1:n_coils;
     end
     
-    n_selected_coils = length(selected.coils);
-    n_selected_echoes = length(selected.echoes);
-    n_selected_sets = length(selected.sets);
-    n_selected_repetitions = length(selected.repetitions);
+    n_selected_coils = length(selected_coils);
+    n_selected_echoes = length(selected_contrasts.echoes);
+    n_selected_sets = length(selected_contrasts.sets);
+    n_selected_repetitions = length(selected_contrasts.repetitions);
 
     scanner_software_version = twix.hdr.Dicom.SoftwareVersions;
 
@@ -75,7 +75,7 @@ function data = read_raw_data(twix, selected)
         set        = set_at_readout(readout);
         repetition = repetition_at_readout(readout);
 
-              raw_k_space(:,k_y,k_z,:,      echo,set,repetition) = unsorted_data(:,selected.coils,readout);
+              raw_k_space(:,k_y,k_z,:,      echo,set,repetition) = unsorted_data(:,selected_coils,readout);
         raw_segment_masks(1,k_y,k_z,segment,echo,set,repetition) = true;
     end
 
@@ -103,26 +103,26 @@ function data = read_raw_data(twix, selected)
                     case "syngo MR E11" % Aera
                         if mod(echo, 2) % is odd
                             k_spaces{echo,set,repetition}(offset(1) + (1:n_k_x),offset(2) + (1:n_k_y),offset(3) + (1:n_k_z),:) ...
-                                = raw_k_space(:,:,:,:,selected.echoes(echo),selected.sets(set),selected.repetitions(repetition));
+                                = raw_k_space(:,:,:,:,selected_contrasts.echoes(echo),selected_contrasts.sets(set),selected_contrasts.repetitions(repetition));
                             segment_masks{echo,set,repetition}(offset(1) + (1:n_k_x),offset(2) + (1:n_k_y),offset(3) + (1:n_k_z),:) ...
-                                = repmat(raw_segment_masks(1,:,:,:,selected.echoes(echo),selected.sets(set),selected.repetitions(repetition)), n_k_x, 1);
+                                = repmat(raw_segment_masks(1,:,:,:,selected_contrasts.echoes(echo),oselected_contrasts.sets(set),selected_contrasts.repetitions(repetition)), n_k_x, 1);
                         else           
                             k_spaces{echo,set,repetition}(1:n_k_x,1:n_k_y,1:n_k_z,:) ...
-                                = raw_k_space(:,:,:,:,selected.echoes(echo),selected.sets(set),selected.repetitions(repetition));
+                                = raw_k_space(:,:,:,:,selected_contrasts.echoes(echo),selected_contrasts.sets(set),selected_contrasts.repetitions(repetition));
                             segment_masks{echo,set,repetition}(1:n_k_x,1:n_k_y,1:n_k_z,:) ...
-                                = repmat(raw_segment_masks(1,:,:,:,selected.echoes(echo),selected.sets(set),selected.repetitions(repetition)), n_k_x, 1);
+                                = repmat(raw_segment_masks(1,:,:,:,selected_contrasts.echoes(echo),selected_contrasts.sets(set),selected_contrasts.repetitions(repetition)), n_k_x, 1);
                         end
                     case "syngo MR XA50" % Free.Max
                         k_spaces{echo,set,repetition}(offset(1) + (1:n_k_x),offset(2) + (1:n_k_y),offset(3) + (1:n_k_z),:) ...
-                            = raw_k_space(:,:,:,:,selected.echoes(echo),selected.sets(set),selected.repetitions(repetition));
+                            = raw_k_space(:,:,:,:,selected_contrasts.echoes(echo),selected_contrasts.sets(set),selected_contrasts.repetitions(repetition));
                         segment_masks{echo,set,repetition}(offset(1) + (1:n_k_x),offset(2) + (1:n_k_y),offset(3) + (1:n_k_z),:) ...
-                            = repmat(raw_segment_masks(1,:,:,:,selected.echoes(echo),selected.sets(set),selected.repetitions(repetition)), n_k_x, 1);
+                            = repmat(raw_segment_masks(1,:,:,:,selected_contrasts.echoes(echo),selected_contrasts.sets(set),selected_contrasts.repetitions(repetition)), n_k_x, 1);
                     otherwise
                         warning("unrecognised scanner software version, defaulting to XA50 behaviour")
                         k_spaces{echo,set,repetition}(offset(1) + (1:n_k_x),offset(2) + (1:n_k_y),offset(3) + (1:n_k_z),:) ...
-                            = raw_k_space(:,:,:,:,selected.echoes(echo),selected.sets(set),selected.repetitions(repetition));
+                            = raw_k_space(:,:,:,:,selected_contrasts.echoes(echo),selected_contrasts.sets(set),selected_contrasts.repetitions(repetition));
                         segment_masks{echo,set,repetition}(offset(1) + (1:n_k_x),offset(2) + (1:n_k_y),offset(3) + (1:n_k_z),:) ...
-                            = repmat(raw_segment_masks(1,:,:,:,selected.echoes(echo),selected.sets(set),selected.repetitions(repetition)), n_k_x, 1);                            
+                            = repmat(raw_segment_masks(1,:,:,:,selected_contrasts.echoes(echo),selected_contrasts.sets(set),selected_contrasts.repetitions(repetition)), n_k_x, 1);                            
                 end
 
                 sampling_masks{echo,set,repetition} = sum(segment_masks{echo,set,repetition}, 4);

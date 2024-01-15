@@ -1,0 +1,68 @@
+{
+    "twix_fname": "meas_MID00067_FID16673_GR_DIAS_BOOST_BOOST_T2p60_TI85_1_5mm3_NoScout.dat",
+    // "meas_MID00020_FID16030_FANTOMA_SYS_BOOST_T2MLEV8_T2p60_TI85_1_5mm3_NoScout.dat"
+
+    // Use $WORKSPACE to replace by your workspace folder
+    // Use ~ to replace by your home
+    "folder_input": "$WORKSPACE/input", // will look for twix here and base DICOM info
+    "folder_output": "$WORKSPACE/output", // will store DICOM under dcm/
+
+    "save_dcm": true, // whether or not to store resulting dicom file
+    "save_dcm_intrabin": false, // whether or not to store intrabin reconstruction
+    "save_csm": false, // whether or not to save .mat file with csm
+    "save_data": false, // whether or not to save .mat file with moco data
+    "save_images": false, // whether or not to save .mat file with (noisy) images
+
+    "load_motion_curves": true, // whether or not to load curves from file
+    // if false, requires UI to select iNAV
+
+    "dicom_params": {
+        // clamp image values by a percentage before saving to DICOM
+        "min_perc": 10,
+        "max_perc": 100,
+    },
+
+    "coil_params": {
+        "use_only": [], // pass empty list to use all coils
+        "csm_algorithm": "ESPIRiT", // SOS, ESPIRiT, WASLH
+        "n_compressed_coils": -1, // Set to -1 to not compress coils
+        "reject_ui": false, // display UI to reject coils manually
+    },
+    "selected_contrasts": {
+        // pass empty list to use all
+        "echoes": [],
+        "sets": [],
+        "repetitions": [],
+    },
+    "selected_contrasts_for_rating": {
+        // select contrast to use for coils
+        "echo": 1,
+        "set": 1,
+        "repetition": 1,
+    },
+    "motion_correction_params": {
+        "type": "non_rigid", // none, translational, non_rigid
+        "ref_bin": 4, // 1: inspiration, 4: expiration
+    },
+    "reconstruction_type": "it_SENSE", // it_SENSE, admm
+    "denoising_type": "HD_PROST", // none, HD_PROST
+    "water_fat_algorithm": "none",
+    "prost_params": {
+        "sig": 0.055,
+        "patch_sz": 5,
+        "max_patch": 20,
+        "win": 20,
+        "offset": 4,
+        "debug": 1,
+        "recon_mode": 6,
+        "sharpness": 0,
+        "type": 0,
+    },
+    "cg_params": {
+        "ADMM_maxit": 3,
+        "CG_minres": 1e-10,
+        "CG_maxit_ini": 5,
+        "CG_maxit": 5,
+        "CG_lambda": 0.01,
+    }
+}
