@@ -49,12 +49,12 @@ data = remove_readout_oversampling(data);
 
 disp("step 3: rejecting coils")
 
-if CONFIG.coil_params.reject_ui && any(structfun(@isempty, CONFIG.selected_contrasts_for_rating))
+if CONFIG.coil_params.reject_via_ui && any(structfun(@isempty, CONFIG.selected_contrasts_for_rating))
     % TODO: allow partial selection
     CONFIG.selected_contrasts_for_rating = select_for_coil_rating(data);
 end
 
-if CONFIG.coil_params.reject_ui && isempty(CONFIG.coil_params.use_only)
+if CONFIG.coil_params.reject_via_ui && isempty(CONFIG.coil_params.use_only)
     [yes_indices, maybe_indices, no_indices] = rate_coils(data, CONFIG.selected_contrasts_for_rating);
     data = reject_coils(data, vertcat(maybe_indices, no_indices)); % TODO include variable if use maybe or not?
 end

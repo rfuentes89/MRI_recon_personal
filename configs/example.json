@@ -33,7 +33,7 @@
         "use_only": [], // pass empty list to use all coils
         "csm_algorithm": "ESPIRiT", // SOS, ESPIRiT, WASLH
         "n_compressed_coils": -1, // Set to -1 to not compress coils
-        "reject_ui": false, // display UI to reject coils manually
+        "reject_via_ui": false, // display UI to reject coils manually
     },
     "selected_contrasts": {
         // pass empty list to use all
