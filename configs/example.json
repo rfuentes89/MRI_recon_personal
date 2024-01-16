@@ -2,15 +2,17 @@
     // Run name will be used to save output files
     "run_name": "boost_NR_bin4",
 
-    "twix_fname": "example_twix.dat",
-
-    // Input and output folders
+    // Choose to override results if using the same run_name
+    "override_if_exists": false,
+    
+    // Input and Output folders
     // Use $WORKSPACE to replace by your workspace folder
     // Use ~ to replace by your home
     "folder_input": "$WORKSPACE/input", // will look here for twix and base DICOMs (HB1, HB2, BB)
     "folder_output": "$WORKSPACE/output", // see list of what will be stored in README
 
-
+    // Raw data from scanner
+    "twix_fname": "example_twix.dat",
 
     // Whether or not to save to file
     "save_dcm": true, // whether or not to store resulting dicom file

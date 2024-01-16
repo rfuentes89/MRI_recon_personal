@@ -214,7 +214,11 @@ function save_config_to_file(config)
 
     filename = fullfile(folder, config.run_name + ".json");
     if exist(filename, "file")
-        warning("Will override " + filename);
+        if config.override_if_exists
+            warning("Will override run " + filename);
+        else
+            error("Won't override run " + filename);
+        end
     end
 
     txt = jsonencode(config);
