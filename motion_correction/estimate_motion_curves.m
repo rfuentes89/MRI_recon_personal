@@ -9,11 +9,15 @@ function motion_curves = estimate_motion_curves(twix, selected)
     plot(fh_displacements(:))
     plot(rl_displacements(:))
     legend("fh", "rl")
+    ylabel("pixels")
     
     % for rest of reconstruction it's more convenient to directly retrieve
     % the set of displacements corresponding to a particular contrast
     [n_echoes, n_sets, ~, n_repetitions]  = size(navigators);    
     motion_curves = cell(n_echoes, n_sets, n_repetitions);
+
+    xlabel("time (" + string(numel(motion_curves)) + " contrasts concatenated)");
+
     for repetition = 1:n_repetitions
         for set = 1:n_sets            
             for echo = 1:n_echoes
