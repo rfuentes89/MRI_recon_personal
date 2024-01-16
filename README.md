@@ -68,9 +68,18 @@ Follow instructions in [their README](https://github.com/RCiHealthGroup/HD_PROST
 
 1. Create a JSON configuration file to specify the parameters for the reconstruction.
    See an example in [`configs/example.json`](configs/example.json), it has comments on each parameter.
+    * You can use the example itself or create a copy
+    * Set the `run_name` to something appropriate (it will be used in the output files later, see below)
 
 2. Run the `main.m` script either from the MATLAB editor or from the terminal:
     1. Option 1, MATLAB Editor: open the script, set the `config_fname` variable to the name of your configuration file,
-       then run the script (e.g. section by section, or whole file at once)
-    2. Option 2, from the terminal: run in a terminal
+       then run the script (e.g. section by section, or the whole file at once)
+    2. Option 2, run from a terminal:
        `matlab -nodisplay -batch "config_fname='/path/to/your/config.json'; main;"`
+
+### Output files
+
+These files will be stored:
+* A JSON file with the configuration `output_folder/config/<RUN_NAME>.json`
+* A `.mat` file with the motion curve in `output_folder/motion_curves/<TWIX_FNAME>.mat`
+* DICOM files in the folder `output_folder/dcm/<RUN_NAME>/`

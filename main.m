@@ -19,12 +19,13 @@ assert(~isempty(getenv('NIFTY_PATH')))
 assert(exist("config_fname", "var"), "config_fname variable must exist");
 
 CONFIG = readstruct(config_fname);
-[~, RUN_NAME, ~] = fileparts(config_fname);
 
 CONFIG.folder_input = strrep(CONFIG.folder_input, "$WORKSPACE", getenv("WORKSPACE"));
 CONFIG.folder_output = strrep(CONFIG.folder_output, "$WORKSPACE", getenv("WORKSPACE"));
 
-disp("Running reconstruction with config file " + string(config_fname));
+disp("Running reconstruction with run name: " + CONFIG.run_name);
+
+save_config_to_file(CONFIG);
 
 %% STEP 0.1: Read Twix
 
@@ -71,7 +72,7 @@ end
 disp("step 4: estimating coil maps")
 csm = estimate_coil_sensitivity_maps(data, CONFIG.coil_params.csm_algorithm, CONFIG.selected_contrasts_for_rating);
 
-save_variable_if_config(CONFIG.save_csm, "csm")
+save_variable_if_config(CONFIG, "csm", CONFIG.save_csm)
 
 %% STEP 5: Reading iNavs
 
@@ -109,14 +110,14 @@ else
     motion_corrected_data = data;
 end
 
-save_variable_if_config(CONFIG.save_data, "motion_corrected_data");
+save_variable_if_config(CONFIG, "motion_corrected_data", CONFIG.save_data);
 
 %% STEP 7: Reconstructions:
 disp("step 7: reconstructing images")
 images = reconstruct_images( ...
     motion_corrected_data, csm, CONFIG.reconstruction_type, CONFIG.cg_params, CONFIG.prost_params);
 
-save_variable_if_config(CONFIG.save_images, "images");
+save_variable_if_config(CONFIG, "images", CONFIG.save_images);
 
 %% STEP 8: PROST Denoising
 
@@ -159,19 +160,20 @@ end
 
 %% Write main DICOM
 if CONFIG.save_dcm
-    save_dicom(denoised_images{1}, "HB1", "HB1")
+    save_dicom(CONFIG, denoised_images{1}, "HB1", "HB1")
     
     if (length(denoised_images) == 2)
-        save_dicom(denoised_images{2}, "HB2", "HB2")
-        save_dicom(deno_blackblood, "BB", "BB")
+        save_dicom(CONFIG, denoised_images{2}, "HB2", "HB2")
+        save_dicom(CONFIG, deno_blackblood, "BB", "BB")
     end
 end
 
 %% Write Bin images
-if CONFIG.save_dcm_intrabin
+if CONFIG.save_dcm_intrabin && isfield(motion_corrected_data, "bin_images")
     for i_contrast = 1:numel(motion_corrected_data.bin_images)
         for i_bin = 1:numel(motion_corrected_data.bin_images{i_contrast})
             save_dicom( ...
+                CONFIG, ...
                 motion_corrected_data.bin_images{i_contrast}{i_bin}, ...
                 "HB" + string(i_contrast) + "-bin" + string(i_bin), ...
                 "HB" + string(i_contrast))
@@ -180,28 +182,46 @@ if CONFIG.save_dcm_intrabin
 end
 
 %% Small util functions
-function save_dicom(image, contrast_name, input_info_name)
-    folder = fullfile(CONFIG.folder_output, "dcm", RUN_NAME);
+function save_dicom(config, image, contrast_name, input_info_name)
+    folder = fullfile(config.folder_output, "dcm", config.run_name);
     if ~exist(folder, "dir"), mkdir(folder), end
 
     contrast_name = string(contrast_name);
 
-    info_base = dicominfo(fullfile(folder_input, string(input_info_name) + ".dcm"));
-    info_base.SeriesDescription = convertStringsToChars(contrast_name + "-" + RUN_NAME);
+    info_base = dicominfo(fullfile(config.folder_input, string(input_info_name) + ".dcm"));
+    info_base.SeriesDescription = convertStringsToChars(contrast_name + "-" + config.run_name);
 
     filename = fullfile(folder, contrast_name + ".dcm");
-    write_dicom_volume(abs(image), filename, info_base, CONFIG.dicom_params);
+    write_dicom_volume(abs(image), filename, info_base, config.dicom_params);
 end
 
 
-function save_variable_if_config(config, var_name)
-    if config
-        folder = fullfile(CONFIG.folder_output, var_name);
+function save_variable_if_config(config, var_name, should_save)
+    if should_save
+        folder = fullfile(config.folder_output, var_name);
         if ~exist(folder, "dir"), mkdir(folder), end
-        filename = fullfile(folder, RUN_NAME + ".mat");
-    
+        filename = fullfile(folder, config.run_name + ".mat");
+
         save(filename, var_name);
         disp("Saved " + var_name + " to " + filename);
     end
+end
+
+
+function save_config_to_file(config)
+    folder = fullfile(config.folder_output, "config");
+    if ~exist(folder, "dir"), mkdir(folder), end
+
+    filename = fullfile(folder, config.run_name + ".json");
+    if exist(filename, "file")
+        warning("Will override " + filename);
+    end
+
+    txt = jsonencode(config);
+
+    fid = fopen(filename, "w");
+    fprintf(fid, txt);
+    fclose(fid);
+    disp("Saved config to " + filename);
 end
 

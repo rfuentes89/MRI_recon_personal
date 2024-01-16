@@ -1,11 +1,15 @@
 {
+    // Run name will be used to save output files
+    "run_name": "boost_NR_bin4",
+
     "twix_fname": "example_twix.dat",
 
-    // Base folders
-    "folder_input": "$WORKSPACE/input", // will look here for twix and base DICOMs
-    "folder_output": "$WORKSPACE/output", // will store DICOM under dcm/
+    // Input and output folders
     // Use $WORKSPACE to replace by your workspace folder
     // Use ~ to replace by your home
+    "folder_input": "$WORKSPACE/input", // will look here for twix and base DICOMs (HB1, HB2, BB)
+    "folder_output": "$WORKSPACE/output", // see list of what will be stored in README
+
 
 
     // Whether or not to save to file
