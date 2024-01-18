@@ -19,18 +19,13 @@ function [kdata_OUT,At_bins] = Focus_binsV2(raw_data,At,motion_info,bins)
 % Init some vars
 nav = motion_info.Tx;
 
-% Check if need it to correct in the x dimension . 
-% Fix to 0 because I don't have to correct in the x dimension
-motion_info.Ty = zeros(size(motion_info.Tx));
-
 kdata_OUT = zeros(size(raw_data,1),size(raw_data,2),size(raw_data,3),size(raw_data,4),size(bins,1));
 At_bins   = zeros(size(At,1),size(At,2),size(At,3),size(bins,1));
 
 % Focus ALL data onto each bin
 for bbb = 1:size(bins,1)  
-    % Still need to find the mean position of the bin
-    %curr_shots  = find(nav>=bins(bbb,1) & nav<=bins(bbb,2));
-    curr_shots  = find(nav>=bins{bbb}.lower & nav<bins{bbb}.upper);
+    curr_shots  = nav>=bins{bbb}.lower & nav<bins{bbb}.upper;
+
     %bin_mean_Tx = (bins{bbb}.lower + bins{bbb}.upper) / 2;
     bin_mean_Tx = mean(motion_info.Tx(curr_shots)); 
     bin_mean_Ty = mean(motion_info.Ty(curr_shots));
@@ -50,5 +45,3 @@ for bbb = 1:size(bins,1)
     kdata_OUT(:,:,:,:,bbb) = kdata_corr; % sample_dataV2(kdata_corr, bin_At);
     At_bins(:,:,:,bbb) = sum(bin_At,4);
 end
-
-% kdata_OUT = sum(kdata_OUT,5);

@@ -93,6 +93,16 @@ if CONFIG.motion_correction_params.type ~= "none"
     end
 end
 
+%% Step 5.1: Ignore right-left motion
+
+if CONFIG.zero_rl_motion
+    disp("Zeroing right-left motion")
+    for i_contrast = 1:numel(motion_curves)
+        motion_curves{i_contrast}.rl = zeros(size(motion_curves{i_contrast}.fh));
+    end
+end
+
+
 %% STEP 6: Motion Correction
 % Uncorrected
 % Rigid
