@@ -16,7 +16,7 @@ function motion_curves = estimate_motion_curves(twix, selected)
     [n_echoes, n_sets, ~, n_repetitions]  = size(navigators);    
     motion_curves = cell(n_echoes, n_sets, n_repetitions);
 
-    xlabel("time (" + string(numel(motion_curves)) + " contrasts concatenated)");
+    xlabel("motion in time (" + string(numel(motion_curves)) + " contrasts concatenated)");
 
     for repetition = 1:n_repetitions
         for set = 1:n_sets            

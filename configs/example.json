@@ -1,6 +1,7 @@
 {
     // Run name will be used to save output files
     "run_name": "boost_NR_bin4",
+    "notes": "You can add custom notes to remind yourself what you were trying in this run",
 
     // Choose to override results if using the same run_name
     "override_if_exists": false,
