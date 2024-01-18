@@ -40,42 +40,11 @@ for bbb = 1:size(bins,1)
     bin_motion.Ty = motion_info.Ty-bin_mean_Ty;
     
     bin_At = At(:,:,:,curr_shots);
-    
+
     % Andy's fast phase shift
-    % Split the data if it is too large
-    chunksize = 100 ; % 201;
-    if size(At,4) > chunksize
-        nchunks = floor(size(At,4)/chunksize);
-        kdata_corr = zeros(size(raw_data,1),size(raw_data,2),size(raw_data,3),size(raw_data,4),nchunks+1);
-        
-        % Phase shift each chunk
-        for ccc = 1:nchunks
-            curr_idx = 1+(chunksize*(ccc-1)):chunksize*ccc;
-            curr_At =  At(:,:,:,curr_idx);
-            curr_info.Tx = bin_motion.Tx(curr_idx);
-            curr_info.Ty = bin_motion.Ty(curr_idx);
-            curr_kdata = translationCorrectionAndy_V3(raw_data, curr_At, curr_info);
-            kdata_corr(:,:,:,:,ccc) = sample_dataV2(curr_kdata, curr_At);
-        end
-        
-        % Phase shift last chunk
-        ccc = nchunks+1;
-        curr_idx = 1+(chunksize*(ccc-1)):size(At,4);
-        curr_At =  At(:,:,:,curr_idx);
-        curr_info.Tx = bin_motion.Tx(curr_idx);
-        curr_info.Ty = bin_motion.Ty(curr_idx);
-
-        curr_kdata = translationCorrectionAndy_V3(raw_data, curr_At, curr_info);
-        kdata_corr(:,:,:,:,ccc) = sample_dataV2(curr_kdata, curr_At);
-       
-        kdata_corr = sum(kdata_corr,5);
-    else
-        curr_info.Tx = bin_motion.Tx;
-        curr_info.Ty = bin_motion.Ty;
-
-        kdata_corr =  translationCorrectionAndy_V3(raw_data, At, curr_info);
-
-    end
+    % TODO(pdpino): check if we should use bin_At instead of At
+    % Is showing poor results so far!
+    kdata_corr =  translationCorrectionAndy_V3(raw_data, At, bin_motion);
     
     % Push data on bin level
     kdata_OUT(:,:,:,:,bbb) = kdata_corr; % sample_dataV2(kdata_corr, bin_At);

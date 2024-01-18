@@ -18,7 +18,8 @@ function data = motion_correction_translational(data, motion_curves)
                 corrected = translationCorrectionAndy_V3( ...
                     data.k_spaces{echo,set,repetition}, ...
                     data.segment_masks{echo,set,repetition}, ... % 4th dimension is (should be) segments (I think)
-                    motion ... % expects a struct containing two arrays of displacement at each segment, named Tx and Ty
+                    motion, ... % expects a struct containing two arrays of displacement at each segment, named Tx and Ty
+                    struct(force_nochunks=true) ...
                 );
 
                 data.k_spaces{echo,set,repetition} = corrected .* data.sampling_masks{echo,set,repetition};
