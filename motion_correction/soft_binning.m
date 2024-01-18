@@ -16,7 +16,7 @@ function [weighted_k_spaces, weighted_sampling_masks] = soft_binning(k_space, se
         % deviation <  mean_bin_range => weight > 1 but then clipped to 1
         % deviation    within limits  => weight = 1 regardless
         weights = exp(-decay * (deviations / mean_bin_range - 1));
-        weights = min(weights, 1);
+        weights = min(weights, 1); % clip large values to 1
 
         outside_bin = fh_motion < bin_limits{bin}.lower | bin_limits{bin}.upper <= fh_motion;
 

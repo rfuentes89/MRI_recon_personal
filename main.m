@@ -125,16 +125,17 @@ if CONFIG.denoising_type ~= "none"
     disp("step 8: PROST denoising")
     denoised_images = denoising_HD_PROST(images, CONFIG.prost_params);
 
-    if CONFIG.save_dcm_intrabin
-        disp("   denoising intrabin images")
-        for i_contrast = 1:numel(motion_corrected_data.bin_images)
-            for i_bin = 1:numel(motion_corrected_data.bin_images{i_contrast})
-                motion_corrected_data.bin_images{i_contrast}{i_bin} = denoising_HD_PROST( ...
-                    motion_corrected_data.bin_images{i_contrast}{i_bin}, ...
-                    CONFIG.prost_params);
-            end
-        end
-    end
+    % TODO(pdpino): fixme: HD_PROST requires cell with more than 1 contrast
+    % if CONFIG.save_dcm_intrabin
+    %     disp("   denoising intrabin images")
+    %     for i_contrast = 1:numel(motion_corrected_data.bin_images)
+    %         for i_bin = 1:numel(motion_corrected_data.bin_images{i_contrast})
+    %             motion_corrected_data.bin_images{i_contrast}{i_bin} = denoising_HD_PROST( ...
+    %                 motion_corrected_data.bin_images{i_contrast}{i_bin}, ...
+    %                 CONFIG.prost_params);
+    %         end
+    %     end
+    % end
     disp("PROST done")
 else
     denoised_images = images;
