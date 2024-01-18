@@ -46,8 +46,8 @@ function kdata_corr = apply_translationCorrectionAndy_V3(kdata, At, motion_info)
     Tx = motion_info.Tx;
 
     n_shots = size(AtFE, 4);
-    assert(n_shots == size(Tx), "n_shots mismatches with x motion: " + string(size(Tx)));
-    assert(n_shots == size(Ty), "n_shots mismatches with y motion: " + string(size(Ty)));
+    assert(n_shots == numel(Tx), "n_shots mismatches with x motion: " + string(size(Tx)));
+    assert(n_shots == numel(Ty), "n_shots mismatches with y motion: " + string(size(Ty)));
 
     AffMats = zeros(3,3,n_shots);
     % Create affine matrices
