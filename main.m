@@ -23,17 +23,18 @@ CONFIG = readstruct(config_fname);
 CONFIG.folder_input = strrep(CONFIG.folder_input, "$WORKSPACE", getenv("WORKSPACE"));
 CONFIG.folder_output = strrep(CONFIG.folder_output, "$WORKSPACE", getenv("WORKSPACE"));
 
+%% Step 0.1: Save configuration file
 disp("Running reconstruction with run name: " + CONFIG.run_name);
 
 save_config_to_file(CONFIG);
 
-%% STEP 0.1: Read Twix
+%% STEP 1: Read Twix
 
 disp("step 0.1: reading twix")
 path_to_twix = find_twix_file(fullfile(CONFIG.folder_input, CONFIG.twix_fname));
 twix = read_twix(path_to_twix);
 
-%% STEP 1: Unpack raw data
+%% STEP 1.1: Unpack raw data
 
 disp("step 1: unpacking raw data")
 data = read_raw_data(twix, CONFIG.selected_contrasts, CONFIG.coil_params.use_only);
@@ -125,7 +126,12 @@ save_variable_if_config(CONFIG, "motion_corrected_data", CONFIG.save_data);
 %% STEP 7: Reconstructions:
 disp("step 7: reconstructing images")
 images = reconstruct_images( ...
-    motion_corrected_data, csm, CONFIG.reconstruction_type, CONFIG.cg_params, CONFIG.prost_params);
+    motion_corrected_data, ...
+    csm, ...
+    CONFIG.reconstruction_type, ...
+    CONFIG.motion_correction_params.type, ...
+    CONFIG.cg_params, ...
+    CONFIG.prost_params);
 
 save_variable_if_config(CONFIG, "images", CONFIG.save_images);
 
