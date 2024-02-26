@@ -1,11 +1,11 @@
-function data = motion_correction_non_rigid(data, motion_curves, csm, ref_bin_idx)
+function data = motion_correction_non_rigid(data, motion_curves, csm, params)
 
     % TODO: maybe these should be parameters, although Karl intends to
     % force this behaviour for the inline reconstruction
 
     [n_echoes, n_sets, n_repetitions] = size(data.k_spaces);
     n_bins = 4;
-    assert(ref_bin_idx <= n_bins);
+    assert(params.ref_bin <= n_bins);
 
     n_contrasts = size(data.sampling_masks);
 
@@ -39,10 +39,13 @@ function data = motion_correction_non_rigid(data, motion_curves, csm, ref_bin_id
                 data.bin_images{echo,set,repetition} = reconstruct_bin_images( ...
                     weighted_k_spaces, ...
                     weighted_sampling_masks, ...
-                    csm);
+                    csm, ...
+                    bin_limits, ...
+                    motion, ...
+                    params);
                 data.displacement_fields{echo,set,repetition} = register_bins( ...
                     data.bin_images{echo,set,repetition}, ...
-                    ref_bin_idx);
+                    params.ref_bin);
             end
         end
     end

@@ -5,7 +5,7 @@
 
     // Choose to override results if using the same run_name
     "override_if_exists": false,
-    
+
     // Input and Output folders
     // Use $WORKSPACE to replace by your workspace folder
     // Use ~ to replace by your home
@@ -55,6 +55,7 @@
     "motion_correction_params": {
         "type": "non_rigid", // none, translational, non_rigid
         "ref_bin": 4, // 1: inspiration, 4: expiration
+        "bin_recon_mode": "it_sense", // it_sense, orcca
     },
     "reconstruction_type": "it_SENSE", // it_SENSE, admm
     "denoising_type": "HD_PROST", // none, HD_PROST
