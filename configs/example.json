@@ -70,6 +70,7 @@
             "weight_id": 0,
             "max_iter": 1, // outer loop iterations
             "verbose": 1,
+            "n_threads": 5, // set to a number or "ncoils"
             "L1_smooth": 1e-15,
             "line_search_params": {
                 "max_iter": 1, // inner loop iterations

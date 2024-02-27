@@ -14,8 +14,7 @@ if a.adjoint % EH operation
         % Parfor complaints
 %         Bin_At = complex(double(a.At(:,:,:,bin)));
         coils = a.csm;
-%         for coil = 1:a.ncoils % number of coils
-        parfor coil = 1:a.ncoils % number of coils
+        parfor (coil = 1:a.ncoils, a.n_threads)
             % Sampling -> FFT -> Coil
 %             res_coils(:,:,coil) = K2Image(b(:,:,coil,bin).*Bin_At).*conj(coils(:,:,coil)); 
 %             res_coils(:,:,:,coil) = b(:,:,:,coil,bin).*Bin_At;
@@ -47,8 +46,7 @@ else % E operation
         % Parfor complaints
         Bin_At = complex(double(a.At(:,:,:,bin)));
         coils = a.csm;
-%         for coil = 1:a.ncoils % number of coils
-        parfor coil = 1:a.ncoils % number of coils
+        parfor (coil = 1:a.ncoils, a.n_threads)
             b_sample = b_bin.*coils(:,:,:,coil);
             b_sample = 1/(size(b_sample,1))*fftshift(fft(ifftshift( b_sample, 1 ),[],1),1);
             b_sample = 1/(size(b_sample,2))*fftshift(fft(ifftshift( b_sample, 2 ),[],2),2);
