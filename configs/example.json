@@ -3,6 +3,10 @@
     "run_name": "boost_NR_bin4",
     "notes": "You can add custom notes to remind yourself what you were trying in this run",
 
+    // If specified and > 0, kdata will be reduced to debug faster
+    // e.g. set to 20
+    "debug_ksize": 0,
+
     // Choose to override results if using the same run_name
     "override_if_exists": false,
 
