@@ -30,6 +30,7 @@ CONFIG.folder_output = strrep(CONFIG.folder_output, "$WORKSPACE", getenv("WORKSP
 %% Step 0.1: Save configuration file
 disp("Running reconstruction with run name: " + CONFIG.run_name);
 
+CONFIG.timestamp = string(datetime("now"), "yyyy-MM-dd_HH:mm:ss");
 save_config_to_file(CONFIG);
 
 %% STEP 1: Read Twix
