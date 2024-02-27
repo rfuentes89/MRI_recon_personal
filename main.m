@@ -20,6 +20,10 @@ assert(exist("config_fname", "var"), "config_fname variable must exist");
 
 CONFIG = readstruct(config_fname);
 
+if isfield(CONFIG, "run_name_prepend_datestamp") && CONFIG.run_name_prepend_datestamp
+    CONFIG.run_name = string(datetime("now"), "yyyy-MM-dd") + "_" + CONFIG.run_name;
+end
+
 CONFIG.folder_input = strrep(CONFIG.folder_input, "$WORKSPACE", getenv("WORKSPACE"));
 CONFIG.folder_output = strrep(CONFIG.folder_output, "$WORKSPACE", getenv("WORKSPACE"));
 

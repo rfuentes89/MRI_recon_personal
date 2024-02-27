@@ -1,6 +1,7 @@
 {
     // Run name will be used to save output files
     "run_name": "boost_NR_bin4",
+    "run_name_prepend_datestamp": false, // prepend yyyy-mm-dd to run_name
     "notes": "You can add custom notes to remind yourself what you were trying in this run",
 
     // If specified and > 0, kdata will be reduced to debug faster
