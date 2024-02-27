@@ -61,6 +61,23 @@
         "type": "non_rigid", // none, translational, non_rigid
         "ref_bin": 4, // 1: inspiration, 4: expiration
         "bin_recon_mode": "it_sense", // it_sense, orcca
+        "orcca_params": { // only used if bin_recon_mode == orcca
+            "lambda_b": 0.00001, // lambda_scale = lambda_b * max(data)
+            "lambda_s": 1, // weight_TV = lambda_s * lambda_scale
+            "lambda_t": 150, // weight_MTV = lambda_t * lambda_scale
+            "weight_L1": 0.00,
+            "weight_TV_Temp": 0,
+            "weight_id": 0,
+            "max_iter": 1, // outer loop iterations
+            "verbose": 1,
+            "L1_smooth": 1e-15,
+            "line_search_params": {
+                "max_iter": 1, // inner loop iterations
+                "alpha": 0.01,
+                "beta": 0.6,
+                "t0": 1,
+            },
+        },
     },
     "reconstruction_type": "it_SENSE", // it_SENSE, admm
     "denoising_type": "HD_PROST", // none, HD_PROST

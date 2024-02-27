@@ -79,36 +79,30 @@ function bin_images = reconstruct_bin_images_orcca( ...
         k_size, ...
         csm.coil_sensitivity_sum);
     
-    lambda_base = (1*10^-5)*max(abs(kdata(:))); 
-    
     %Sparsity operators and respective weights
-    param.E                 = E_CSbins;
-    param.W                 = TempFFT(3);
-    param.L1Weight          = 0.00; 
+    params_orcca = params_moco.orcca_params;
+
+    lambda_scale = params_orcca.lambda_b*max(abs(kdata(:)));
+
+    params_orcca.E = E_CSbins;
+    params_orcca.W = TempFFT(3);
+
+    params_orcca.TV = TVOP();
+    params_orcca.weight_TV = params_orcca.lambda_s*lambda_scale;
+
+    params_orcca.TV_Temp = TV_Temp();
     
-    param.TV                = TVOP();
-    lambdas                 = 1;
-    param.TVWeight          = lambdas*lambda_base; % Here use 1
-        
-    param.TV_Temp           = TV_Temp(); 
-    param.TV_TempWeight     = 0;
+    %params_orcca.MTV = MTV(interpolationMatrices); % nonrigid correction
+    params_orcca.MTV = TC_XMR_MTVi(target_pos_mean, params_moco.ref_bin);   % translational correction
+    params_orcca.weight_MTV = params_orcca.lambda_t*lambda_scale;
     
-    %param.MTV               = MTV(interpolationMatrices); % nonrigid correction
-    param.MTV               = TC_XMR_MTVi(target_pos_mean, params_moco.ref_bin);   % translational correction
-    lambdat                 = 150;
-    param.MTVWeight         = lambdat*lambda_base;
-    
-    param.nite              = 1;
-    param.display           = 1;
-    param.lsiter_max        = 1;
-    param.IdWeight          = 0;
-    param.y = kdata;
+    params_orcca.y = kdata;
 
 
     disp('************ XD-ORCCA reconstruction **************')
-    recon_dft = param.E'*param.y;
+    recon_dft = params_orcca.E'*params_orcca.y;
 
-    images = CSL1NlCg_ORCCA_gui(recon_dft, param);
+    images = CSL1NlCg_ORCCA_gui(recon_dft, params_orcca);
     
     % Flip dimensions (image is returned upside down)
     images = images(end:-1:1,end:-1:1,end:-1:1,:);
