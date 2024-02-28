@@ -44,8 +44,6 @@ end
 function bin_images = reconstruct_bin_images_orcca( ...
     k_spaces, sampling_masks, csm, bin_limits, motion_curve, params_moco)
 
-    % TODO(pdpino): clean ORCCA parameters (pass as arg, better names)
-
     n_bins = numel(k_spaces);
     [kx_size, ky_size, kz_size, n_coils] = size(k_spaces{1});
     k_size = [kx_size, ky_size, kz_size];
@@ -58,7 +56,6 @@ function bin_images = reconstruct_bin_images_orcca( ...
         At_bins(:,:,:,i_bin) = sampling_masks{i_bin};
     end
 
-    % TODO(pdpino): pass this as arg?
     % Compute mean per bin
     target_pos_mean = cell(n_bins, 1);
     for i_bin = 1:n_bins

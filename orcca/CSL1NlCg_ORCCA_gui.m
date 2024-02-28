@@ -36,14 +36,12 @@ function x = CSL1NlCg_ORCCA_gui(x0,params)
     step_i = 0;
     while(1)
 	    step_i = step_i + 1;
-    %     x0=x;
         
         % backtracking line-search
 	    f0 = objective(x,dx,0,params);
-    %     msg = sprintf('Target f0 = %d',f0); disp(msg);
 	    t = ls_params.t0;
         f1 = objective(x,dx,t,params);
-        % print some numbers	
+
         if params.verbose
             fprintf(' ite = %d, cost = %f \n',step_i,f1);
         end
@@ -62,7 +60,6 @@ function x = CSL1NlCg_ORCCA_gui(x0,params)
             disp("Line search reached max iter = " + string(ls_params.max_iter));
             return;
         end
-        %disp(lsiter)
         
 	    % control the number of line searches by adapting the initial step search
 	    if lsiter > 2, ls_params.t0 = ls_params.t0 * ls_params.beta;end 
@@ -71,15 +68,14 @@ function x = CSL1NlCg_ORCCA_gui(x0,params)
         % update x
 	    x = (x + t*dx);
          
-    %         diff_rel = x - x0; relchg = norm(diff_rel(:))/max(norm(x0(:)),eps);
-    %         fprintf('itr=%d relchg=%4.1e', k, relchg);
-    %         fprintf('\n');
-    %         if relchg < ls_params.relchg_tol
-    %             return;
-    %         end
+        % diff_rel = x - x0; relchg = norm(diff_rel(:))/max(norm(x0(:)),eps);
+        % fprintf('itr=%d relchg=%4.1e', k, relchg);
+        % fprintf('\n');
+        % if relchg < ls_params.relchg_tol
+        %     return;
+        % end
         
 	    
-        
         %conjugate gradient calculation
 	    g1 = grad(x,params);
 	    bk = g1(:)'*g1(:)/(g0(:)'*g0(:)+eps);
@@ -87,7 +83,7 @@ function x = CSL1NlCg_ORCCA_gui(x0,params)
 	    dx =  - g1 + bk* dx;
 	    
 	    % stopping criteria (to be improved)
-    % 	if (k > param.n_iterations) || (norm(dx(:)) < ls_params.grad_toll  ), break;end
+    	% if (k > param.n_iterations) || (norm(dx(:)) < ls_params.grad_toll  ), break;end
         if (step_i > params.max_iter), break;end
     
     end
