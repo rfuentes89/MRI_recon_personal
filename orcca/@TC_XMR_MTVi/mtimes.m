@@ -11,7 +11,7 @@ if ~a.adjoint
     for bbb = 1:size(b,4)
         TX = a.target_pos{ref_bin}.X - a.target_pos{bbb}.X;
         TY = a.target_pos{ref_bin}.Y - a.target_pos{bbb}.Y;
-        res(:,:,:,bbb) = imtranslate(b(:,:,:,bbb),[TY, -TX]);
+        res(:,:,:,bbb) = imtranslate(b(:,:,:,bbb),[TY, TX]);
         %res(:,:,:,bbb) = affine_from_values_B(b(1:250,:,43,bbb),TX,TY,0,1,1,0,0);
     end
     % TV
@@ -24,7 +24,7 @@ else
     for bbb = 1:size(b,4)
         TX = a.target_pos{ref_bin}.X - a.target_pos{bbb}.X;
         TY = a.target_pos{ref_bin}.Y - a.target_pos{bbb}.Y;
-        res(:,:,:,bbb) = imtranslate(res(:,:,:,bbb),[-TY, TX]);
+        res(:,:,:,bbb) = imtranslate(res(:,:,:,bbb),[-TY, -TX]);
     end
  
 end
