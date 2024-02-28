@@ -1,4 +1,4 @@
-function x = CSL1NlCg_ORCCA_gui(x0,params)
+function x = CSL1NlCg_ORCCA(x0,params)
     % 
     % res = CSL1NlCg(param)
     %
