@@ -27,10 +27,9 @@ cd bart-0.8.00
 make
 chmod a+x bart
 
-echo "export MATLABPATH=/path/to/install/bart-0.8.00/matlab:$MATLABPATH" >> ~/.bash_aliases
-echo "export TOOLBOX_PATH=/path/to/install/bart-0.8.00:$TOOLBOX_PATH" >> ~/.bash_aliases
-
-# Logout and log back in for changes to take effect
+# Export env variables before using
+export MATLABPATH=/path/to/install/bart-0.8.00/matlab:$MATLABPATH
+export TOOLBOX_PATH=/path/to/install/bart-0.8.00:$TOOLBOX_PATH
 ```
 
 Find other bart versions in https://github.com/mrirecon/bart/releases.
@@ -42,9 +41,8 @@ Find other bart versions in https://github.com/mrirecon/bart/releases.
 cd /path/to/install
 git clone https://github.com/lab-midas/imagine.git
 
-echo "export MATLABPATH=/path/to/install/imagine:$MATLABPATH" >> ~/.bash_aliases
-
-# Logout and log back in for changes to take effect
+# Export env variables before using
+export MATLABPATH=/path/to/install/imagine:$MATLABPATH
 ```
 
 ### Manual installation: [NIFTY](https://github.com/RCiHealthGroup/NIFTY_REG)
@@ -68,18 +66,35 @@ Follow instructions in [their README](https://github.com/RCiHealthGroup/HD_PROST
 
 1. Create a JSON configuration file to specify the parameters for the reconstruction.
    See an example in [`configs/example.json`](configs/example.json), it has comments on each parameter.
-    * You can use the example itself or create a copy
-    * Set the `run_name` to something appropriate (it will be used in the output files later, see below)
+    * You should create your own copy of `configs/example.json`
+    * Set the `run_name` to something appropriate (it will be used in the output files later, see below)   
 
 2. Run the `main.m` script either from the MATLAB editor or from the terminal:
-    1. Option 1, MATLAB Editor: open the script, set the `config_fname` variable to the name of your configuration file,
+    1. Option 1, MATLAB Editor: open the `main.m` file,
+       set the `config_fname` variable in the first lines to the name of your configuration file,
        then run the script (e.g. section by section, or the whole file at once)
     2. Option 2, run from a terminal:
-       `matlab -nodisplay -batch "config_fname='/path/to/your/config.json'; main;"`
+       `matlab -nodisplay -batch "config_fname='/path/to/your/config.json'; main;"`.
+       Note: you'll need to run in the MATLAB Editor at least once for each twix file, [read below](#saving-motion-curves)
 
 ### Output files
 
 These files will be stored:
-* A JSON file with the configuration `output_folder/config/<RUN_NAME>.json`
-* A `.mat` file with the motion curve in `output_folder/motion_curves/<TWIX_FNAME>.mat`
-* DICOM files in the folder `output_folder/dcm/<RUN_NAME>/`
+* A JSON file with the configuration `<OUTPUT_FOLDER>/config/<RUN_NAME>.json`
+* DICOM files in the folder `<OUTPUT_FOLDER>/dcm/<RUN_NAME>/`
+
+Other files might be saved as well, see JSON options `save_`
+
+
+### Saving motion curves
+
+To run the script from the terminal, you'll first need to save the motion curves to a file:
+
+1. Run the `main.m` script from the MATLAB editor up to the "Step 5: Reading iNAVs"
+    * Set the JSON option `load_motion_curves: false`
+2. You will be prompted to make a selection on the iNAV, and motion curves will be calculated
+3. Motion curves will be saved to `<OUTPUT_FOLDER>/motion_curves/<TWIX_FNAME>.mat`
+4. Repeat this process for each twix file you need to process
+
+Then, you can run the script from the terminal, and motion curves will be loaded from the `.mat` file
+(using the JSON option `load_motion_curves: true`).
