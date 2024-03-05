@@ -145,6 +145,13 @@ end
 
 save_variable_if_config(CONFIG, "motion_corrected_data", CONFIG.save_data);
 
+%% Save disp fields
+% Save displacement fields to file
+displacement_fields = motion_corrected_data.displacement_fields;
+save_variable_if_config(CONFIG, "displacement_fields", CONFIG.save_disp_fields);
+clear displacement_fields;
+
+
 %% STEP 7: Reconstructions:
 disp("step 7: reconstructing images")
 images = reconstruct_images( ...

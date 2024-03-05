@@ -26,6 +26,7 @@
     "save_csm": false, // whether or not to save .mat file with csm
     "save_data": false, // whether or not to save .mat file with moco data
     "save_images": false, // whether or not to save .mat file with (noisy) images
+    "save_disp_fields": false, // whether or not to save displacement_fields
 
     "load_motion_curves": true, // whether or not to load curves from file
     // if false, requires UI to select iNAV
