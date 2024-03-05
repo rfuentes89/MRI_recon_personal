@@ -31,7 +31,6 @@ CONFIG.folder_output = strrep(CONFIG.folder_output, "$WORKSPACE", getenv("WORKSP
 disp("Running reconstruction with run name: " + CONFIG.run_name);
 
 CONFIG.timestamp = string(datetime("now"), "yyyy-MM-dd_HH:mm:ss");
-save_config_to_file(CONFIG);
 
 %% STEP 1: Read Twix
 
@@ -220,6 +219,9 @@ if CONFIG.save_dcm_intrabin && isfield(motion_corrected_data, "bin_images")
         end
     end
 end
+
+CONFIG.timestamp_end = string(datetime("now"), "yyyy-MM-dd_HH:mm:ss");
+save_config_to_file(CONFIG);
 
 %% Small util functions
 function save_dicom(config, image, contrast_name, input_info_name)
