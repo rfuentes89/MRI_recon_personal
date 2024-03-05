@@ -237,9 +237,11 @@ function save_dicom(config, image, contrast_name, input_info_name)
     write_dicom_volume(abs(image), filename, info_base, config.dicom_params);
 end
 
-
 function save_variable_if_config(config, var_name, should_save)
     if should_save
+        % HACK: make variable available
+        eval("global " + string(var_name))
+
         folder = fullfile(config.folder_output, var_name);
         if ~exist(folder, "dir"), mkdir(folder), end
         filename = fullfile(folder, config.run_name + ".mat");
