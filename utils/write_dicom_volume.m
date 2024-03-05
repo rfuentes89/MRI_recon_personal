@@ -56,6 +56,22 @@ function write_dicom_volume(image, filename, info, options)
     % Write volume
     filename = string(filename);
     if ~endsWith(filename, ".dcm"), filename = filename + ".dcm"; end
-    dicomwrite(image_gray, filename, info, 'CreateMode', 'copy')
-    disp("Dicom written to " + filename)
+
+    n_tries = 10;
+    for i_try = 1:n_tries
+        try
+            dicomwrite(image_gray, filename, info, 'CreateMode', 'copy')
+            disp("Dicom written to " + filename);
+            break;
+        catch exception
+            ith_out_of_nth = string(i_try) + "/" + string(n_tries);
+            warning("Tried saving dicom " + ith_out_of_nth + ...
+                ", got exception: " + string(exception.identifier))
+            % NOTE(pdpino): this catches weird non-deterministic exception:
+            %
+            % Matrix index is out of range for deletion.
+            % Error in dicom_generate_uid>guid_to_uid (line 125)
+            % guid(13) = '';
+        end
+    end
 end
