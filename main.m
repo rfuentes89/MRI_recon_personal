@@ -12,10 +12,10 @@ addpath(genpath("./"))
 
 assert(~isempty(getenv('NIFTY_PATH')))
 
-%% STEP 0: Read parameters from file
 % Choose your config file here
 %config_fname = "configs/example.json";
 
+%% STEP 0: Read parameters from file
 assert(exist("config_fname", "var"), "config_fname variable must exist");
 
 CONFIG = readstruct(config_fname);
