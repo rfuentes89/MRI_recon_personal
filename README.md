@@ -58,7 +58,7 @@ Follow instructions in [their README](https://github.com/RCiHealthGroup/mapVBVD)
 
 Follow instructions in [their README](https://github.com/RCiHealthGroup/HD_PROST_MATLAB)
 
-  
+
 </details>
 
 
@@ -66,35 +66,35 @@ Follow instructions in [their README](https://github.com/RCiHealthGroup/HD_PROST
 
 1. Create a JSON configuration file to specify the parameters for the reconstruction.
    See an example in [`configs/example.json`](configs/example.json), it has comments on each parameter.
-    * You should create your own copy of `configs/example.json`
-    * Set the `run_name` to something appropriate (it will be used in the output files later, see below)   
+    * You should NOT edit the `example.json` file, you should create your own copy
+    * Set the `run_name` to something appropriate (it will be used in the output files later, see below)
 
 2. Run the `main.m` script either from the MATLAB editor or from the terminal:
     1. Option 1, MATLAB Editor: open the `main.m` file,
        set the `config_fname` variable in the first lines to the name of your configuration file,
-       then run the script (e.g. section by section, or the whole file at once)
+       then run the script (e.g. section by section, the whole file at once, or as you prefer)
     2. Option 2, run from a terminal:
        `matlab -nodisplay -batch "config_fname='/path/to/your/config.json'; main;"`.
-       Note: you'll need to run in the MATLAB Editor at least once for each twix file, [read below](#saving-motion-curves)
+       Note: first you'll need to run in the MATLAB Editor at least once for each twix file, [read below](#saving-motion-curves)
 
 ### Output files
 
-These files will be stored:
+After running `main.m` successfully, these files will be stored:
 * A JSON file with the configuration `<OUTPUT_FOLDER>/config/<RUN_NAME>.json`
 * DICOM files in the folder `<OUTPUT_FOLDER>/dcm/<RUN_NAME>/`
 
-Other files might be saved as well, see JSON options `save_`
+Other files might be saved as well, see JSON options starting with `save_`, for example save_csm`.
 
 
 ### Saving motion curves
 
 To run the script from the terminal, you'll first need to save the motion curves to a file:
 
-1. Run the `main.m` script from the MATLAB editor up to the "Step 5: Reading iNAVs"
-    * Set the JSON option `load_motion_curves: false`
-2. You will be prompted to make a selection on the iNAV, and motion curves will be calculated
-3. Motion curves will be saved to `<OUTPUT_FOLDER>/motion_curves/<TWIX_FNAME>.mat`
-4. Repeat this process for each twix file you need to process
+1. Prepare your JSON file, and set the option `load_motion_curves: false`
+2. Run the `main.m` script from the MATLAB editor up to the "Step 5: Reading iNAVs"
+3. You will be prompted to make a selection on the iNAV, and motion curves will be calculated
+4. Motion curves will be saved to `<OUTPUT_FOLDER>/motion_curves/<TWIX_FNAME>.mat`
+5. Repeat this process for each twix file you need to process
 
-Then, you can run the script from the terminal, and motion curves will be loaded from the `.mat` file
-(using the JSON option `load_motion_curves: true`).
+After that, you can run from the terminal using the JSON option `load_motion_curves: true`,
+so the script loads the motion curves from the `.mat` file.
