@@ -5,7 +5,6 @@ function [res] = mtimes(a,b)
 if a.adjoint % EH operation
 % b = full_k_data : (Ny,Nx,Nz,Nc) -> (Ny,Nx,Nz) when applying EH
 
-    coil_rss = a.coil_rss; 
     res_coils = zeros(a.siz(1),a.siz(2),a.siz(3),size(a.coils, 4)); % init
     At = a.At;
     coils = a.coils;
@@ -37,22 +36,16 @@ if a.adjoint % EH operation
         res_coils(:,:,:,coil) = b_sample.*conj(coils(:,:,:,coil)); 
     end
 
-    res = sum(res_coils,4)./coil_rss;
-    %res_coils = res_coils./repmat(coil_rss,[1 1 1 32]); 
-    %res = sqrt(sum(res_coils.^2,4)); % sos coil combo
-    res(coil_rss==0) = 0;
+    res = sum(res_coils,4);
     res(isnan(res)) = 0;
     
 else % E operation
 % b = full_image_data : (Ny,Nx,Nz) -> (Ny,Nx,Nz,Nc) when applying E
     
-    coil_rss = a.coil_rss;
     res = zeros(a.Ksiz(1),a.Ksiz(2),a.Ksiz(3),size(a.coils, 4));
     At = a.At;
     coils = a.coils;
     
-    b = b./coil_rss;
-    b(coil_rss==0) = 0;
     b(isnan(b)) = 0;
     
     for coil = 1:size(a.coils, 4) % number of coils

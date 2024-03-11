@@ -122,7 +122,7 @@ if isfield(CONFIG, "debug_ksize") && CONFIG.debug_ksize > 0
     end
 
     csm.coil_sensitivity_maps = csm.coil_sensitivity_maps(1:new_size, 1:new_size, 1:new_size, :);
-    csm.coil_sensitivity_sum = csm.coil_sensitivity_sum (1:new_size, 1:new_size, 1:new_size);
+    csm.coil_sensitivity_maps_raw = csm.coil_sensitivity_maps_raw(1:new_size, 1:new_size, 1:new_size);
 end
 
 

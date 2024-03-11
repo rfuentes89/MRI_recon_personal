@@ -22,8 +22,8 @@ function csm = estimate_coil_sensitivity_maps(data, algorithm_name, selected)
 
     root_sum_of_squares = sqrt(sum(abs(coil_sensitivity_maps) .^ 2, 4));
 
-    csm.coil_sensitivity_maps = coil_sensitivity_maps;
-    csm.coil_sensitivity_sum = root_sum_of_squares;
+    csm.coil_sensitivity_maps = coil_sensitivity_maps./root_sum_of_squares;
+    csm.coil_sensitivity_maps_raw = coil_sensitivity_maps;
 
 end
 

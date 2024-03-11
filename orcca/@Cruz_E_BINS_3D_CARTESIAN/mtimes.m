@@ -28,10 +28,7 @@ if a.adjoint % EH operation
             res_coils(:,:,:,coil) = res_coils(:,:,:,coil).*conj(coils(:,:,:,coil));
         end
         %res_with_coils(:,:,bin,:) = res_coils;
-        % Applying intensity correction
         res_bin = sum(res_coils,4);
-        res_bin = res_bin ./ a.coil_rss;
-        res_bin(a.coil_rss==0) = 0;
         res_bin(isnan(res_bin)) = 0;
         res(:,:,:,bin) = res_bin; % storing bins in a single matrix
     end  
@@ -39,9 +36,7 @@ if a.adjoint % EH operation
 else % E operation
     res = zeros(a.Ksiz(1),a.Ksiz(2),a.Ksiz(3),a.ncoils,a.nbins);
     for bin = 1:a.nbins % iterating thru bins
-        % Applying intensity correction
-        b_bin = b(:,:,:,bin) ./ a.coil_rss;
-        b_bin(a.coil_rss==0) = 0;
+        b_bin = b(:,:,:,bin);
         b_bin(isnan(b_bin)) = 0; 
         % Parfor complaints
         Bin_At = complex(double(a.At(:,:,:,bin)));

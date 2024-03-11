@@ -7,7 +7,6 @@ if a.adjoint % EH operation
 % b can also be (Ny,Nx,Nz,Nc,Nb) -> (Ny,Nx,Nz)
 
     res = zeros(a.siz(1),a.siz(2),a.siz(3));
-    coil_rss = a.coil_rss;
     At = a.At;
     coils = a.coils;
     nbins = size(At,4);
@@ -42,9 +41,6 @@ if a.adjoint % EH operation
         end
 
         res_bin = sum(res_coils,4);
-            %res_bin = sum(res_coils,4)./coil_rss;
-             %res_bin(coil_rss==0) = 0;
-             %res_bin(isnan(res_bin)) = 0;
         res_bin = complex(matrix_interpolation(real(res_bin),curr_mf'),matrix_interpolation(imag(res_bin),curr_mf'));
 
         % normalisation of motion fields
@@ -57,12 +53,7 @@ if a.adjoint % EH operation
 
     end
 
-    % Intensity correction
-    res = res./coil_rss;
-    res(coil_rss==0) = 0;
     res(isnan(res))  = 0;
-%     %Need to look into problem when coil_rss is very small
-%     res(coil_rss<=0) = 0;
 
 else % E operation
 % b = full_image_data : (Ny,Nx,Nz) -> (Ny,Nx,Nz,Nc) when applying E
@@ -70,7 +61,6 @@ else % E operation
     At = a.At;
     coils = a.coils;
     nbins = size(At,4);
-    coil_rss = a.coil_rss;
     Ksiz = a.Ksiz;
     if numel(a.Ksiz) == 4
         res = zeros(a.Ksiz(1),a.Ksiz(2),a.Ksiz(3),a.Ksiz(4));
@@ -81,12 +71,7 @@ else % E operation
     % Sampling for normalization
     At_norm = sum(At,4);
 
-    % Intensity correction
-    b = b./coil_rss;
-    b(coil_rss==0) = 0;
     b(isnan(b)) = 0;
-%     %Need to look into problem when coil_rss is very small
-%     b(coil_rss<=0) = 0;
 
     for bin = 1:nbins
         curr_mf = a.MF;
@@ -97,10 +82,7 @@ else % E operation
             curr_mf = resampleMatrix(zeros(a.siz),curr_mf(:,:,:,:,bin));
         end
 
-	 warp_b = complex(matrix_interpolation(real(b),curr_mf),matrix_interpolation(imag(b),curr_mf));
-        %warp_b = complex(matrix_interpolation(real(b),curr_mf),matrix_interpolation(imag(b),curr_mf))./coil_rss;
-	 %warp_b(coil_rss==0) = 0;
-	 %warp_b(isnan(warp_b)) = 0;
+	    warp_b = complex(matrix_interpolation(real(b),curr_mf),matrix_interpolation(imag(b),curr_mf));
 
         Bin_At = double(At(:,:,:,bin));
 
