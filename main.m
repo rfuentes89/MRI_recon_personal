@@ -1,10 +1,10 @@
 %% OFFLINE MRI RECON MATLAB CODE - SIEMENS
 %
 % This code for the offline MRI reconstruction can be used for multi-coil
-% and multi-echo mri data. 
+% and multi-echo mri data.
 %
 %
-% Matlab version: 
+% Matlab version:
 %
 % Authors: Alina Schneider, Camila Munoz, Carlos Velasco, Donovan Tripp, Lina Felsner (2022)
 
@@ -89,7 +89,7 @@ if CONFIG.motion_correction_params.type ~= "none"
     motion_curves_file = fullfile(motion_curves_folder, strrep(CONFIG.twix_fname, ".dat", ".mat"));
     if (CONFIG.load_motion_curves && isfile(motion_curves_file))
         disp("step 5: loading motion_curves")
-        load(motion_curves_file, 'motion_curves');  
+        load(motion_curves_file, 'motion_curves');
     else
         disp("step 5: estimating motion")
         motion_curves = estimate_motion_curves(twix, CONFIG.selected_contrasts);
@@ -208,7 +208,7 @@ end
 %% Write main DICOM
 if CONFIG.save_dcm
     save_dicom(CONFIG, denoised_images{1}, "HB1", "HB1")
-    
+
     if (length(denoised_images) == 2)
         save_dicom(CONFIG, denoised_images{2}, "HB2", "HB2")
         save_dicom(CONFIG, deno_blackblood, "BB", "BB")
