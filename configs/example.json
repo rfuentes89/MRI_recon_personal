@@ -61,8 +61,8 @@
     "motion_correction_params": {
         "type": "non_rigid", // none, translational, non_rigid
         "ref_bin": 4, // 1: inspiration, 4: expiration
-        "bin_recon_mode": "it_sense", // it_sense, orcca
-        "orcca_params": { // only used if bin_recon_mode == orcca
+        "bin_recon_type": "it_sense", // it_sense, orcca
+        "orcca_params": { // only used if bin_recon_type == orcca
             "lambda_b": 0.00001, // lambda_scale = lambda_b * max(data)
             "lambda_s": 1, // weight_TV = lambda_s * lambda_scale
             "lambda_t": 150, // weight_MTV = lambda_t * lambda_scale

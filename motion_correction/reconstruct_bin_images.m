@@ -6,7 +6,7 @@ function bin_images = reconstruct_bin_images( ...
 %     k_spaces shape: cell{n_bins}: n_kx, n_ky, n_kz, n_coils
 %     sampling_masks shape: cell{n_bins}: n_kx, n_ky, n_kz
 
-    switch lower(params_moco.bin_recon_mode)
+    switch lower(params_moco.bin_recon_type)
         case "it_sense"
             bin_images = reconstruct_bin_images_it_sense(k_spaces, sampling_masks, csm);
         case "orcca"
@@ -18,7 +18,7 @@ function bin_images = reconstruct_bin_images( ...
                 motion_curve, ...
                 params_moco);
         otherwise
-            error("unknown bin reconstruction method: " + string(params_moco.bin_recon_mode))
+            error("unknown bin reconstruction method: " + string(params_moco.bin_recon_type))
     end
 end
 
@@ -89,11 +89,11 @@ function bin_images = reconstruct_bin_images_orcca( ...
     params_orcca.weight_TV = params_orcca.lambda_s*lambda_scale;
 
     params_orcca.TV_Temp = TV_Temp();
-    
+
     %params_orcca.MTV = MTV(interpolationMatrices); % nonrigid correction
     params_orcca.MTV = TC_XMR_MTVi(target_pos_mean, params_moco.ref_bin);   % translational correction
     params_orcca.weight_MTV = params_orcca.lambda_t*lambda_scale;
-    
+
     params_orcca.y = kdata;
 
 
@@ -101,7 +101,7 @@ function bin_images = reconstruct_bin_images_orcca( ...
     recon_dft = params_orcca.E'*params_orcca.y;
 
     images = CSL1NlCg_ORCCA(recon_dft, params_orcca);
-    
+
     % Flip dimensions (image is returned upside down)
     images = images(end:-1:1,end:-1:1,end:-1:1,:);
 
