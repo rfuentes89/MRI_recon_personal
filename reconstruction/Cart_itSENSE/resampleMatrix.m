@@ -8,37 +8,37 @@ ndims = numel(size(old));
 
 if ndims == 2
     [ymax,xmax] = size(old);
-    
+
     % floor and ceil value for each pixel are extracted
     floorGridX=floor(deformationField(:,:,1));
     floorGridY=floor(deformationField(:,:,2));
     ceilGridX=ceil(deformationField(:,:,1));
     ceilGridY=ceil(deformationField(:,:,2));
-    
+
     % We here compute the relative position of each pixel
     wx=deformationField(:,:,1)-floorGridX;
     wy=deformationField(:,:,2)-floorGridY;
-    
+
     % We compute the weight that will be applied to each intensity
     w1=(1-wx).*(1-wy);
     w2=wx.*(1-wy);
     w3=(1-wx).*wy;
     w4=wx.*wy;
-    
+
     % Killing off the coefficients of points that leave the FOV.
     % This is just a safe-guard.
     w1(floorGridX<1 | floorGridX>size(old,1)) = 0; w1(floorGridY<1 | floorGridY>size(old,2)) = 0;
     w1(ceilGridX<1 | ceilGridX>size(old,1)) = 0; w1(ceilGridY<1 | ceilGridY>size(old,2)) = 0;
-    
+
     w2(floorGridX<1 | floorGridX>size(old,1)) = 0; w2(floorGridY<1 | floorGridY>size(old,2)) = 0;
     w2(ceilGridX<1 | ceilGridX>size(old,1)) = 0; w2(ceilGridY<1 | ceilGridY>size(old,2)) = 0;
-    
+
     w3(floorGridX<1 | floorGridX>size(old,1)) = 0; w3(floorGridY<1 | floorGridY>size(old,2)) = 0;
     w3(ceilGridX<1 | ceilGridX>size(old,1)) = 0; w3(ceilGridY<1 | ceilGridY>size(old,2)) = 0;
-    
+
     w4(floorGridX<1 | floorGridX>size(old,1)) = 0; w4(floorGridY<1 | floorGridY>size(old,2)) = 0;
     w4(ceilGridX<1 | ceilGridX>size(old,1)) = 0; w4(ceilGridY<1 | ceilGridY>size(old,2)) = 0;
-    
+
     % Cheap boundary conditions were the intensity at the border is replicated
     % However, because the weights above are being nulled, this will make the
     % point disappear.
@@ -50,7 +50,7 @@ if ndims == 2
     floorGridY(floorGridY>size(old,2))=ymax;
     ceilGridX(ceilGridX>size(old,1))=xmax;
     ceilGridY(ceilGridY>size(old,2))=ymax;
-    
+
     % We here compute the index in 1D of each pixel
     P(:,:,1) = floorGridX+size(old,1)*(floorGridY-1);
     P(:,:,2) = ceilGridX+size(old,1)*(floorGridY-1);
@@ -61,7 +61,7 @@ if ndims == 2
     W(:,:,2) = w2;
     W(:,:,3) = w3;
     W(:,:,4) = w4;
-    
+
     % Vectorizing Y indexes
     Ys = 4*ones(1,ymax*xmax);
     CS = cumsum(Ys);
@@ -77,7 +77,7 @@ if ndims == 2
     Vs = double(Vs(:));
     % Summons the interpolation matrix
     interpolationMatrix = sparse(Ys,Xs,Vs,ymax*xmax,ymax*xmax);
-    
+
     % Using tighter precisions in 3D.
 elseif ndims == 3
     [ymax,xmax,zmax] = size(old);
@@ -89,12 +89,12 @@ elseif ndims == 3
     ceilGridX=double(ceil(deformationField(:,:,:,1)));
     ceilGridY=double(ceil(deformationField(:,:,:,2)));
     ceilGridZ=double(ceil(deformationField(:,:,:,3)));
-    
+
     % We here compute the relative position of each pixel
     wx=deformationField(:,:,:,1)-floorGridX;
     wy=deformationField(:,:,:,2)-floorGridY;
     wz=deformationField(:,:,:,3)-floorGridZ;
-    
+
     % We compute the weight that will be applied to each intensity
     w1=(1-wx).*(1-wy).*(1-wz);
     w2=wx.*(1-wy).*(1-wz);
@@ -104,7 +104,7 @@ elseif ndims == 3
     w6=wx.*(1-wy).*wz;
     w7=(1-wx).*wy.*wz;
     w8=wx.*wy.*wz;
-    
+
     % Killing off the coefficients of points that leave the FOV.
     % This is just a safe-guard.
     % Killing off the coefficients of points that leave the FOV.
@@ -124,7 +124,7 @@ elseif ndims == 3
     w7(ceilGridX<1 | ceilGridX>size(old,1)) = 0; w7(ceilGridY<1 | ceilGridY>size(old,2)) = 0; w7(ceilGridZ<1 | ceilGridZ>size(old,3)) = 0;
     w8(floorGridX<1 | floorGridX>size(old,1)) = 0; w8(floorGridY<1 | floorGridY>size(old,2)) = 0; w8(floorGridZ<1 | floorGridZ>size(old,3)) = 0;
     w8(ceilGridX<1 | ceilGridX>size(old,1)) = 0; w8(ceilGridY<1 | ceilGridY>size(old,2)) = 0; w8(ceilGridZ<1 | ceilGridZ>size(old,3)) = 0;
-    
+
     % Current boundary condition is NaN. This means that points that leave the
     % FOV disapear altogether.
     floorGridX(floorGridX<1)=1;
@@ -139,7 +139,7 @@ elseif ndims == 3
     ceilGridX(ceilGridX>size(old,1))=ymax;
     ceilGridY(ceilGridY>size(old,2))=xmax;
     ceilGridZ(ceilGridZ>size(old,3))=zmax;
-    
+
     P = double(zeros(ymax,xmax,zmax,8));
     W = double(zeros(ymax,xmax,zmax,8));
     % We here compute the index in 1D of each pixel
@@ -151,7 +151,7 @@ elseif ndims == 3
     P(:,:,:,6) = ceilGridX+ymax*(floorGridY-1)+ymax*xmax*(ceilGridZ-1);
     P(:,:,:,7) = floorGridX+ymax*(ceilGridY-1)+ymax*xmax*(ceilGridZ-1);
     P(:,:,:,8) = ceilGridX+ymax*(ceilGridY-1)+ymax*xmax*(ceilGridZ-1);
-    
+
     % Storing weights in a double matrix
     W(:,:,:,1) = w1;
     W(:,:,:,2) = w2;
@@ -161,7 +161,7 @@ elseif ndims == 3
     W(:,:,:,6) = w6;
     W(:,:,:,7) = w7;
     W(:,:,:,8) = w8;
-    
+
     % Vectorizing Y indexes
     Ys = double(8*ones(ymax*xmax*zmax,1));
     CS = cumsum(Ys);
@@ -177,7 +177,7 @@ elseif ndims == 3
     Vs = double(Vs(:));
     % Summons the interpolation matrix
     interpolationMatrix = sparse(Ys,Xs,Vs,ymax*xmax*zmax,ymax*xmax*zmax);
-    
+
 end
 
 end
