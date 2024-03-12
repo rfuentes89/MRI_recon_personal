@@ -75,7 +75,7 @@ end
 %% STEP 4: CSM Estimation
 
 disp("step 4: estimating coil maps")
-csm = estimate_coil_sensitivity_maps(data, CONFIG.coil_params.csm_algorithm, CONFIG.selected_contrasts_for_rating);
+csm = get_csm(data, CONFIG.coil_params.csm_algorithm, CONFIG.selected_contrasts_for_rating);
 
 save_variable_if_config(CONFIG, "csm", CONFIG.save_csm)
 

@@ -5,7 +5,7 @@
 
 **All requirements are already installed in iHEALTH servers** (e.g. ih-condor, nyquist, fourier). Simply load them by running:
 ```bash
-module load bart imagine nifty gsl/2.3 mapVBVD prost
+module load bart imagine nifty gsl/2.3 mapVBVD prost mri-coils
 ```
 
 You must run them before running MATLAB.
