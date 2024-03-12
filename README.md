@@ -8,7 +8,7 @@
 module load bart imagine nifty gsl/2.3 mapVBVD prost mri-coils
 ```
 
-You must run them before running MATLAB.
+You must load them before running MATLAB.
 
 <details>
   <summary>
