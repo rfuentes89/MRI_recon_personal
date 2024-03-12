@@ -13,6 +13,6 @@ function image = non_rigid_it_SENSE(k_space, binned_sampling_masks, displacement
     );
 
     result = Cart_itSENSE(k_space, operator, n_iter, verbose);
-    image = flip(flip(flip(result, 1), 2), 3); % ./ csm.coil_sensitivity_sum ??
+    image = flip(flip(flip(result, 1), 2), 3);
 
 end
