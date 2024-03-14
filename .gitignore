@@ -1,6 +1,7 @@
 # Tmp files
 *.asv
 ._*
+*.swp
 
 # Dependencies
 dependencies/NIFTI_REG/Temps/
