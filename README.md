@@ -79,6 +79,8 @@ Follow instructions in [their README](https://github.com/RCiHealthGroup/Coils_To
        `matlab -nodisplay -batch "config_fname='/path/to/your/config.json'; main;"`.
        Note: first you'll need to run in the MATLAB Editor at least once for each twix file, [read below](#saving-motion-curves)
 
+<!-- TODO: mention requires HB1, HB2 files as input -->
+
 ### Output files
 
 After running `main.m` successfully, these files will be stored:

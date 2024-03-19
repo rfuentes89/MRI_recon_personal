@@ -102,5 +102,9 @@
         "CG_maxit_ini": 5,
         "CG_maxit": 5,
         "CG_lambda": 0.01,
-    }
+    },
+    "seq_params": { // description of the sequence
+        "contrast_names": ["HB1", "HB2"], // contrasts (HBs) used
+        "bb": true,
+    },
 }

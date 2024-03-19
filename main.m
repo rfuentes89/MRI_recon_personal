@@ -183,37 +183,35 @@ end
 %     denoised_images{image_i} = denoised_images{image_i}(10:200,40:247,9:96);
 % end
 
-%% Black blood
-if (length(denoised_images) == 2)
-    deno_blackblood = abs(denoised_images{2}) - abs(denoised_images{1});
+%% Set default contrast names
+if length(CONFIG.seq_params.contrast_names) < length(denoised_images)
+    CONFIG.seq_params.contrast_names = ["HB1", "HB2"];
 end
-
-%% Display with Imagine
-% imagine(...
-%     abs(denoised_images{1}),'w',[0 max(abs(denoised_images{1}),[],'all')],...
-%     abs(denoised_images{2}),'w',[0 max(abs(denoised_images{2}),[],'all')], ...
-%     abs(deno_blackblood),'w',[0 max(abs(deno_blackblood),[],'all')]...
-%     )
 
 %% Write main DICOM
 if CONFIG.save_dcm
-    save_dicom(CONFIG, denoised_images{1}, "HB1", "HB1")
+    for image_i = 1:length(denoised_images)
+        cname = CONFIG.seq_params.contrast_names{image_i};
+        save_dicom(CONFIG, denoised_images{image_i}, cname, cname);
+    end
 
-    if (length(denoised_images) == 2)
-        save_dicom(CONFIG, denoised_images{2}, "HB2", "HB2")
-        save_dicom(CONFIG, deno_blackblood, "BB", "BB")
+    % Black blood
+    if (length(denoised_images) == 2) && CONFIG.seq_params.bb
+        deno_blackblood = abs(denoised_images{2}) - abs(denoised_images{1});
+        save_dicom(CONFIG, deno_blackblood, "BB", "BB");
     end
 end
 
 %% Write Bin images
 if CONFIG.save_dcm_intrabin && isfield(motion_corrected_data, "bin_images")
     for i_contrast = 1:numel(motion_corrected_data.bin_images)
+        cname = string(CONFIG.seq_params.contrast_names{i_contrast});
         for i_bin = 1:numel(motion_corrected_data.bin_images{i_contrast})
             save_dicom( ...
                 CONFIG, ...
                 motion_corrected_data.bin_images{i_contrast}{i_bin}, ...
-                "HB" + string(i_contrast) + "-bin" + string(i_bin), ...
-                "HB" + string(i_contrast))
+                cname + "-bin" + string(i_bin), ...
+                cname)
         end
     end
 end
