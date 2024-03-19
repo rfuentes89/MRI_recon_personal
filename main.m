@@ -31,6 +31,7 @@ CONFIG.folder_output = strrep(CONFIG.folder_output, "$WORKSPACE", getenv("WORKSP
 disp("Running reconstruction with run name: " + CONFIG.run_name);
 
 CONFIG.timestamp = string(datetime("now"), "yyyy-MM-dd_HH:mm:ss");
+save_config_to_file(CONFIG);
 
 %% STEP 1: Read Twix
 
@@ -218,7 +219,7 @@ if CONFIG.save_dcm_intrabin && isfield(motion_corrected_data, "bin_images")
 end
 
 CONFIG.timestamp_end = string(datetime("now"), "yyyy-MM-dd_HH:mm:ss");
-save_config_to_file(CONFIG);
+save_config_to_file(CONFIG, true);
 
 %% Small util functions
 function save_dicom(config, image, contrast_name, input_info_name)
@@ -258,12 +259,16 @@ function save_variable_if_config(config, var_name, should_save)
 end
 
 
-function save_config_to_file(config)
+function save_config_to_file(config, force_override)
+    if nargin < 2
+        force_override = false;
+    end
+
     folder = fullfile(config.folder_output, "config");
     if ~exist(folder, "dir"), mkdir(folder), end
 
     filename = fullfile(folder, config.run_name + ".json");
-    if exist(filename, "file")
+    if ~force_override && exist(filename, "file")
         if config.override_if_exists
             warning("Will override run " + filename);
         else
