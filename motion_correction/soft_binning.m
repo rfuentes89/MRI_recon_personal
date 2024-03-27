@@ -1,9 +1,11 @@
-function [weighted_k_spaces, weighted_sampling_masks] = soft_binning(k_space, segment_masks, fh_motion, bin_limits)
+function [weighted_k_spaces, weighted_sampling_masks] = soft_binning(k_space, segment_masks, fh_motion, bin_limits, decay)
+    if nargin < 5
+        decay = 1;
+    end
 
     n_bins = numel(bin_limits);
 
     mean_bin_range = mean(cellfun(@(s) s.upper - s.lower, bin_limits));
-    decay = 1;
 
     weighted_k_spaces = cell(size(bin_limits));
     weighted_sampling_masks = cell(size(bin_limits));
