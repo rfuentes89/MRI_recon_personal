@@ -229,7 +229,8 @@ function save_dicom(config, image, contrast_name, input_info_name)
     contrast_name = string(contrast_name);
 
     info_base = dicominfo(fullfile(config.folder_input, string(input_info_name) + ".dcm"));
-    info_base.SeriesDescription = convertStringsToChars(contrast_name + "-" + config.run_name);
+    run_wo_datestamp = regexprep(config.run_name, "^\d\d\d\d-\d\d-\d\d_", "");
+    info_base.SeriesDescription = convertStringsToChars(contrast_name + "-" + run_wo_datestamp);
 
     filename = fullfile(folder, contrast_name + ".dcm");
     write_dicom_volume(abs(image), filename, info_base, config.dicom_params);
