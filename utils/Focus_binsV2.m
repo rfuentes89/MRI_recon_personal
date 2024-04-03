@@ -1,4 +1,4 @@
-function [kdata_OUT,At_bins] = Focus_binsV2(raw_data,At,motion_info,bins)
+function [kdata_OUT,At_bins] = Focus_binsV2(raw_data,At,motion_info,bins, apply_TL)
 % Focus_and_recon takes a list of "bins" locations and corresponding "nav"
 % and focuses the "raw_data" onto the average position of each of these.
 % Then it reconstructs the cartesian dataset.
@@ -36,10 +36,14 @@ for bbb = 1:size(bins,1)
     
     bin_At = At(:,:,:,curr_shots);
 
-    % Andy's fast phase shift
-    % TODO(pdpino): check if we should use bin_At instead of At
-    % Is showing poor results so far!
-    kdata_corr =  translationCorrectionAndy_V3(raw_data, At, bin_motion);
+    if apply_TL
+        % Andy's fast phase shift
+        % TODO(pdpino): check if we should use bin_At instead of At
+        % Is showing poor results so far!
+        kdata_corr =  translationCorrectionAndy_V3(raw_data, At, bin_motion);
+    else
+        kdata_corr = raw_data;
+    end
     
     % Push data on bin level
     kdata_OUT(:,:,:,:,bbb) = kdata_corr; % sample_dataV2(kdata_corr, bin_At);

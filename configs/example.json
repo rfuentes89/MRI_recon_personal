@@ -56,6 +56,7 @@
         "ref_bin": 4, // 1: inspiration, 4: expiration
         "bin_recon_type": "it_sense", // it_sense, orcca
         "soft_decay": 1, // exponential decay for the soft binning
+        "intrabin_TL_corr": true, // whether or not to apply intrabin translational correction
         "orcca_params": { // only used if bin_recon_type == orcca
             "lambda_b": 0.00001, // lambda_scale = lambda_b * max(data)
             "lambda_s": 1, // weight_TV = lambda_s * lambda_scale
