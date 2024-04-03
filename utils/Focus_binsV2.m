@@ -34,18 +34,20 @@ for bbb = 1:size(bins,1)
     bin_motion.Tx = -motion_info.Tx+bin_mean_Tx;
     bin_motion.Ty = motion_info.Ty-bin_mean_Ty;
     
+    % Save bin positions
     bin_At = At(:,:,:,curr_shots);
+    At_bins(:,:,:,bbb) = sum(bin_At,4);
 
     if apply_TL
         % Andy's fast phase shift
-        % TODO(pdpino): check if we should use bin_At instead of At
-        % Is showing poor results so far!
-        kdata_corr =  translationCorrectionAndy_V3(raw_data, At, bin_motion);
+        kdata_corr = translationCorrectionAndy_V3(raw_data, At, bin_motion);
+        % NOTE: we need to correct all data (pass At instead of bin_At)
+        % due to soft gating later: some data outside of the bin is also
+        % used for the reconstruction, that data also needs to be corrected
     else
         kdata_corr = raw_data;
     end
     
     % Push data on bin level
     kdata_OUT(:,:,:,:,bbb) = kdata_corr; % sample_dataV2(kdata_corr, bin_At);
-    At_bins(:,:,:,bbb) = sum(bin_At,4);
 end
