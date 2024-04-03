@@ -51,6 +51,8 @@
     },
     "motion_correction_params": {
         "type": "non_rigid", // none, translational, non_rigid
+        // non_rigid only params:
+        "n_bins": 8, // number of respiratory bins
         "ref_bin": 4, // 1: inspiration, 4: expiration
         "bin_recon_type": "it_sense", // it_sense, orcca
         "soft_decay": 1, // exponential decay for the soft binning

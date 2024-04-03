@@ -109,7 +109,7 @@ function [fh_displacements, rl_displacements] = register_navigators(navigators)
     optimizer_mono.MaximumStepLength            = 1E-2;
     optimizer_mono.MaximumIterations            = 2000;
     optimizer_mono.RelaxationFactor             = 5E-1;
-    n_bins = 4;
+
     for repetition = 1:n_repetitions
         for set = 1:n_sets
             for echo = 1:n_echoes

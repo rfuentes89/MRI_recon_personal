@@ -4,8 +4,7 @@ function data = motion_correction_non_rigid(data, motion_curves, csm, params)
     % force this behaviour for the inline reconstruction
 
     [n_echoes, n_sets, n_repetitions] = size(data.k_spaces);
-    n_bins = 4;
-    assert(params.ref_bin <= n_bins);
+    assert(params.ref_bin <= params.n_bins);
 
     n_contrasts = size(data.sampling_masks);
 
@@ -26,7 +25,7 @@ function data = motion_correction_non_rigid(data, motion_curves, csm, params)
             for echo = 1:n_echoes
                 fh_motion = motion_curves{echo,set,repetition}.fh;
                 included = abs(fh_motion - mean(fh_motion)) <= 2 * std(fh_motion);
-                bin_limits = hard_bin_limits(fh_motion(included), n_bins);
+                bin_limits = hard_bin_limits(fh_motion(included), params.n_bins);
 
                 % This have to be I unique function I guess?.
                 motion.Tx = motion_curves{echo,set,repetition}.fh * 1;
