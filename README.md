@@ -3,18 +3,17 @@
 
 ## Requirements
 
-**All requirements are already installed in iHEALTH servers** (e.g. ih-condor, nyquist, fourier). Simply load them by running:
+**All requirements are already installed in iHEALTH servers** (e.g. ih-condor, nyquist, fourier). Load them before running MATLAB, by running in the terminal:
 ```bash
 module load bart imagine nifty gsl/2.3 mapVBVD prost mri-coils
 ```
 
-You must load them before running MATLAB.
-
 <details>
   <summary>
-    If you need to install them manually, you can follow the instructions below (for a Linux system).
+    How to install locally
   </summary>
 
+If you need to install them manually (e.g. in your computer), you can follow the instructions below (for a Linux system).
 
 ### Manual installation: [bart](https://github.com/mrirecon/bart)
 
@@ -53,11 +52,13 @@ Follow instructions in [their README](https://github.com/RCiHealthGroup/NIFTY_RE
 
 Follow instructions in [their README](https://github.com/RCiHealthGroup/mapVBVD).
 
-
 ### Manual installation: PROST
 
 Follow instructions in [their README](https://github.com/RCiHealthGroup/HD_PROST_MATLAB)
 
+### Manual installation: MRI-coils
+
+Follow instructions in [their README](https://github.com/RCiHealthGroup/Coils_Toolbox).
 
 </details>
 
@@ -68,6 +69,7 @@ Follow instructions in [their README](https://github.com/RCiHealthGroup/HD_PROST
    See an example in [`configs/example.json`](configs/example.json), it has comments on each parameter.
     * You should NOT edit the `example.json` file, you should create your own copy
     * Set the `run_name` to something appropriate (it will be used in the output files later, see below)
+    * TODO(pdpino): mention HB1.dcm and HB2.dcm files (needed as input)
 
 2. Run the `main.m` script either from the MATLAB editor or from the terminal:
     1. Option 1, MATLAB Editor: open the `main.m` file,
