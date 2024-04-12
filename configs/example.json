@@ -1,20 +1,43 @@
 {
     // Run name will be used to save output files
-    "run_name": "boost_NR_bin4",
-    "run_name_prepend_datestamp": false, // prepend yyyy-mm-dd to run_name
+    "run_name": "NR_ref-bin4",
+    "run_name_prepend_datestamp": false, // prepend "yyyy-mm-dd_" to run_name
+
     "notes": "You can add custom notes to remind yourself what you were trying in this run",
+
     // If specified and > 0, kdata will be reduced to debug faster
     // e.g. set to 20
+    // If present, will add "_DEBUG" to the run_name
     "debug_ksize": 0,
-    // Choose to override results if using the same run_name
+
+    // Whether or not to override results if using the same run_name
     "override_if_exists": false,
-    // Input and Output folders
+
+    // Acquisition folder
     // Use $WORKSPACE to replace by your workspace folder
     // Use ~ to replace by your home
-    "folder_input": "$WORKSPACE/input", // will look here for twix and base DICOMs (HB1, HB2, BB)
-    "folder_output": "$WORKSPACE/output", // see list of what will be stored in README
+    "acq_folder": "$WORKSPACE/acquisitions/ismrm2024/2024-01-01_HV1_BOOST",
+
     // Raw data from scanner
+    // Will be searched in folder: acq_folder/raw/
     "twix_fname": "example_twix.dat",
+
+    // Motion curve options
+    "motion_curve": {
+        "name": "inav-heart", // custom name to save motion_curves
+        "recompute": false, // if present, will compute curve again and save it
+    },
+
+    // Options for the sequence
+    "seq_params": {
+        "scanner_dcms": ["HB1", "HB2"], // Names of the input DCM files for each contrast
+        "contrast_names": ["HB1", "HB2"], // contrast names, will be used to store output DCMs
+        "bb": { // set to null if not needed
+		"scanner_dcm": "BB", // Name of the input DCM file for black blood
+		"contrast_name": "BB", // Name for the BB output DCM
+	},
+    },
+
     // Whether or not to save to file
     "save_dcm": true, // whether or not to store resulting dicom file
     "save_dcm_intrabin": false, // whether or not to store intrabin reconstruction
@@ -22,7 +45,7 @@
     "save_data": false, // whether or not to save .mat file with moco data
     "save_images": false, // whether or not to save .mat file with (noisy) images
     "save_disp_fields": false, // whether or not to save displacement_fields
-    "load_motion_curves": true, // whether or not to load curves from file
+
     // if false, requires UI to select iNAV
     "zero_rl_motion": true, // if true will ignore right-left motion
     // Output DICOM params
@@ -102,9 +125,5 @@
         "CG_maxit_ini": 5,
         "CG_maxit": 5,
         "CG_lambda": 0.01,
-    },
-    "seq_params": { // description of the sequence
-        "contrast_names": ["HB1", "HB2"], // contrasts (HBs) used
-        "bb": true,
-    },
+    }
 }

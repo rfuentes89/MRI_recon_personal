@@ -20,14 +20,30 @@ assert(exist("config_fname", "var"), "config_fname variable must exist");
 
 CONFIG = readstruct(config_fname);
 
+if CONFIG.debug_ksize > 0
+    CONFIG.run_name = string(CONFIG.run_name) + "_DEBUG";
+end
+
 if isfield(CONFIG, "run_name_prepend_datestamp") && CONFIG.run_name_prepend_datestamp
     CONFIG.run_name = string(datetime("now"), "yyyy-MM-dd") + "_" + CONFIG.run_name;
 end
 
-CONFIG.folder_input = strrep(CONFIG.folder_input, "$WORKSPACE", getenv("WORKSPACE"));
-CONFIG.folder_output = strrep(CONFIG.folder_output, "$WORKSPACE", getenv("WORKSPACE"));
+CONFIG.acq_folder = strrep(CONFIG.acq_folder, "$WORKSPACE", getenv("WORKSPACE"));
+CONFIG.run_folder = fullfile(CONFIG.acq_folder, "recons", CONFIG.run_name);
 
-%% Step 0.1: Save configuration file
+%% Step 0.1: Check if run exists
+if exist(CONFIG.run_folder, "dir")
+    if CONFIG.override_if_exists
+        warning("Will override run " + CONFIG.run_name);
+    else
+        error("Won't override run " + CONFIG.run_name);
+    end
+else
+    mkdir(CONFIG.run_folder);
+end
+
+
+%% Step 0.2: Save configuration file
 disp("Running reconstruction with run name: " + CONFIG.run_name);
 
 CONFIG.timestamp = string(datetime("now"), "yyyy-MM-dd_HH:mm:ss");
@@ -36,7 +52,7 @@ save_config_to_file(CONFIG);
 %% STEP 1: Read Twix
 
 disp("step 0.1: reading twix")
-path_to_twix = find_twix_file(fullfile(CONFIG.folder_input, CONFIG.twix_fname));
+path_to_twix = find_twix_file(fullfile(CONFIG.acq_folder, "raw", CONFIG.twix_fname));
 twix = read_twix(path_to_twix);
 
 %% STEP 1.1: Unpack raw data
@@ -86,9 +102,9 @@ save_variable_if_config(CONFIG, "csm", CONFIG.save_csm)
 % TODO: use iNavs from DICOM if available (not necessary)
 
 if CONFIG.motion_correction_params.type ~= "none"
-    motion_curves_folder = fullfile(CONFIG.folder_output, "motion_curves");
-    motion_curves_file = fullfile(motion_curves_folder, strrep(CONFIG.twix_fname, ".dat", ".mat"));
-    if (CONFIG.load_motion_curves && isfile(motion_curves_file))
+    motion_curves_folder = fullfile(CONFIG.acq_folder, "motion_curves");
+    motion_curves_file = fullfile(motion_curves_folder, CONFIG.motion_curve.name + ".mat");
+    if (~CONFIG.motion_curve.recompute && isfile(motion_curves_file))
         disp("step 5: loading motion_curves")
         load(motion_curves_file, 'motion_curves');
     else
@@ -192,13 +208,15 @@ end
 if CONFIG.save_dcm
     for image_i = 1:length(denoised_images)
         cname = CONFIG.seq_params.contrast_names{image_i};
-        save_dicom(CONFIG, denoised_images{image_i}, cname, cname);
+        info_name = CONFIG.seq_params.scanner_dcms{image_i};
+        save_dicom(CONFIG, denoised_images{image_i}, info_name, cname);
     end
 
     % Black blood
-    if (length(denoised_images) == 2) && CONFIG.seq_params.bb
+    if (length(denoised_images) == 2) && isstruct(CONFIG.seq_params.bb)
+	bb = CONFIG.seq_params.bb;
         deno_blackblood = abs(denoised_images{2}) - abs(denoised_images{1});
-        save_dicom(CONFIG, deno_blackblood, "BB", "BB");
+        save_dicom(CONFIG, deno_blackblood, bb.scanner_dcm, bb.contrast_name);
     end
 end
 
@@ -206,30 +224,40 @@ end
 if CONFIG.save_dcm_intrabin && isfield(motion_corrected_data, "bin_images")
     for i_contrast = 1:numel(motion_corrected_data.bin_images)
         cname = string(CONFIG.seq_params.contrast_names{i_contrast});
+        info_name = string(CONFIG.seq_params.scanner_dcms{i_contrast});
         for i_bin = 1:numel(motion_corrected_data.bin_images{i_contrast})
             save_dicom( ...
                 CONFIG, ...
                 motion_corrected_data.bin_images{i_contrast}{i_bin}, ...
-                cname + "-bin" + string(i_bin), ...
-                cname)
+		info_name, ...
+                cname + "-bin" + string(i_bin))
         end
     end
 end
 
+%% Write config at end
 CONFIG.timestamp_end = string(datetime("now"), "yyyy-MM-dd_HH:mm:ss");
-save_config_to_file(CONFIG, true);
+save_config_to_file(CONFIG);
 
 %% Small util functions
-function save_dicom(config, image, contrast_name, input_info_name)
-    folder = fullfile(config.folder_output, "dcm", config.run_name);
-    if ~exist(folder, "dir"), mkdir(folder), end
-
+function save_dicom(config, image, input_info_name, contrast_name)
     contrast_name = string(contrast_name);
 
-    info_base = dicominfo(fullfile(config.folder_input, string(input_info_name) + ".dcm"));
+    % Load or create empty info
+    info_fpath = fullfile(config.acq_folder, "dcm", string(input_info_name) + ".dcm");
+    if isfile(info_fpath)
+        info_base = dicominfo(info_fpath);
+    else
+        info_base = build_empty_dicominfo(image);
+    end
+
+    % Replace SeriesDescription
     run_wo_datestamp = regexprep(config.run_name, "^\d\d\d\d-\d\d-\d\d_", "");
     info_base.SeriesDescription = convertStringsToChars(contrast_name + "-" + run_wo_datestamp);
 
+    % Write output
+    folder = fullfile(config.run_folder, "dcm");
+    if ~exist(folder, "dir"), mkdir(folder), end
     filename = fullfile(folder, contrast_name + ".dcm");
     write_dicom_volume(abs(image), filename, info_base, config.dicom_params);
 end
@@ -249,7 +277,7 @@ function save_variable_if_config(config, var_name, should_save)
         return;
     end
 
-    folder = fullfile(config.folder_output, var_name);
+    folder = fullfile(config.run_folder, var_name);
     if ~exist(folder, "dir"), mkdir(folder), end
     filename = fullfile(folder, config.run_name + ".mat");
 
@@ -258,23 +286,8 @@ function save_variable_if_config(config, var_name, should_save)
 end
 
 
-function save_config_to_file(config, force_override)
-    if nargin < 2
-        force_override = false;
-    end
-
-    folder = fullfile(config.folder_output, "config");
-    if ~exist(folder, "dir"), mkdir(folder), end
-
-    filename = fullfile(folder, config.run_name + ".json");
-    if ~force_override && exist(filename, "file")
-        if config.override_if_exists
-            warning("Will override run " + filename);
-        else
-            error("Won't override run " + filename);
-        end
-    end
-
+function save_config_to_file(config)
+    filename = fullfile(config.run_folder, "config.json");
     txt = jsonencode(config);
 
     fid = fopen(filename, "w");
