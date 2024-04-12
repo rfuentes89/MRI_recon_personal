@@ -277,10 +277,7 @@ function save_variable_if_config(config, var_name, should_save)
         return;
     end
 
-    folder = fullfile(config.run_folder, var_name);
-    if ~exist(folder, "dir"), mkdir(folder), end
-    filename = fullfile(folder, config.run_name + ".mat");
-
+    filename = fullfile(config.run_folder, var_name + ".mat");
     save(filename, var_name);
     disp("Saved " + var_name + " to " + filename);
 end
