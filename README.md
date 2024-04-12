@@ -65,40 +65,79 @@ Follow instructions in [their README](https://github.com/RCiHealthGroup/Coils_To
 
 ## Usage
 
-1. Create a JSON configuration file to specify the parameters for the reconstruction.
-   See an example in [`configs/example.json`](configs/example.json), it has comments on each parameter.
-    * You should NOT edit the `example.json` file, you should create your own copy
-    * Set the `run_name` to something appropriate (it will be used in the output files later, see below)
-    * TODO(pdpino): mention HB1.dcm and HB2.dcm files (needed as input)
+### Step 0: Check the folder structure
+* There should be 1 folder per acquisition
+  * All inputs (e.g. raw data) and all outputs (e.g. reconstructions) will be stored in subfolders of the acquisition folder
+* The structure follows the same structure used for [MRI acquisitions stored in the NAS](https://i-health.cl/ih-condor/PE5YVBozG89q5qtsEo/build/faq/mri-acq/)
+* Input files:
+  * (required) Raw data as twix (`.dat`)
+  * (optional) DCM reconstructed by the scanner, used to copy the dicom-info
+* Output files
+  * DCMs with reconstructed images (`.dcm`)
+  * Configuration parameters (`.json`)
+  * MATLAB variables for debugging (`.mat`), see example below
 
-2. Run the `main.m` script either from the MATLAB editor or from the terminal:
-    1. Option 1, MATLAB Editor: open the `main.m` file,
-       set the `config_fname` variable in the first lines to the name of your configuration file,
-       then run the script (e.g. section by section, the whole file at once, or as you prefer)
-    2. Option 2, run from a terminal:
-       `matlab -nodisplay -batch "config_fname='/path/to/your/config.json'; main;"`.
-       Note: first you'll need to run in the MATLAB Editor at least once for each twix file, [read below](#saving-motion-curves)
+See this example of the folder structure:
+```bash
+2024-01-01_HV1_BOOST/                 # Acquisition folder
+    ## Inputs:
+    raw/                              # raw data
+        TWIX1.dat
+        TWIX2.dat
+    dcm/                              # DCM from the scanner (if any)
+        HB1.dcm
+        HB2.dcm
 
-<!-- TODO: mention requires HB1, HB2 files as input -->
+    ## Outputs:
+    recons/                           # Reconstruction outputs will be saved here
+        RUN_1/                        # One folder for each recon experiment (named as the run_name)
+            config.json               # Config given to the recon script
+            dcm/                      # Final recons and bin images (if any)
+	        CONTRAST_1.dcm        # One image per contrast, if save_dcm = true
+                CONTRAST_2.dcm
 
-### Output files
+                BB.dcm                # Black blood image, if included in the sequence
 
-After running `main.m` successfully, these files will be stored:
-* A JSON file with the configuration `<OUTPUT_FOLDER>/config/<RUN_NAME>.json`
-* DICOM files in the folder `<OUTPUT_FOLDER>/dcm/<RUN_NAME>/`
+                CONTRAST_1-bin1.dcm   # Bin images, if save_dcm_intrabin = true
+                CONTRAST_1-bin2.dcm
+                ...
 
-Other files might be saved as well, see JSON options starting with `save_`, for example save_csm`.
+            # Other MATLAB variables:
+            csm.mat                   # Coil sensitivies, if save_csm = true
+            displacement_fields.mat   # 3D displacement fields, if save_disp_fields = true
+            images.mat                # Denoised images, if save_images = true
+            motion_corrected_data.mat # Struct storing full data, if save_data = true
+
+        RUN_2/
+        ...
+
+    motion_curves/                    # Motion curves calculated with the selected iNAV will be saved here
+        CURVE_NAME.mat
+```
+
+### Step 1: Create config file
+Create a JSON configuration with the reconstruction parameters
+* See an example in [`configs/example.json`](configs/example.json), it has comments on each parameter
+* You should NOT edit the `example.json` file, you should create your own copy
+
+To run the `main.m` script in the later steps, you'll need to set the `config_fname` variable in the first lines of `main.m`, e.g. `config_fname='configs/myconfig.json'`
 
 
-### Saving motion curves
+### Step 2: Save motion curves
+For each raw data to reconstruct you'll need to compute its motion curves. Follow these steps:
+1. Run the `main.m` script from the MATLAB editor up to the "Step 5: Reading iNAVs"
+2. You will be presented with an iNAV image, and will need to make a selection to track the movement
+  * Motion curves will be calculated, plotted, and saved to the `motion_curves/` folder with the name indicated in the param `motion_curve.name`
+  * Note: you can try selecting the iNAV differently and save it with different filenames (i.e. changing the param `motion_curve.name`
+3. Repeat this process for each twix file you need to process
 
-To run the script from the terminal, you'll first need to save the motion curves to a file:
+After this, the motion curves will be loaded from file for the reconstruction (to avoid reselecting the iNAV with the UI).
 
-1. Prepare your JSON file, and set the option `load_motion_curves: false`
-2. Run the `main.m` script from the MATLAB editor up to the "Step 5: Reading iNAVs"
-3. You will be prompted to make a selection on the iNAV, and motion curves will be calculated
-4. Motion curves will be saved to `<OUTPUT_FOLDER>/motion_curves/<TWIX_FNAME>.mat`
-5. Repeat this process for each twix file you need to process
 
-After that, you can run from the terminal using the JSON option `load_motion_curves: true`,
-so the script loads the motion curves from the `.mat` file.
+### Step 3: Run reconstruction
+Run the `main.m` script either from the MATLAB editor or from the terminal:
+* Option 1, MATLAB Editor:
+  1. Open the `main.m` file
+  2. Set the `config_fname` variable in the first lines to the name of your configuration file
+  3. Run the script (e.g. section by section, the whole file at once, or as you prefer)
+* Option 2, run from a terminal: `matlab -nodisplay -batch "config_fname='/path/to/your/config.json'; main;"`
