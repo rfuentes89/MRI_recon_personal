@@ -70,7 +70,7 @@ Follow instructions in [their README](https://github.com/RCiHealthGroup/Coils_To
 * There should be 1 folder per acquisition (see details in example below)
   * Inputs:
     * (required) Raw data as twix (`.dat`) inside the `raw/` folder
-    * (optional) DCM reconstructed by the scanner inside the `dcm/` folder (used to copy the dicom-info)
+    * (optional) DCM reconstructed by the scanner inside the `dcm/` folder (will be used to copy the dicom attributes in the output DCM)
   * Outputs will be stored in a subfolder per recon experiment, specifically:
     * DCMs with reconstructed images (`.dcm`)
     * Configuration parameters (`.json`)
