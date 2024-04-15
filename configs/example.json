@@ -33,9 +33,9 @@
         "scanner_dcms": ["HB1", "HB2"], // Names of the input DCM files for each contrast
         "contrast_names": ["HB1", "HB2"], // contrast names, will be used to store output DCMs
         "bb": { // set to null if not needed
-		"scanner_dcm": "BB", // Name of the input DCM file for black blood
-		"contrast_name": "BB", // Name for the BB output DCM
-	},
+		    "scanner_dcm": "BB", // Name of the input DCM file for black blood
+		    "contrast_name": "BB", // Name for the BB output DCM
+	    },
     },
 
     // Whether or not to save to file
