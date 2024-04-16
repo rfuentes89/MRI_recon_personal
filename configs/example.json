@@ -5,8 +5,8 @@
 
     "notes": "You can add custom notes to remind yourself what you were trying in this run",
 
-    // If specified and > 0, kdata will be reduced to debug faster
-    // e.g. set to 20
+    // If specified and > 0 (e.g. 20), kdata will be reduced to run the code faster,
+    // only useful to test the code
     // If present, will add "_DEBUG" to the run_name
     "debug_ksize": 0,
 
@@ -87,12 +87,12 @@
             "weight_L1": 0.00,
             "weight_TV_Temp": 0,
             "weight_id": 0,
-            "max_iter": 1, // outer loop iterations
+            "max_iter": 5, // outer loop iterations
             "verbose": 1,
             "n_threads": 5, // set to a number or "ncoils"
             "L1_smooth": 1e-15,
             "line_search_params": {
-                "max_iter": 1, // inner loop iterations
+                "max_iter": 20, // inner loop iterations
                 "alpha": 0.01,
                 "beta": 0.6,
                 "t0": 1,
