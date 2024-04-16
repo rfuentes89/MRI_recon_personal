@@ -1,4 +1,4 @@
-function [weighted_k_spaces, weighted_sampling_masks] = soft_binning(k_space, segment_masks, fh_motion, bin_limits, decay)
+function [weighted_k_spaces, weighted_sampling_masks, bin_weights] = soft_binning(k_space, segment_masks, fh_motion, bin_limits, decay)
     if nargin < 5
         decay = 1;
     end
@@ -9,6 +9,8 @@ function [weighted_k_spaces, weighted_sampling_masks] = soft_binning(k_space, se
 
     weighted_k_spaces = cell(size(bin_limits));
     weighted_sampling_masks = cell(size(bin_limits));
+    bin_weights = cell(n_bins, 1);
+
     for bin = 1:n_bins
         mean_displacement = (bin_limits{bin}.lower + bin_limits{bin}.upper) / 2;
         deviations = abs(fh_motion - mean_displacement);
@@ -19,6 +21,7 @@ function [weighted_k_spaces, weighted_sampling_masks] = soft_binning(k_space, se
         % deviation    within limits  => weight = 1 regardless
         weights = exp(-decay * (deviations / mean_bin_range - 1));
         weights = min(weights, 1); % clip large values to 1
+        bin_weights{bin} = weights;
 
         outside_bin = fh_motion < bin_limits{bin}.lower | bin_limits{bin}.upper <= fh_motion;
 
