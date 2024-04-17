@@ -78,6 +78,7 @@
         "n_bins": 8, // number of respiratory bins
         "ref_bin": 4, // 1: inspiration, 4: expiration
         "bin_recon_type": "it_sense", // it_sense, orcca
+        "soft_fn": "bins_avg", // choose exponential decay function, one of bins_avg, bin_range, bin_range_scaled
         "soft_decay": 1, // exponential decay for the soft binning
         "intrabin_TL_corr": true, // whether or not to apply intrabin translational correction
         "orcca_params": { // only used if bin_recon_type == orcca
