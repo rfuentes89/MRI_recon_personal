@@ -4,17 +4,23 @@
 %
 % Steps:
 % 1. Run the main recon script until right before the correct_motion step
-% 2. Run this full script to correct the motion and plot the weights
-% 3. If needed, run the soft_binning() in this script changing the
-%    parameters and plot the weights again
+% 2. Run the correct_motion function in this script once
+% 3. Plot the weights
+% 4. If needed, change the soft_binning() params in this script and plot
+%    the weights again
 
-%% Run motion correction with it-sense (faster than orcca)
-CONFIG.motion_correction_params.bin_recon_type = "it_sense";
+%% Run motion correction
+% Change parameters as needed
+%CONFIG.motion_correction_params.n_bins = 8;
+CONFIG.motion_correction_params.bin_recon_type = "it_sense"; % faster than orcca
+CONFIG.motion_correction_params.intrabin_TL_corr = false; % faster
 motion_corrected_data = correct_motion(data, motion_curves, csm, CONFIG.motion_correction_params);
 
-%% Choose contrast (only once)
+% Choose contrast
 i_contrast = 1;
 bins_info = motion_corrected_data.bins_info{i_contrast};
+
+disp("Finished correct_motion");
 
 %% Run soft gating again (to try different params)
 % re-run this as needed
@@ -44,7 +50,7 @@ subplot(1,2,2);
 plot_weights(fh_motion, bins_info, CONFIG.motion_correction_params, true);
 
 
-%% Util function
+%% Util plot functions
 function plot_weights(fh_motion, bins_info, used_params, plot_resp_positions)
     n_bins = length(bins_info.soft_weights);
 
