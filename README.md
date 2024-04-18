@@ -3,14 +3,19 @@
 
 ## Requirements
 
-**All requirements are already installed in iHEALTH servers** (e.g. ih-condor, nyquist, fourier). Load them before running MATLAB, by running in the terminal:
-```bash
-module load bart imagine nifty gsl/2.3 mapVBVD prost mri-coils
-```
+1. Install MATLAB and include the following toolboxes:
+  * _"Image Processing Toolbox"_ (required)
+  * _"Parallel Processing Toolbox"_ (optional)
+  * _"Optimization Toolbox"_ (optional)
+  * _"Signal Processing Toolbox"_ (optional)
+2. Load these modules before running MATLAB in iHEALTH servers (e.g. ih-condor, nyquist, fourier):
+  ```bash
+  module load bart imagine nifty gsl/2.3 mapVBVD prost mri-coils
+  ```
 
 <details>
   <summary>
-    How to install locally
+    How to install modules locally
   </summary>
 
 If you need to install them manually (e.g. in your computer), you can follow the instructions below (for a Linux system).
@@ -78,7 +83,7 @@ Follow instructions in [their README](https://github.com/RCiHealthGroup/Coils_To
 
 See this example of the folder structure:
 ```bash
-2024-01-01_HV1_BOOST/                 # Acquisition folder
+acquisitions/2024-01-01_HV1_BOOST/    # Acquisition folder
     ## Inputs:
     raw/                              # raw data
         TWIX1.dat
@@ -125,8 +130,8 @@ For each raw data to reconstruct you'll need to compute its motion curves. Follo
 1. Run the `main.m` script from the MATLAB editor up to the "Step 5: Reading iNAVs"
    * Set the `config_fname` variable in the first lines to the name of your configuration file
 2. You will be presented with an iNAV image, and will need to make a selection to track the movement
-   * Motion curves will be calculated, plotted, and saved to the `motion_curves/` folder with the name indicated in the param `motion_curve.name`
-   * Note: you can try selecting the iNAV differently and save it with different filenames (i.e. changing the param `motion_curve.name`)
+   * Motion curves will be calculated, plotted, and saved to the `motion_curves/` folder with the name indicated in the JSON param `"motion_curve"."name"`
+   * Note: you can try selecting the iNAV differently and save it with different filenames (i.e. changing the param `"motion_curve"."name"`)
 3. Repeat this process for each twix file you need to process
    * You need to run this only once per twix file, then the motion curves will be loaded from file
 
