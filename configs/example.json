@@ -1,6 +1,6 @@
 {
     // Run name will be used to save output files
-    "run_name": "NR_ref-bin4",
+    "run_name": "NR_itsense",
     "run_name_prepend_datestamp": false, // prepend "yyyy-mm-dd_" to run_name
 
     "notes": "You can add custom notes to remind yourself what you were trying in this run",
@@ -28,6 +28,8 @@
         "recompute": false, // if present, will compute curve again and save it
     },
 
+    "zero_rl_motion": true, // if true will ignore right-left motion
+
     // Options for the sequence
     "seq_params": {
         "scanner_dcms": ["HB1", "HB2"], // Names of the input DCM files for each contrast
@@ -46,8 +48,6 @@
     "save_images": false, // whether or not to save .mat file with (noisy) images
     "save_disp_fields": false, // whether or not to save displacement_fields
 
-    // if false, requires UI to select iNAV
-    "zero_rl_motion": true, // if true will ignore right-left motion
     // Output DICOM params
     "dicom_params": {
         // clamp image values by a percentage before saving to DICOM
@@ -75,10 +75,10 @@
     "motion_correction_params": {
         "type": "non_rigid", // none, translational, non_rigid
         // non_rigid only params:
-        "n_bins": 8, // number of respiratory bins
-        "ref_bin": 4, // 1: inspiration, 4: expiration
+        "n_bins": 4, // number of respiratory bins
+        "ref_bin": 4, // 1: inspiration, end: expiration
         "bin_recon_type": "it_sense", // it_sense, orcca
-        "soft_fn": "bins_avg", // choose exponential decay function, one of bins_avg, bin_range, bin_range_scaled
+        "soft_fn": "bin_range_scaled", // choose exponential decay function, one of bins_avg, bin_range, bin_range_scaled
         "soft_decay": 1, // exponential decay for the soft binning
         "intrabin_TL_corr": true, // whether or not to apply intrabin translational correction
         "orcca_params": { // only used if bin_recon_type == orcca
