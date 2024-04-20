@@ -67,12 +67,18 @@ function plot_weights(fh_motion, bins_info, used_params, plot_resp_positions)
         ws = bins_info.soft_weights{i_bin}(sorted_fh_idx);
         plot(x_range, ws, 'DisplayName', "bin " + string(i_bin))
 
-        plot_vline(x_range, sorted_fh_motion, bins_info.limits{i_bin}.lower);
-        plot_vline(x_range, sorted_fh_motion, bins_info.limits{i_bin}.upper);
+        limits = bins_info.limits{i_bin};
+
+        plot_vline(x_range, sorted_fh_motion, limits.lower);
+        plot_vline(x_range, sorted_fh_motion, limits.upper);
+
+        bin_center = (limits.upper + limits.lower)/2;
+        x_text = x_range(find_idx(sorted_fh_motion, bin_center));
+        text(x_text, 1.05, string(i_bin), 'HorizontalAlignment', 'center');
     end
     legend();
     ylabel("soft gating weight");
-    ylim([0 1.05])
+    ylim([0 1.1])
 
     decay = string(used_params.soft_decay);
     method = string(used_params.soft_fn);
@@ -90,7 +96,10 @@ function plot_weights(fh_motion, bins_info, used_params, plot_resp_positions)
 end
 
 function plot_vline(x_range, target_array, value)
+    xline(x_range(find_idx(target_array, value)), '--black','HandleVisibility','off');
+end
+
+function value_idx = find_idx(target_array, value)
     value_idx = find(target_array > value, 1);
     if isempty(value_idx), value_idx = length(target_array); end
-    xline(x_range(value_idx), '--black','HandleVisibility','off');
 end
