@@ -4,14 +4,14 @@
 ## Requirements
 
 1. Install MATLAB and include the following toolboxes:
-  * _"Image Processing Toolbox"_ (required)
-  * _"Parallel Processing Toolbox"_ (optional)
-  * _"Optimization Toolbox"_ (optional)
-  * _"Signal Processing Toolbox"_ (optional)
+    * _"Image Processing Toolbox"_ (required)
+    * _"Parallel Processing Toolbox"_ (optional)
+    * _"Optimization Toolbox"_ (optional)
+    * _"Signal Processing Toolbox"_ (optional)
 2. Load these modules before running MATLAB in iHEALTH servers (e.g. ih-condor, nyquist, fourier):
-  ```bash
-  module load bart imagine nifty gsl/2.3 mapVBVD prost mri-coils
-  ```
+    ```bash
+    module load bart imagine nifty gsl/2.3 mapVBVD prost mri-coils
+    ```
 
 <details>
   <summary>
@@ -97,7 +97,7 @@ acquisitions/2024-01-01_HV1_BOOST/    # Acquisition folder
         RUN_1/                        # One folder for each recon experiment (named as the run_name)
             config.json               # Config given to the recon script
             dcm/                      # Final recons and bin images (if any)
-	        CONTRAST_1.dcm        # One image per contrast, if save_dcm = true
+                CONTRAST_1.dcm        # One image per contrast, if save_dcm = true
                 CONTRAST_2.dcm
 
                 BB.dcm                # Black blood image, if included in the sequence
