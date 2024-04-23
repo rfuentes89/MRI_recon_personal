@@ -18,7 +18,7 @@ assert(~isempty(getenv('NIFTY_PATH')))
 %% STEP 0: Read parameters from file
 assert(exist("config_fname", "var"), "config_fname variable must exist");
 
-CONFIG = readstruct(config_fname);
+CONFIG = load_config(config_fname);
 
 if CONFIG.debug_ksize > 0
     CONFIG.run_name = string(CONFIG.run_name) + "_DEBUG";
@@ -28,7 +28,6 @@ if isfield(CONFIG, "run_name_prepend_datestamp") && CONFIG.run_name_prepend_date
     CONFIG.run_name = string(datetime("now"), "yyyy-MM-dd") + "_" + CONFIG.run_name;
 end
 
-CONFIG.acq_folder = strrep(CONFIG.acq_folder, "$WORKSPACE", getenv("WORKSPACE"));
 CONFIG.run_folder = fullfile(CONFIG.acq_folder, "recons", CONFIG.run_name);
 
 %% Step 0.1: Check if run exists
@@ -46,8 +45,7 @@ end
 %% Step 0.2: Save configuration file
 disp("Running reconstruction with run name: " + CONFIG.run_name);
 
-CONFIG.timestamp = string(datetime("now"), "yyyy-MM-dd_HH:mm:ss");
-save_config_to_file(CONFIG);
+save_config(CONFIG.run_folder, CONFIG);
 
 %% STEP 1: Read Twix
 
@@ -237,7 +235,7 @@ end
 
 %% Write config at end
 CONFIG.timestamp_end = string(datetime("now"), "yyyy-MM-dd_HH:mm:ss");
-save_config_to_file(CONFIG);
+save_config(CONFIG.run_folder, CONFIG);
 
 %% Small util functions
 function save_dicom(config, image, input_info_name, contrast_name)
@@ -281,15 +279,3 @@ function save_variable_if_config(config, var_name, should_save)
     save(filename, var_name);
     disp("Saved " + var_name + " to " + filename);
 end
-
-
-function save_config_to_file(config)
-    filename = fullfile(config.run_folder, "config.json");
-    txt = jsonencode(config);
-
-    fid = fopen(filename, "w");
-    fprintf(fid, txt);
-    fclose(fid);
-    disp("Saved config to " + filename);
-end
-
