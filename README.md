@@ -105,6 +105,9 @@ acquisitions/2024-01-01_HV1_BOOST/    # Acquisition folder
                 CONTRAST_1-bin1.dcm   # Bin images, if save_dcm_intrabin = true
                 CONTRAST_1-bin2.dcm
                 ...
+            gif/                      # GIFs created with create_demo_gif.m script
+                bin_images/
+                final_recon/
 
             # Other MATLAB variables:
             csm.mat                   # Coil sensitivies, if save_csm = true

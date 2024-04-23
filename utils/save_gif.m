@@ -17,6 +17,7 @@ function images = save_gif(images, filename, options)
     if ~isfield(options, 'delay_time'), options.delay_time = 0.02; end
     if ~isfield(options, 'axis'), options.axis = "z"; end
     if ~isfield(options, 'norm'), options.norm = true; end
+    if ~isfield(options, 'verbose'), options.verbose = false; end
 
     % Check filename input
     filename = string(filename);
@@ -29,7 +30,7 @@ function images = save_gif(images, filename, options)
     [nx, ny, nz] = size(images);
     if options.norm, images = Normalize(images, 0, 255); end
     images = uint8(images);
-    
+
     % Check axis input
     switch options.axis
        case "x"
@@ -44,7 +45,7 @@ function images = save_gif(images, filename, options)
        otherwise
           error("axis not recognized: " + string(options.axis))
     end
-    
+
     % Write GIF
     for idx = 1:n_slices
         im_slice = get_slice(images, idx);
@@ -55,6 +56,6 @@ function images = save_gif(images, filename, options)
         end
     end
 
-    disp("GIF saved to " + filename)
+    if options.verbose, disp("GIF saved to " + filename); end
 end
 

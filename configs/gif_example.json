@@ -1,0 +1,56 @@
+{
+  // Acquisition folder
+  "acq_folder": "$WORKSPACE/acquisitions/2024-01-01_HV_SEQ",
+
+  // Which DCMs to use, one of: "bin_images", "final_recon"
+  "mode": "final_recon",
+  // bin_images: use bin images from one recon to create GIF
+  // final_recon: use final reconstructions from multiple recons to create GIF
+
+  // If mode == "bin_images", which recon to load bin-images from
+  //"recon_name": "RUN_1",
+
+  // If mode == "final_recon", which recons to use
+  "recon_name": [
+    "RUN_1",
+    "RUN_2",
+    "RUN_3",
+    "RUN_4", // GIFs will be saved in the last recon
+  ],
+
+  // Choose contrast to select DCM files
+  "contrast_name": "HB1",
+  // If mode == "bin_images", will look for files: HB1-bin01.dcm, HB1-bin02.dcm, etc
+  // If mode == "final_recon", will look for HB1.dcm files in each recon folder
+
+  // Add a suffix to the output GIF folder
+  "gif_name_suffix": "",
+
+  // Choose MIP params
+  "mip_params": {
+    "apply": true, // whether or not to apply MIP to each image
+    "thickness": 10, // number of slices to grab to either side
+    "axis": "z", // which axis to apply MIP, one of "x", "y", "z"
+  },
+
+  // Choose Lookup Table params
+  "lut_params": {
+    "apply": true, // whether or not to apply window and level
+    "window": 1399,
+    "level": 391,
+
+    // Both window and level can be provided as a list to select a different value for each image, e.g.:
+    // "window": [1000, 1100, 1200, 1300],
+    // "level": [300, 310, 320, 330],
+  },
+
+  // Choose GIF generation params
+  "gif_params": {
+    "delay_time": 0.2, // delay seconds between animated slices
+    "axis": "z", // which axis to slice to generate GIFs, one of "x", "y", "z"
+      // For a regular DCM:
+      // "x" will generate transversal images
+      // "y" will generate sagittal images
+      // "z" will generate coronal images
+  }
+}

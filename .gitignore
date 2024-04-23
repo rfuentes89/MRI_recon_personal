@@ -28,3 +28,4 @@ main_DF.m
 # Config files
 **/*.json
 !configs/example.json
+!configs/gif_example.json
