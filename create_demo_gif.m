@@ -20,8 +20,8 @@ switch lower(CONFIG.mode)
 
         CONFIG.run_folder = fullfile(CONFIG.acq_folder, "recons", CONFIG.recon_name);
         dcm_fpaths = get_bin_dcm_filepaths(CONFIG.run_folder, CONFIG.contrast_name);
-    case "final_recon"
-        assert(length(CONFIG.recon_name) > 1, "in mode final_recon you must provide more than 1 recon_name");
+    case "final_recons"
+        assert(length(CONFIG.recon_name) > 1, "in mode final_recons you must provide more than 1 recon_name");
 
         recons_folder = fullfile(CONFIG.acq_folder, "recons");
         dcm_fpaths = get_final_dcm_filepaths(recons_folder, CONFIG.recon_name, CONFIG.contrast_name);
@@ -97,7 +97,7 @@ for i_slice = 1:n_slices
 end
 
 save_config(folder_gif, CONFIG);
-disp(string(n_targets) + " GIFs saved in " + string(folder_gif));
+disp(string(n_slices) + " GIFs saved in " + string(folder_gif));
 
 
 %% Utils
@@ -112,7 +112,7 @@ function targets = get_bin_dcm_filepaths(recon_folder, contrast_name)
     subfiles = dir(dcm_folder);
     prefix = string(contrast_name) + "-bin";
     i_target = 1;
-    
+
     for i_subfile = 1:length(subfiles)
         subfile = subfiles(i_subfile);
         if startsWith(subfile.name, prefix)
@@ -123,7 +123,7 @@ function targets = get_bin_dcm_filepaths(recon_folder, contrast_name)
     if ~exist("targets", "var")
         error("No DCM with prefix " + prefix + " found in " + dcm_folder);
     end
-    
+
     targets = sort(targets);
 end
 
