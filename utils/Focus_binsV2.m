@@ -25,20 +25,20 @@ At_bins   = zeros(size(At,1),size(At,2),size(At,3),size(bins,1));
 % Focus ALL data onto each bin
 for bbb = 1:size(bins,1)  
     curr_shots  = nav>=bins{bbb}.lower & nav<bins{bbb}.upper;
-
-    %bin_mean_Tx = (bins{bbb}.lower + bins{bbb}.upper) / 2;
-    bin_mean_Tx = mean(motion_info.Tx(curr_shots)); 
-    bin_mean_Ty = mean(motion_info.Ty(curr_shots));
-    
-    bin_motion  = motion_info;
-    bin_motion.Tx = -motion_info.Tx+bin_mean_Tx;
-    bin_motion.Ty = motion_info.Ty-bin_mean_Ty;
     
     % Save bin positions
     bin_At = At(:,:,:,curr_shots);
     At_bins(:,:,:,bbb) = sum(bin_At,4);
 
     if apply_TL
+        %bin_mean_Tx = (bins{bbb}.lower + bins{bbb}.upper) / 2;
+        bin_mean_Tx = mean(motion_info.Tx(curr_shots));
+        bin_mean_Ty = mean(motion_info.Ty(curr_shots));
+
+        bin_motion  = motion_info;
+        bin_motion.Tx = -motion_info.Tx+bin_mean_Tx;
+        bin_motion.Ty = motion_info.Ty-bin_mean_Ty;
+
         % Andy's fast phase shift
         kdata_corr = translationCorrectionAndy_V3(raw_data, At, bin_motion);
         % NOTE: we need to correct all data (pass At instead of bin_At)
