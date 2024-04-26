@@ -1,9 +1,15 @@
 function image_out = apply_window_level(image, window, level)
 %APPLY_WINDOW_LEVEL Apply window and level LUT to image
-    min_im = level - window / 2;
-    max_im = level + window / 2;
-
-    max_value = max(image(:));
-
-    image_out = uint16(max_value * (image - min_im) / (max_im - min_im));
+% Args:
+%    image: array of any shape
+%    window: number
+%    level: number
+%
+% Returned image is in range [0,1], same type as input array
+    min_out = level - window / 2;
+    max_out = level + window / 2;
+    image_out = image;
+    image_out(image_out < min_out) = min_out;
+    image_out(image_out > max_out) = max_out;
+    image_out = ((image_out - min_out) / window);
 end
