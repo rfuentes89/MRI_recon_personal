@@ -1,8 +1,8 @@
-function motion_curves = estimate_motion_curves(twix, selected)
+function motion_curves = estimate_motion_curves(twix, selected, base_fname)
 
     navigators = read_navigators(twix, selected);
 
-    [fh_displacements, rl_displacements] = register_navigators(navigators);
+    [fh_displacements, rl_displacements] = register_navigators(navigators, base_fname);
     
     % plot motion of all navigators in acquisition order
     hold on
@@ -17,6 +17,10 @@ function motion_curves = estimate_motion_curves(twix, selected)
     motion_curves = cell(n_echoes, n_sets, n_repetitions);
 
     xlabel("motion in time (" + string(numel(motion_curves)) + " contrasts concatenated)");
+
+    if exist(base_fname, "var")
+        saveas(gcf, base_fname + "_curve.png");
+    end
 
     for repetition = 1:n_repetitions
         for set = 1:n_sets            

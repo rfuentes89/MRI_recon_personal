@@ -107,7 +107,9 @@ if CONFIG.motion_correction_params.type ~= "none"
         load(motion_curves_file, 'motion_curves');
     else
         disp("step 5: estimating motion")
-        motion_curves = estimate_motion_curves(twix, CONFIG.selected_contrasts);
+        base_fname = fullfile(motion_curves_folder, CONFIG.motion_curve.name);
+
+        motion_curves = estimate_motion_curves(twix, CONFIG.selected_contrasts, base_fname);
         if ~exist(motion_curves_folder, 'dir'), mkdir(motion_curves_folder), end
         save(motion_curves_file, 'motion_curves')
     end

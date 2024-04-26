@@ -1,4 +1,4 @@
-function [fh_displacements, rl_displacements] = register_navigators(navigators)
+function [fh_displacements, rl_displacements] = register_navigators(navigators, base_fname)
 
     [n_echoes, n_sets, n_navigators, n_repetitions]  = size(navigators);
     
@@ -36,7 +36,10 @@ function [fh_displacements, rl_displacements] = register_navigators(navigators)
             warndlg("please select a region")
             return
         end
-        p = ROI.Position;    
+        p = ROI.Position;
+        if exist(base_fname, "var")
+            saveas(gcf, base_fname + "_selection.png")
+        end
         delete(gcf)
     end
     
