@@ -1,10 +1,11 @@
-%%% Create GIFs for demos
+%%% Create GIF or PNGs for demos
 % Steps:
 % 1. Create a config file, see configs/gif_example.json for an example
 % 2. Select the config_fname in the first lines
 % 3. Run this script
 %
-% GIFs will be saved as: acq_folder/recons/recon_name/gif/gif_mode/*.gif
+% GIFs will be saved as: acq_folder/recons/recon_name/gif/mode/*.gif
+% PNGs will be saved as: acq_folder/recons/recon_name/png/mode/*.png
 
 %% Import files
 addpath(genpath("./"))
@@ -13,24 +14,35 @@ addpath(genpath("./"))
 %config_fname = "configs/gif_example.json";
 CONFIG = load_config(config_fname);
 
-%% Get DCM filenames
-switch lower(CONFIG.mode)
-    case "bin_images"
-        assert(length(CONFIG.recon_name) == 1, "in mode bin_images you must provide exactly 1 recon_name");
+%% Prepare DCM filenames
+base_recons_folder = fullfile(CONFIG.acq_folder, "recons");
 
-        CONFIG.run_folder = fullfile(CONFIG.acq_folder, "recons", CONFIG.recon_name);
-        dcm_fpaths = get_bin_dcm_filepaths(CONFIG.run_folder, CONFIG.contrast_name);
-    case "final_recons"
-        assert(length(CONFIG.recon_name) > 1, "in mode final_recons you must provide more than 1 recon_name");
-
-        recons_folder = fullfile(CONFIG.acq_folder, "recons");
-        dcm_fpaths = get_final_dcm_filepaths(recons_folder, CONFIG.recon_name, CONFIG.contrast_name);
-
-        % GIFs are saved in the last recon
-        CONFIG.run_folder = fullfile(recons_folder, CONFIG.recon_name(end));
+switch CONFIG.mode
+    case "png_final_recon"
+        assert(length(CONFIG.recon_name) == 1, "mode png_final_recon requires exactly 1 recon_name");
+        dcm_fpaths = get_final_dcm_filepaths(base_recons_folder, CONFIG.recon_name, CONFIG.contrast_name);
+    case "gif_bin_images"
+        assert(length(CONFIG.recon_name) == 1, "mode gif_bin_images requires exactly 1 recon_name");
+        dcm_fpaths = get_bin_dcm_filepaths(base_recons_folder, CONFIG.recon_name, CONFIG.contrast_name);
+    case "gif_final_recons"
+        assert(length(CONFIG.recon_name) > 1, "mode gif_final_recons requires more than 1 recon_name");
+        dcm_fpaths = get_final_dcm_filepaths(base_recons_folder, CONFIG.recon_name, CONFIG.contrast_name);
     otherwise
         error("Mode not recognized: " + string(CONFIG.mode));
 end
+
+% Build output folder (for png/gif files)
+folder_name = extractBefore(CONFIG.mode, 4); % i.e. "gif" or "png"
+output_name = extractAfter(CONFIG.mode, 4);
+if strlength(CONFIG.name_suffix) > 0
+    output_name = output_name + "_" + string(CONFIG.name_suffix);
+end
+folder_output = fullfile( ...
+    CONFIG.acq_folder, ...
+    "recons", ...
+    CONFIG.recon_name(end), ... % always save in the last recon
+    folder_name, ...
+    output_name);
 
 
 %% Use arrays in window and level
@@ -67,14 +79,31 @@ images = cat(4, images{:});
 disp("Images size: (nx, ny, nz, n_dcms)")
 disp(size(images))
 
-%% Generate GIFs
-gif_name = CONFIG.mode;
-if strlength(CONFIG.gif_name_suffix) > 0
-    gif_name = gif_name + "_" + string(CONFIG.gif_name_suffix);
-end
-folder_gif = fullfile(CONFIG.run_folder, "gif", gif_name);
+%% Normalize images for output
+images = Normalize(images, 0, 255);
+images = uint8(images);
 
-switch CONFIG.gif_params.axis
+%% Generate PNGs/GIFs
+if startsWith(CONFIG.mode, "png")
+    axis = CONFIG.png_params.axis;
+    extension = ".png";
+
+    write_output = @(slice, fname) imwrite(slice, fname);
+elseif startsWith(CONFIG.mode, "gif")
+    axis = CONFIG.gif_params.axis;
+    extension = ".gif";
+
+    params = struct( ...
+        axis="z", ... % must be z (last dimension will be animated)
+        norm=false, ...
+        delay_time=CONFIG.gif_params.delay_time);
+
+    write_output = @(volume, fname) save_gif(volume, fname, params);
+else
+    error("Mode not png or gif: " + string(CONFIG.mode))
+end
+
+switch axis
     case {"x", "tra", "transverse"}
         n_slices = size(images, 1);
         get_slice = @(idx) squeeze(images(idx,:,:,:));
@@ -85,26 +114,24 @@ switch CONFIG.gif_params.axis
         n_slices = size(images, 3);
         get_slice = @(idx) squeeze(images(:,:,idx,:));
     otherwise
-        error("Axis not recognized: "+ string(CONFIG.gif_params.axis));
+        error("Axis not recognized: "+ string(axis));
 end
 
 for i_slice = 1:n_slices
     sliced_im = get_slice(i_slice);
-    filename = fullfile(folder_gif, "slice" +sprintf("%03d", i_slice)+ ".gif");
+    filename = fullfile(folder_output, "slice" +sprintf("%03d", i_slice)+ extension);
 
-    save_gif(sliced_im, filename, struct(axis="z", delay_time=CONFIG.gif_params.delay_time));
-    % Note: axis needs to be z, as the last dimension wants to be animated
+    write_output(sliced_im, filename);
 end
 
-save_config(folder_gif, CONFIG);
-disp(string(n_slices) + " GIFs saved in " + string(folder_gif));
-
+save_config(folder_output, CONFIG);
+disp(string(n_slices) + " " + extension + "s saved in " + string(folder_output));
 
 %% Utils
-function targets = get_bin_dcm_filepaths(recon_folder, contrast_name)
+function targets = get_bin_dcm_filepaths(base_recons_folder, recon_name, contrast_name)
 %get_bin_dcm_filepaths Get bin images filepaths
 
-    dcm_folder = fullfile(recon_folder, "dcm");
+    dcm_folder = fullfile(base_recons_folder, recon_name, "dcm");
     if ~isfolder(dcm_folder)
         error("Recon folder does not exist: " + string(dcm_folder));
     end

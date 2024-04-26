@@ -2,15 +2,16 @@
   // Acquisition folder
   "acq_folder": "$WORKSPACE/acquisitions/2024-01-01_HV_SEQ",
 
-  // Which DCMs to use, one of: "bin_images", "final_recons"
-  "mode": "final_recons",
-  // bin_images: use bin images from one recon to create GIF
-  // final_recons: use final reconstructions from multiple recons to create GIF
+  // Which DCMs to use, see options below
+  "mode": "gif_final_recons",
+  // "png_final_recon": use one final recon to create PNGs
+  // "gif_bin_images": use bin images from one recon to create GIFs
+  // "gif_final_recons": use final reconstructions from multiple recons to create GIFs
 
-  // If mode == "bin_images", which recon to load bin-images from
+  // If mode == "png_final_recon" or "gif_bin_images" set 1 recon
   //"recon_name": "RUN_1",
 
-  // If mode == "final_recons", which recons to use
+  // If mode == "gif_final_recons" set multiple recons
   "recon_name": [
     "RUN_1",
     "RUN_2",
@@ -20,11 +21,12 @@
 
   // Choose contrast to select DCM files
   "contrast_name": "HB1",
-  // If mode == "bin_images", will look for files: HB1-bin01.dcm, HB1-bin02.dcm, etc
-  // If mode == "final_recons", will look for HB1.dcm files in each recon folder
+  // If mode == "png_final_recon", will look for file HB1.dcm
+  // If mode == "gif_bin_images", will look for files: HB1-bin01.dcm, HB1-bin02.dcm, etc
+  // If mode == "gif_final_recons", will look for HB1.dcm files in each recon folder
 
   // Add a suffix to the output GIF folder
-  "gif_name_suffix": "",
+  "name_suffix": "",
 
   // Choose MIP params
   "mip_params": {
@@ -44,7 +46,12 @@
     // "level": [300, 310, 320, 330],
   },
 
-  // Choose GIF generation params
+  // Choose PNG generation params (for "png_" modes only)
+  "png_params": {
+    "axis": "z", // which axis to slice to generate PNGs, one of "x", "y", "z"
+  },
+
+  // Choose GIF generation params (for "gif_" modes only)
   "gif_params": {
     "delay_time": 0.2, // delay seconds between animated slices
     "axis": "z", // which axis to slice to generate GIFs, one of "x", "y", "z"
