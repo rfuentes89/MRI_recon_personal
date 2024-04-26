@@ -1,4 +1,4 @@
-function images = save_gif(images, filename, options)
+function save_gif(images, filename, options)
 % SAVE_GIF Save an image volume to a GIF file
 %
 % save_gif(images, filename, options)
@@ -14,7 +14,7 @@ function images = save_gif(images, filename, options)
 %          might be lost when casting to uint8.
 
     if ~exist('options', 'var'), options = struct(); end
-    if ~isfield(options, 'delay_time'), options.delay_time = 0.02; end
+    if ~isfield(options, 'delay_time'), options.delay_time = 0.2; end
     if ~isfield(options, 'axis'), options.axis = "z"; end
     if ~isfield(options, 'norm'), options.norm = true; end
     if ~isfield(options, 'verbose'), options.verbose = false; end
