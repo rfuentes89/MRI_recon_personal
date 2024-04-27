@@ -3,17 +3,15 @@
 
 %% Imports
 addpath(genpath("./"))
-config_fname = "configs/t_jr_08bins_no-intrabin-TL_decayINF.json";
+config_fname = "configs/example.json";
 
 CONFIG = load_config(config_fname);
 
-%% Read data
+%% Read twix
 path_to_twix = find_twix_file(fullfile(CONFIG.acq_folder, "raw", CONFIG.twix_fname));
 twix = read_twix(path_to_twix);
-data = read_raw_data(twix, CONFIG.selected_contrasts, CONFIG.coil_params.use_only);
-data = remove_readout_oversampling(data);
 
-disp("Data loaded");
+disp("Twix loaded");
 
 %% Load navigators
 raw_navigators = read_navigators(twix, CONFIG.selected_contrasts);
