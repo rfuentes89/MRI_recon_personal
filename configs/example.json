@@ -83,12 +83,17 @@
         "soft_decay": 1, // exponential decay for the soft binning
         "intrabin_TL_corr": true, // whether or not to apply intrabin translational correction
         "orcca_params": { // only used if bin_recon_type == orcca
-            "lambda_b": 0.00001, // lambda_scale = lambda_b * max(data)
-            "lambda_s": 1, // weight_TV = lambda_s * lambda_scale
-            "lambda_t": 150, // weight_MTV = lambda_t * lambda_scale
-            "weight_L1": 0.00,
-            "weight_TV_Temp": 0,
-            "weight_id": 0,
+            // if weight_scale > 0, other weights are scaled with the data,
+            // i.e. weight_X = weight_X * weight_scale * max(data)
+            // if weight_scale <= 0, other weights are used as is
+            "weight_scale": 0.00001,
+
+            "weight_L1": 1,
+            "weight_TV": 1,
+            "weight_TV_Temp": 1,
+            "weight_MTV": 1,
+            "weight_id": 1,
+
             "max_iter": 5, // outer loop iterations
             "verbose": 1,
             "n_threads": 5, // set to a number or "ncoils"

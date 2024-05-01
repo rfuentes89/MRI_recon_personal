@@ -78,20 +78,23 @@ function bin_images = reconstruct_bin_images_orcca( ...
         k_size, ...
         params_orcca.n_threads);
 
-    %Sparsity operators and respective weights
-    lambda_scale = params_orcca.lambda_b*max(abs(kdata(:)));
+    % Sparsity operators and respective weights
+    if params_orcca.weight_scale > 0
+        weight_scale = params_orcca.weight_scale*max(abs(kdata(:)));
+
+        params_orcca.weight_L1 = params_orcca.weight_L1*weight_scale;
+        params_orcca.weight_TV = params_orcca.weight_TV*weight_scale;
+        params_orcca.weight_TV_Temp = params_orcca.weight_TV_Temp*weight_scale;
+        params_orcca.weight_MTV = params_orcca.weight_MTV*weight_scale;
+        params_orcca.weight_id = params_orcca.weight_id*weight_scale;
+    end
 
     params_orcca.E = E_CSbins;
     params_orcca.W = TempFFT(3);
-
     params_orcca.TV = TVOP();
-    params_orcca.weight_TV = params_orcca.lambda_s*lambda_scale;
-
     params_orcca.TV_Temp = TV_Temp();
-
     %params_orcca.MTV = MTV(interpolationMatrices); % nonrigid correction
     params_orcca.MTV = TC_XMR_MTVi(target_pos_mean, params_moco.ref_bin);   % translational correction
-    params_orcca.weight_MTV = params_orcca.lambda_t*lambda_scale;
 
     params_orcca.y = kdata;
 
