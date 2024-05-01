@@ -58,6 +58,7 @@ function x = CSL1NlCg_ORCCA(x0,params)
     
         if lsiter == ls_params.max_iter
             disp("Line search reached max iter = " + string(ls_params.max_iter));
+            % TODO(pdpino): ok to return here? instead of continue/pass?
             return;
         end
         
@@ -129,7 +130,7 @@ function res = objective(x,dx,t,params)
     
     % L1 in image space
     if params.weight_id
-        x = x+t*dx; 
+        x = x+t*dx;
         IdObj = sum((x(:).*conj(x(:))+params.L1_smooth).^(1/2));
     else
         IdObj = 0;
@@ -137,18 +138,18 @@ function res = objective(x,dx,t,params)
 
     % objective function
     res = L2Obj ...
-        + params.weight_L1*L1Obj ...
-        + params.weight_TV*TVObj ...
-        + params.weight_TV_Temp*TV_TempObj ...
-        + params.weight_id*IdObj ...
-        + params.weight_MTV*MTV_TempObj;
+        + params.weight_L1      * L1Obj ...
+        + params.weight_TV      * TVObj ...
+        + params.weight_TV_Temp * TV_TempObj ...
+        + params.weight_MTV     * MTV_TempObj ...
+        + params.weight_id      * IdObj;
 
 end
 
 function g = grad(x, params)
     % L2-norm part with preconditioning in E'
     L2Grad = 2.*(params.E'*(params.E*x-params.y));
-    
+
     % L1-norm part
     if params.weight_L1
         w = params.W*x;
@@ -156,7 +157,7 @@ function g = grad(x, params)
     else
         L1Grad = 0;
     end
-    
+
     % TV part
     if params.weight_TV
         w = params.TV*x;
@@ -164,7 +165,7 @@ function g = grad(x, params)
     else
         TVGrad = 0;
     end
-    
+
     % Temporal TV part
     if params.weight_TV_Temp
         w = params.TV_Temp*x;
@@ -172,7 +173,7 @@ function g = grad(x, params)
     else
         TV_TempGrad = 0;
     end
-    
+
     % MTV (Motion corrected temporal TV)
     if params.weight_MTV
         w = params.MTV*x;
@@ -180,15 +181,15 @@ function g = grad(x, params)
     else
         MTV_TempGrad = 0;
     end
-    
+
     % L1 in image space
     if params.weight_id
+        % TODO(pdpino): is TV_Temp ok here?
         IdGrad = params.TV_Temp'*(x.*(x.*conj(x)+params.L1_smooth).^(-0.5));
     else
         IdGrad = 0;
     end
-    
-    
+
     % complete gradient
     g = L2Grad ...
        + params.weight_L1*L1Grad ...
@@ -196,5 +197,4 @@ function g = grad(x, params)
        + params.weight_TV_Temp*TV_TempGrad ...
        + params.weight_id*IdGrad ...
        + params.weight_MTV*MTV_TempGrad;
-
 end
