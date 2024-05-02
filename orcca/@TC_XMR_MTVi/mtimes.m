@@ -16,7 +16,6 @@ if ~a.adjoint
     end
     % TV
     res = res(:,:,:,[2:end,end]) - res(:,:,:,:);
-    % TODO(pdpino): is this assuming ref_bin = 1?
 else
     res = b(:,:,:,[1,1:end-1]) - b(:,:,:,:);
     res(:,:,:,1) = -b(:,:,:,1);

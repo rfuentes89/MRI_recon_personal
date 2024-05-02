@@ -1,4 +1,4 @@
-function x = CSL1NlCg_ORCCA(x0,params)
+function x = CSL1NlCg_ORCCA(params)
     % 
     % res = CSL1NlCg(param)
     %
@@ -21,6 +21,8 @@ function x = CSL1NlCg_ORCCA(x0,params)
     fprintf('\n ---------------------------------------\n')
     
     % starting point
+    x0 = params.E'*params.y;
+
     x=single(x0);
     
     % line search parameters
@@ -46,8 +48,8 @@ function x = CSL1NlCg_ORCCA(x0,params)
             fprintf(' ite = %d, cost = %f \n',step_i,f1);
         end
         
-	    lsiter = 0;
-    %     disp('Looping objective');
+        % Line search (i.e. find optimal step_size)
+        lsiter = 0;
         % TODO(pdpino): check if power of 2 should be inside parenthesis
         while (f1 > f0 - ls_params.alpha*t*abs(g0(:)'*dx(:)))^2 & (lsiter<ls_params.max_iter)
     %         msg = sprintf('Current f1 = %f',f1); disp(msg);
@@ -55,10 +57,9 @@ function x = CSL1NlCg_ORCCA(x0,params)
             t = t * ls_params.beta;
             f1 = objective(x,dx,t,params);
         end
-    
-        if lsiter == ls_params.max_iter
-            disp("Line search reached max iter = " + string(ls_params.max_iter));
-            % TODO(pdpino): ok to return here? instead of continue/pass?
+
+        if lsiter >= ls_params.max_iter
+            warning("Line search reached max iter = %d", ls_params.max_iter);
             return;
         end
         

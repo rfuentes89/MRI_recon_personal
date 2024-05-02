@@ -100,9 +100,7 @@ function bin_images = reconstruct_bin_images_orcca( ...
 
 
     disp('************ XD-ORCCA reconstruction **************')
-    recon_dft = params_orcca.E'*params_orcca.y;
-
-    images = CSL1NlCg_ORCCA(recon_dft, params_orcca);
+    images = CSL1NlCg_ORCCA(params_orcca);
 
     % Flip dimensions (image is returned upside down)
     images = images(end:-1:1,end:-1:1,end:-1:1,:);
