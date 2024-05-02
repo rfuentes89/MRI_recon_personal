@@ -93,13 +93,15 @@ function x = CSL1NlCg_ORCCA(params)
 end
 
 function res = objective(x,dx,t,params)
+    next_x = x + t*dx;
+
     % L2-norm part with preconditioning
-    w=params.E*(x+t*dx)-params.y;
+    w=params.E*next_x-params.y;
     L2Obj=w(:)'*w(:);
     
     % L1-norm part
     if params.weight_L1
-        w = params.W*(x+t*dx);
+        w = params.W*next_x;
         L1Obj = sum((conj(w(:)).*w(:)+params.L1_smooth).^(1/2));
     else
         L1Obj = 0;
@@ -107,7 +109,7 @@ function res = objective(x,dx,t,params)
     
     % TV part
     if params.weight_TV
-        w = params.TV*(x+t*dx);
+        w = params.TV*next_x;
         TVObj = sum((w(:).*conj(w(:))+params.L1_smooth).^(1/2));
     else
         TVObj = 0;
@@ -115,7 +117,7 @@ function res = objective(x,dx,t,params)
     
     % Temporal TV part
     if params.weight_TV_Temp
-        w = params.TV_Temp*(x+t*dx);
+        w = params.TV_Temp*next_x;
         TV_TempObj = sum((w(:).*conj(w(:))+params.L1_smooth).^(1/2));
     else
         TV_TempObj = 0;
@@ -123,7 +125,7 @@ function res = objective(x,dx,t,params)
     
     % MTV (Motion corrected temporal TV)
     if params.weight_MTV
-        w = params.MTV*(x+t*dx);
+        w = params.MTV*next_x;
         MTV_TempObj = sum((w(:).*conj(w(:))+params.L1_smooth).^(1/2));
     else
         MTV_TempObj = 0;
@@ -131,8 +133,7 @@ function res = objective(x,dx,t,params)
     
     % L1 in image space
     if params.weight_id
-        x = x+t*dx;
-        IdObj = sum((x(:).*conj(x(:))+params.L1_smooth).^(1/2));
+        IdObj = sum((next_x(:).*conj(next_x(:))+params.L1_smooth).^(1/2));
     else
         IdObj = 0;
     end
