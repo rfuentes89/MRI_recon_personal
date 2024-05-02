@@ -33,6 +33,12 @@ function x = CSL1NlCg_ORCCA(params)
     % compute g0  = grad(f(x))
     g0 = grad(x,params);
     dx = -g0;
+
+    % Initial objective
+    f0 = objective(x,dx,0,params);
+    if params.verbose >= 1
+        fprintf('  ite=0, cost=%f\n', f0);
+    end
     
     % iterations
     step_i = 0;
@@ -40,12 +46,11 @@ function x = CSL1NlCg_ORCCA(params)
 	    step_i = step_i + 1;
         
         % backtracking line-search
-	    f0 = objective(x,dx,0,params);
-	    t = ls_params.t0;
+        t = ls_params.t0;
         f1 = objective(x,dx,t,params);
 
-        if params.verbose
-            fprintf(' ite = %d, cost = %f \n',step_i,f1);
+        if params.verbose >= 1
+            fprintf('  ite=%d, cost=%f\n', step_i, f1);
         end
         
         % Line search (i.e. find optimal step_size)
@@ -83,6 +88,8 @@ function x = CSL1NlCg_ORCCA(params)
 	    bk = g1(:)'*g1(:)/(g0(:)'*g0(:)+eps);
 	    g0 = g1;
 	    dx =  - g1 + bk* dx;
+
+        f0 = f1;
 	    
 	    % stopping criteria (to be improved)
     	% if (k > param.n_iterations) || (norm(dx(:)) < ls_params.grad_toll  ), break;end
