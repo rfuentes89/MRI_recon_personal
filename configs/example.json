@@ -102,7 +102,7 @@
                 "max_iter": 20, // inner loop iterations
                 "alpha": 0.01,
                 "beta": 0.6,
-                "t0": 1,
+                "step_size": 1,
             },
         },
         "selected_contrast_for_disp_fields": {
