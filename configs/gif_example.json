@@ -2,6 +2,9 @@
   // Acquisition folder
   "acq_folder": "$WORKSPACE/acquisitions/2024-01-01_HV_SEQ",
 
+  // If true, prints more information to stdout
+  "verbose": false,
+
   // Which DCMs to use, see options below
   "mode": "gif_final_recons",
   // "png_final_recon": use one final recon to create PNGs

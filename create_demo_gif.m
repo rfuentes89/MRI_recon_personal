@@ -10,7 +10,7 @@
 %% Import files
 addpath(genpath("./"))
 
-% Load config
+%% Load config
 %config_fname = "configs/gif_example.json";
 CONFIG = load_config(config_fname);
 
@@ -76,8 +76,10 @@ end
 
 images = cat(4, images{:});
 
-disp("Images size: (nx, ny, nz, n_dcms)")
-disp(size(images))
+if CONFIG.verbose
+    disp("Images size: (nx, ny, nz, n_dcms)")
+    disp(size(images))
+end
 
 %% Normalize images for output
 images = Normalize(images, 0, 255);
@@ -124,7 +126,7 @@ for i_slice = 1:n_slices
     write_output(sliced_im, filename);
 end
 
-save_config(folder_output, CONFIG);
+save_config(folder_output, CONFIG, CONFIG.verbose);
 disp(string(n_slices) + " " + extension + "s saved in " + string(folder_output));
 
 %% Utils

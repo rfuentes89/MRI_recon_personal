@@ -1,4 +1,7 @@
-function save_config(folder, config)
+function save_config(folder, config, verbose)
+    if nargin < 3
+        verbose = false;
+    end
     if ~exist(folder, "dir"), mkdir(folder); end
 
     txt = jsonencode(config);
@@ -7,5 +10,6 @@ function save_config(folder, config)
     fid = fopen(filename, "w");
     fprintf(fid, txt);
     fclose(fid);
-    disp("Saved config to " + filename);
+
+    if verbose, disp("Saved config to " + filename); end
 end
