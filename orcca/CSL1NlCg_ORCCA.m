@@ -24,13 +24,11 @@ function x = CSL1NlCg_ORCCA(params)
 
     % starting point
     x0 = params.E'*params.y;
-
     x=single(x0);
 
     % line search parameters
     ls_params = params.line_search_params;
-    %ls_params.grad_toll = 1e-3;
-    %ls_params.relchg_tol = 1e-3;
+    %params.grad_tol = 1e-3;
 
     % compute g0  = grad(f(x))
     g0 = grad(x,params);
@@ -70,14 +68,17 @@ function x = CSL1NlCg_ORCCA(params)
         end
 
         if lsiter > 5
-            line1 = sprintf("Too many LS iterations (%d), consider reducing the step size", lsiter);
-            line2 = "(set verbose>=2 to see values)";
-            warning("  %s\n  %s", line1, line2);
+            msg1 = sprintf("Too many LS iterations (%d)", lsiter);
+            msg2 = "consider reducing step_size or increasing beta to run faster";
+            msg3 = "(set verbose>=2 to see step_size values)";
+            warning("  %s, %s\n  %s", msg1, msg2, msg3);
         end
 
         if lsiter >= ls_params.max_iter
-            warning("Line search reached max iter = %d", ls_params.max_iter);
-            return;
+            if params.verbose >= 1
+                fprintf("\tStopping: line search reached max iter = %d\n", ls_params.max_iter);
+            end
+            break;
         end
 
         % control the number of line searches by adapting the initial step search
@@ -88,15 +89,25 @@ function x = CSL1NlCg_ORCCA(params)
         end
 
         % update x
-	    x = (x + step_size*dx);
+        step_x = step_size*dx;
+        x = x + step_x;
 
-        % diff_rel = x - x0; relchg = norm(diff_rel(:))/max(norm(x0(:)),eps);
-        % fprintf('itr=%d relchg=%4.1e', k, relchg);
-        % fprintf('\n');
-        % if relchg < ls_params.relchg_tol
-        %     return;
-        % end
+        % Max steps stopping criterion
+        if (step_i >= params.max_iter)
+            if params.verbose >= 1
+                fprintf("\tStopping: reached last iter: %d", step_i);
+            end
+            break;
+        end
 
+        % Norm stopping criterion
+        relative_change = norm(step_x(:)) / max(norm(x(:)), eps);
+        if relative_change < params.rel_norm_tol
+            if params.verbose >= 1
+                fprintf("\tStopping: change smaller than norm_tol: %f\n", relative_change);
+            end
+            break;
+        end
 
         %conjugate gradient calculation
         g1 = grad(x,params);
@@ -106,10 +117,8 @@ function x = CSL1NlCg_ORCCA(params)
 
         f0 = f1;
 
-        % stopping criteria (to be improved)
-        % if (k > param.n_iterations) || (norm(dx(:)) < ls_params.grad_toll  ), break;end
-        if (step_i > params.max_iter), break;end
-
+        % Gradient stopping criterion
+        % if (norm(dx(:)) < params.grad_tol), break;end
     end
 
 end

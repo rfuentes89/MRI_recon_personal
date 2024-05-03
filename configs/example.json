@@ -95,6 +95,7 @@
             "weight_id": 1,
 
             "max_iter": 5, // outer loop iterations
+            "rel_norm_tol": 0.001, // stop if image norm (relative) improves less than this
             "verbose": 1,
             "n_threads": 5, // set to a number or "ncoils"
             "L1_smooth": 1e-15,
