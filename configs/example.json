@@ -41,13 +41,13 @@
     },
 
     // Whether or not to save to file
-    "save_dcm": true, // whether or not to store resulting dicom file
-    "save_dcm_intrabin": false, // whether or not to store intrabin reconstruction
-    "save_csm": false, // whether or not to save .mat file with csm
-    "save_data": false, // whether or not to save .mat file with moco data
-    "save_images": false, // whether or not to save .mat file with (noisy) images
-    "save_disp_fields": false, // whether or not to save displacement_fields
-    "save_stdout": true, // whether or not to save prints and warnings to stdout.txt
+    "save_dcm": true, // save final recon as .dcm
+    "save_dcm_intrabin": false, // save reconstructed bin images as .dcm
+    "save_csm": false, // save coil sensitivity maps as .mat
+    "save_data": false, // save motion corrected data as .mat
+    "save_images": false, // save images before denoising as .mat
+    "save_disp_fields": false, // save displacement_fields as .mat
+    "save_stdout": true, // save console output to stdout.txt (prints, warnings, errors)
 
     // Output DICOM params
     "dicom_params": {
@@ -68,7 +68,7 @@
         "repetitions": [],
     },
     "selected_contrasts_for_rating": {
-        // select contrast to use for coils
+        // select contrast to use for coil selection and sensitivities calculation
         "echo": 1,
         "set": 1,
         "repetition": 1,
