@@ -41,8 +41,13 @@ else
     mkdir(CONFIG.run_folder);
 end
 
+%% Step 0.2: Setup diary
+if isfield(CONFIG, 'save_stdout') && CONFIG.save_stdout
+    diary_fname = fullfile(CONFIG.run_folder, "stdout.txt");
+    diary(diary_fname);
+end
 
-%% Step 0.2: Save configuration file
+%% Step 0.3: Save configuration file
 disp("Running reconstruction with run name: " + CONFIG.run_name);
 
 save_config(CONFIG.run_folder, CONFIG);
