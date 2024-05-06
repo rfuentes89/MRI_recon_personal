@@ -53,17 +53,18 @@ function x = CSL1NlCg_ORCCA(params)
         lsiter = 0;
         % TODO(pdpino): check if power of 2 should be inside parenthesis
         min_delta = ls_params.alpha*abs(g0(:)'*dx(:));
-        if params.verbose >= 3
-            fprintf("\t\t\tmin delta: %.20f\n", min_delta);
-            fprintf("\t\t\tthresh: %.20f\n", f0 - step_size * min_delta);
+        if params.verbose >= 2
+            fprintf("\t\tmin_delta = %.20f\n", min_delta);
+            fprintf("\t\tthresh    = %.20f\n", f0 - step_size * min_delta);
         end
         while (f1 > f0 - step_size*min_delta)^2 && (lsiter<ls_params.max_iter)
             lsiter = lsiter + 1;
             step_size = step_size * ls_params.beta;
             f1 = objective(x,dx,step_size,params);
             if params.verbose >= 2
-                fprintf('\t\tline search: lsiter=%d, stepsize=%.3f', lsiter, step_size);
-                fprintf('\t\tcost=%.20f\n\t\tthresh=%.20f\n', f1, f0 - step_size * min_delta);
+                fprintf('\t\tline search: lsiter=%d, stepsize=%.3f\n', lsiter, step_size);
+                fprintf('\t\t  cost  =%.20f\n', f1);
+                fprintf('\t\t  thresh=%.20f\n', f0 - step_size * min_delta);
             end
         end
 
@@ -71,7 +72,7 @@ function x = CSL1NlCg_ORCCA(params)
             msg1 = sprintf("Too many LS iterations (%d)", lsiter);
             msg2 = "consider reducing step_size or increasing beta to run faster";
             msg3 = "(set verbose>=2 to see step_size values)";
-            warning("  %s, %s\n  %s", msg1, msg2, msg3);
+            warning("  %s, %s %s", msg1, msg2, msg3);
         end
 
         if lsiter >= ls_params.max_iter
@@ -95,7 +96,7 @@ function x = CSL1NlCg_ORCCA(params)
         % Max steps stopping criterion
         if (step_i >= params.max_iter)
             if params.verbose >= 1
-                fprintf("\tStopping: reached last iter: %d", step_i);
+                fprintf("\tStopping: reached last iter: %d\n", step_i);
             end
             break;
         end
