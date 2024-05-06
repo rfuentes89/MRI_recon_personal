@@ -4,7 +4,7 @@ function save_config(folder, config, verbose)
     end
     if ~exist(folder, "dir"), mkdir(folder); end
 
-    txt = jsonencode(config);
+    txt = jsonencode(config, PrettyPrint=true);
 
     filename = fullfile(folder, "config.json");
     fid = fopen(filename, "w");
