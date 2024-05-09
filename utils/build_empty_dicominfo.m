@@ -28,11 +28,11 @@ function info = build_empty_dicominfo(image)
     %info.PixelSpacing=[volscale(1); volscale(2)];
     %info.SliceThickness=volscale(3);
     %info.SpacingBetweenSlices=volscale(3);
+    info.LargestImagePixelValue = 2^16 - 1;
 
     if nargin >= 1
-        info.Width=size(image,1);
-        info.Height=size(image,2);
-        info.LargestImagePixelValue = max(image(:));
+        info.Width = size(image,1);
+        info.Height = size(image,2);
     end
 end
 

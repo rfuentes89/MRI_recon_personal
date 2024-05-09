@@ -10,6 +10,9 @@ function write_dicom_volume(image, filename, info, options)
     % Compute min and max percentiles
     if isfield(info, 'LargestImagePixelValue')
         max_value = info.LargestImagePixelValue;
+        if max_value < 100
+            warning("max_value is low: %d, might get an empty image", max_value);
+        end
     else
         max_value = (2^16 - 1);
     end
