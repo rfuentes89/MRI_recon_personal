@@ -82,7 +82,7 @@ if CONFIG.verbose
 end
 
 %% Normalize images for output
-images = Normalize(images, 0, 255);
+images = rescale(images, 0, 255);
 images = uint8(images);
 
 %% Generate PNGs/GIFs
@@ -179,7 +179,7 @@ function targets = get_final_dcm_filepaths(base_recons_folder, recon_names, cont
             warning("Contrast not found for recon " + string(dcm_fpath));
         end
     end
-    
+
     if ~exist("targets", "var")
         error("No DCM for contrast " + contrast_name + " for recons");
     end

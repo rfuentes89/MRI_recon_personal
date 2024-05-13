@@ -28,7 +28,7 @@ function save_gif(images, filename, options)
     % Check images input
     assert(numel(size(images)) == 3, "images must have 3 dimensions");
     [nx, ny, nz] = size(images);
-    if options.norm, images = Normalize(images, 0, 255); end
+    if options.norm, images = rescale(images, 0, 255); end
     images = uint8(images);
 
     % Check axis input

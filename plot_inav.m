@@ -25,8 +25,8 @@ disp("Navigators loaded");
 navs1 = zeros(n_x, n_y, n_navigators);
 navs2 = zeros(n_x, n_y, n_navigators);
 for i_navigator = 1:n_navigators
-    navs1(:,:,i_navigator) = Normalize(raw_navigators{1,1,i_navigator,1}, 0, 255);
-    navs2(:,:,i_navigator) = Normalize(raw_navigators{1,2,i_navigator,1}, 0, 255);
+    navs1(:,:,i_navigator) = rescale(raw_navigators{1,1,i_navigator,1}, 0, 255);
+    navs2(:,:,i_navigator) = rescale(raw_navigators{1,2,i_navigator,1}, 0, 255);
 end
 
 
@@ -44,7 +44,7 @@ save_gif(navs2, fullfile(folder_output, "HB2.gif"))
 sum_of_navigators = zeros(size(raw_navigators{1}));
 for repetition = 1:n_repetitions
     for navigator = 1:n_navigators
-        for set = 1:n_sets            
+        for set = 1:n_sets
             for echo = 1:n_echoes
                 sum_of_navigators = sum_of_navigators + mat2gray(abs(raw_navigators{echo,set,navigator,repetition}));
             end

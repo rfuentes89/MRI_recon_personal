@@ -36,7 +36,7 @@ function bin_images = reconstruct_bin_images_it_sense(k_spaces, sampling_masks, 
         filtered_k_space = k_spaces{bin} .* filter;
 
         bin_image = it_SENSE(filtered_k_space, sampling_masks{bin}, csm);
-        bin_images{bin} = Normalize(abs(bin_image), 0, 1);
+        bin_images{bin} = rescale(abs(bin_image), 0, 1);
 
     end
 end
