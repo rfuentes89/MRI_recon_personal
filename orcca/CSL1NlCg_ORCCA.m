@@ -228,8 +228,7 @@ function g = grad(x, params)
 
     % L1 in image space
     if params.weight_id
-        % TODO(pdpino): is TV_Temp ok here?
-        IdGrad = params.TV_Temp'*(x.*(x.*conj(x)+params.L1_smooth).^(-0.5));
+        IdGrad = x.*(x.*conj(x)+params.L1_smooth).^(-0.5);
     else
         IdGrad = 0;
     end
