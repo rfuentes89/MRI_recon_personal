@@ -44,6 +44,7 @@ folder_output = fullfile( ...
     folder_name, ...
     output_name);
 
+if ~exist(folder_output, "dir"), mkdir(folder_output); end
 
 %% Use arrays in window and level
 n_targets = length(dcm_fpaths);

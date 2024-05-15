@@ -23,7 +23,7 @@ function save_gif(images, filename, options)
     filename = string(filename);
     if ~endsWith(filename, ".gif"), filename = filename + ".gif"; end
     [folder, ~, ~] = fileparts(filename);
-    if ~exist(folder, "dir"), mkdir(folder); end
+    if strlength(folder) > 0 && ~exist(folder, "dir"), mkdir(folder); end
 
     % Check images input
     assert(numel(size(images)) == 3, "images must have 3 dimensions");
