@@ -121,14 +121,12 @@ if CONFIG.motion_correction_params.type ~= "none"
 end
 
 %% Step 5.1: Ignore right-left motion
-
-if CONFIG.zero_rl_motion
+if CONFIG.motion_correction_params.type ~= "none" && CONFIG.zero_rl_motion
     disp("Zeroing right-left motion")
     for i_contrast = 1:numel(motion_curves)
         motion_curves{i_contrast}.rl = zeros(size(motion_curves{i_contrast}.fh));
     end
 end
-
 %% STEP 5.2: Reduce data for debugging
 
 if isfield(CONFIG, "debug_ksize") && CONFIG.debug_ksize > 0
@@ -168,13 +166,11 @@ end
 save_variable_if_config(CONFIG, "motion_corrected_data", CONFIG.save_data);
 
 %% Save disp fields
-if isfield(motion_corrected_data, "displacement_fields")
+if CONFIG.motion_correction_params.type ~= "none" && isfield(motion_corrected_data, "displacement_fields")
     displacement_fields = motion_corrected_data.displacement_fields;
     save_variable_if_config(CONFIG, "displacement_fields", CONFIG.save_disp_fields);
     clear displacement_fields;
 end
-
-
 %% STEP 7: Reconstructions:
 disp("step 7: reconstructing images")
 images = reconstruct_images( ...
