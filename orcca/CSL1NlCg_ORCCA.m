@@ -84,11 +84,13 @@ function x = CSL1NlCg_ORCCA(params)
             break;
         end
 
-        % control the number of line searches by adapting the initial step search
-        if lsiter > 2
-            ls_params.step_size = ls_params.step_size * ls_params.beta;
-        elseif lsiter < 1
-            ls_params.step_size = ls_params.step_size / ls_params.beta;
+        if ls_params.adapt_step
+            % control the number of line searches by adapting the initial step search
+            if lsiter > 2
+                ls_params.step_size = ls_params.step_size * ls_params.beta;
+            elseif lsiter < 1
+                ls_params.step_size = ls_params.step_size / ls_params.beta;
+            end
         end
 
         % update x
