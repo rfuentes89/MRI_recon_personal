@@ -3,7 +3,7 @@
 
 %% Imports
 addpath(genpath("./"))
-config_fname = "configs/example.json";
+config_fname = "configs/example_recon.json";
 
 CONFIG = load_config(config_fname);
 

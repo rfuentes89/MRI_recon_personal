@@ -124,8 +124,8 @@ acquisitions/2024-01-01_HV1_BOOST/    # Acquisition folder
 
 ### Step 1: Create config file
 Create a JSON configuration with the reconstruction parameters
-* See an example in [`configs/example.json`](configs/example.json), it has comments on each parameter
-* You should NOT edit the `example.json` file, you should create your own copy
+* See an example in [`configs/example_recon.json`](configs/example_recon.json), it has comments on each parameter
+* You should NOT edit the `example_recon.json` file, you should create your own copy
 
 
 ### Step 2: Save motion curves

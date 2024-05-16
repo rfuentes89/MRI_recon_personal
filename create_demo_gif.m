@@ -1,6 +1,6 @@
 %%% Create GIF or PNGs for demos
 % Steps:
-% 1. Create a config file, see configs/gif_example.json for an example
+% 1. Create a config file, see configs/example_gif.json for an example
 % 2. Select the config_fname in the first lines
 % 3. Run this script
 %
@@ -11,7 +11,7 @@
 addpath(genpath("./"))
 
 %% Load config
-%config_fname = "configs/gif_example.json";
+%config_fname = "configs/example_gif.json";
 CONFIG = load_config(config_fname);
 
 %% Prepare DCM filenames

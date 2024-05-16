@@ -13,7 +13,7 @@ addpath(genpath("./"))
 assert(~isempty(getenv('NIFTY_PATH')))
 
 % Choose your config file here
-%config_fname = "configs/example.json";
+%config_fname = "configs/example_recon.json";
 
 %% STEP 0: Read parameters from file
 assert(exist("config_fname", "var"), "config_fname variable must exist");

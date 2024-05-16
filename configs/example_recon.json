@@ -104,6 +104,7 @@
                 "alpha": 0.01,
                 "beta": 0.6,
                 "step_size": 1,
+                "adapt_step": true, // if present, adapts step_size in each iteration
             },
         },
         "selected_contrast_for_disp_fields": {
