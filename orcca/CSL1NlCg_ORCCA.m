@@ -47,7 +47,9 @@ function x = CSL1NlCg_ORCCA(params)
         % backtracking line-search
         step_size = ls_params.step_size;
         f1 = objective(x,dx,step_size,params);
-        if params.verbose >= 1, fprintf('\tite=%d, cost=%.20f\n', step_i, f1); end
+        if params.verbose >= 1
+            fprintf('\tite=%d, cost=%.20f, stepsize=%.4f\n', step_i, f1, step_size);
+        end
 
         % Line search (i.e. find optimal step_size)
         lsiter = 0;
@@ -62,7 +64,7 @@ function x = CSL1NlCg_ORCCA(params)
             step_size = step_size * ls_params.beta;
             f1 = objective(x,dx,step_size,params);
             if params.verbose >= 2
-                fprintf('\t\tline search: lsiter=%d, stepsize=%.3f\n', lsiter, step_size);
+                fprintf('\t\tline search: lsiter=%d, stepsize=%.4f\n', lsiter, step_size);
                 fprintf('\t\t  cost  =%.20f\n', f1);
                 fprintf('\t\t  thresh=%.20f\n', f0 - step_size * min_delta);
             end
@@ -105,7 +107,7 @@ function x = CSL1NlCg_ORCCA(params)
         relative_change = norm(step_x(:)) / max(norm(x(:)), eps);
         if relative_change < params.rel_norm_tol
             if params.verbose >= 1
-                fprintf("\tStopping: change smaller than norm_tol: %f\n", relative_change);
+                fprintf("\tStopping: change smaller than norm_tol: %.8f\n", relative_change);
             end
             break;
         end
