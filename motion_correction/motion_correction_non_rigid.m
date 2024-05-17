@@ -4,7 +4,6 @@ function data = motion_correction_non_rigid(data, motion_curves, csm, params)
     % force this behaviour for the inline reconstruction
 
     [n_echoes, n_sets, n_repetitions] = size(data.k_spaces);
-    assert(params.ref_bin <= params.n_bins);
 
     n_contrasts = size(data.sampling_masks);
     data.displacement_fields = cell(n_contrasts);
@@ -55,40 +54,6 @@ function data = motion_correction_non_rigid(data, motion_curves, csm, params)
                     bin_limits, ...
                     motion, ...
                     params);
-                data.displacement_fields{echo,set,repetition} = register_bins( ...
-                    data.bin_images{echo,set,repetition}, ...
-                    params.ref_bin);
-            end
-        end
-    end
-
-    % Point displacement fields to chosen DF
-    if df_contrast.echo ~= -1
-        for repetition = 1:n_repetitions
-            for set = 1:n_sets
-                for echo = 1:n_echoes
-                    if df_contrast.echo ~= echo || df_contrast.set ~= set || df_contrast.repetition ~= repetition
-                        data.displacement_fields{echo,set,repetition} = data.displacement_fields{...
-                            df_contrast.echo,...
-                            df_contrast.set,...
-                            df_contrast.repetition};
-                    end
-                end
-            end
-        end
-    end
-
-    nbins = size(data.k_spaces_corrected{echo,set,repetition},5);
-    interpolationMatrices = cell(1,nbins);
-    Image_size            = zeros(size(data.displacement_fields{echo,set,repetition},1), size(data.displacement_fields{echo,set,repetition},2), size(data.displacement_fields{echo,set,repetition},3)); %sizezeros(siz);
-    data.interpolation_matrix = cell(size(data.sampling_masks));
-    for repetition = 1:n_repetitions
-        for set = 1:n_sets
-            for echo = 1:n_echoes
-                for b = 1:nbins%size(bins_all,1)
-                    interpolationMatrices{b} = resampleMatrix(Image_size, data.displacement_fields{echo,set,repetition}(:,:,:,:,b));  %linear interp
-                end
-                data.interpolation_matrix{echo,set,repetition} = interpolationMatrices;
             end
         end
     end

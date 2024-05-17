@@ -3,6 +3,8 @@ function [interpolationMatrix] = resampleMatrix(old,deformationField)
 % function of the derformationField and the interpolation scheme (bilinear
 % in this case).
 
+% TODO(pdpino): pass dimensions instead of empty array (first arg)
+
 % Number of dimensions of the image
 ndims = numel(size(old));
 
