@@ -88,11 +88,11 @@
             // if weight_scale <= 0, other weights are used as is
             "weight_scale": 0.00001,
 
-            "weight_L1": 1,
+            "weight_L1": 0,
             "weight_TV": 1,
-            "weight_TV_Temp": 1,
-            "weight_MTV": 1,
-            "weight_id": 1,
+            "weight_TV_Temp": 0,
+            "weight_MTV": 150,
+            "weight_id": 0,
 
             "max_iter": 5, // outer loop iterations
             "rel_norm_tol": 0.001, // stop if image norm (relative) improves less than this
