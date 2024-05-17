@@ -18,24 +18,30 @@ raw_navigators = read_navigators(twix, CONFIG.selected_contrasts);
 disp("Navigators loaded");
 
 %% Pass to array
-[n_x, n_y] = size(raw_navigators{1});
 [n_echoes, n_sets, n_navigators, n_repetitions]  = size(raw_navigators);
 
-% Hard-coded for 2 sets (boost)
-navs1 = zeros(n_x, n_y, n_navigators);
-navs2 = zeros(n_x, n_y, n_navigators);
-for i_navigator = 1:n_navigators
-    navs1(:,:,i_navigator) = rescale(raw_navigators{1,1,i_navigator,1}, 0, 255);
-    navs2(:,:,i_navigator) = rescale(raw_navigators{1,2,i_navigator,1}, 0, 255);
+navs = cell(n_echoes, n_sets, n_repetitions);
+for repetition = 1:n_repetitions
+    for set = 1:n_sets
+        for echo = 1:n_echoes
+            [n_x, n_y] = size(raw_navigators{echo,set,1,repetition});
+            nav = zeros(n_x, n_y, n_navigators);
+            for i_navigator = 1:n_navigators
+                nav(:,:,i_navigator) = rescale(raw_navigators{echo,set,i_navigator,repetition}, 0, 255);
+            end
+            navs{echo, set, repetition} = nav;
+        end
+    end
 end
-
 
 %% Save GIFs
 folder_output = fullfile(CONFIG.acq_folder, "navigators");
 if ~exist(folder_output, "dir"), mkdir(folder_output); end
-save_gif(navs1, fullfile(folder_output, "HB1.gif"))
-save_gif(navs2, fullfile(folder_output, "HB2.gif"))
-
+for i_contrast = 1:length(navs)
+    cname = string(CONFIG.seq_params.contrast_names{i_contrast});
+    fpath = fullfile(folder_output, cname + ".gif");
+    save_gif(navs{i_contrast}, fpath);
+end
 
 %% Sum navigators
 % Same code as register_navigators
