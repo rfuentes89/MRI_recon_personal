@@ -21,5 +21,24 @@ function config = clean_config_recon(config)
         config.motion_correction_params.selected_contrast_for_disp_fields.set = -1;
         config.motion_correction_params.selected_contrast_for_disp_fields.repetition = -1;
     end
+
+    % Check valid ref_bin
+    mc_params = config.motion_correction_params;
+    assert( ...
+        all(mc_params.ref_bin <= mc_params.n_bins), ...
+        "ref_bin must be less than n_bins");
+
+    % Parse ref_bin=0
+    if any(mc_params.ref_bin < 1)
+        config.motion_correction_params.ref_bin = 1:mc_params.n_bins;
+    end
+
+    % Warn multiple ref-bins with ORCCA MTV
+    mc_params = config.motion_correction_params;
+    if numel(mc_params.ref_bin) > 1 && mc_params.bin_recon_type == "orcca" && mc_params.orcca_params.weight_MTV > 0
+        warning( ...
+            "Reconstructing to >1 ref-bin with ORCCA MTV -- MTV transform will use the first ref-bin %d", ...
+            mc_params.ref_bin(1));
+    end
 end
 

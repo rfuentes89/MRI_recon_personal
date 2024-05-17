@@ -94,7 +94,7 @@ function bin_images = reconstruct_bin_images_orcca( ...
     params_orcca.TV = TVOP();
     params_orcca.TV_Temp = TV_Temp();
     %params_orcca.MTV = MTV(interpolationMatrices); % nonrigid correction
-    params_orcca.MTV = TC_XMR_MTVi(target_pos_mean, params_moco.ref_bin);   % translational correction
+    params_orcca.MTV = TC_XMR_MTVi(target_pos_mean, params_moco.ref_bin(1));   % translational correction
 
     params_orcca.y = kdata;
 

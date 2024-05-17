@@ -158,60 +158,59 @@ if CONFIG.save_dcm_intrabin && isfield(motion_corrected_data, "bin_images")
                 CONFIG, ...
                 motion_corrected_data.bin_images{i_contrast}{i_bin}, ...
                 info_name, ...
-                cname + "-bin" + sprintf("%02d", i_bin))
+                cname + "-binimage" + sprintf("%02d", i_bin))
         end
     end
 end
 
-%% Save disp fields
-if CONFIG.motion_correction_params.type ~= "none" && isfield(motion_corrected_data, "displacement_fields")
-    displacement_fields = motion_corrected_data.displacement_fields;
-    save_variable_if_config(CONFIG, "displacement_fields", CONFIG.save_disp_fields);
-    clear displacement_fields;
-end
-
 %% STEP 7: Reconstruction
-disp("step 7: reconstructing images")
+disp("step 7: reconstructing and denoising images")
 
-if CONFIG.motion_correction_params.type == "non_rigid"
-    motion_corrected_data = calculate_disp_fields( ...
+n_ref_bins = numel(CONFIG.motion_correction_params.ref_bin);
+for i_ref_bin = 1:n_ref_bins
+    ref_bin = CONFIG.motion_correction_params.ref_bin(i_ref_bin);
+    fprintf("Reconstructing with ref_bin=%d (recon %d/%d)\n", ref_bin, i_ref_bin, n_ref_bins);
+
+    if CONFIG.motion_correction_params.type == "non_rigid"
+        fprintf("\tCalculating displacement fields\n");
+        motion_corrected_data = calculate_disp_fields( ...
+            motion_corrected_data, ...
+            CONFIG.motion_correction_params.selected_contrast_for_disp_fields, ...
+            ref_bin);
+    end
+
+    fprintf("\tReconstructing images\n");
+    images = reconstruct_images( ...
         motion_corrected_data, ...
-        CONFIG.motion_correction_params.selected_contrast_for_disp_fields, ...
-        CONFIG.motion_correction_params.ref_bin);
-end
+        csm, ...
+        CONFIG.reconstruction_type, ...
+        CONFIG.motion_correction_params.type, ...
+        CONFIG.cg_params, ...
+        CONFIG.prost_params);
 
-images = reconstruct_images( ...
-    motion_corrected_data, ...
-    csm, ...
-    CONFIG.reconstruction_type, ...
-    CONFIG.motion_correction_params.type, ...
-    CONFIG.cg_params, ...
-    CONFIG.prost_params);
+    % STEP 8: PROST Denoising
+    if CONFIG.denoising_type ~= "none"
+        fprintf("\tPROST denoising\n");
+        images = denoising_HD_PROST(images, CONFIG.prost_params);
+    end
 
-save_variable_if_config(CONFIG, "images", CONFIG.save_images);
+    if ~CONFIG.save_dcm, continue; end
 
-%% STEP 8: PROST Denoising
-if CONFIG.denoising_type ~= "none"
-    disp("step 8: PROST denoising")
-    images = denoising_HD_PROST(images, CONFIG.prost_params);
+    suffix = ternary(n_ref_bins > 1, sprintf("_refpos%02d", ref_bin), "");
 
-    disp("PROST done")
-end
-
-
-%% Write main DICOM
-if CONFIG.save_dcm
+    % Write main DICOM
     for image_i = 1:length(images)
-        cname = CONFIG.seq_params.contrast_names{image_i};
+        cname = string(CONFIG.seq_params.contrast_names{image_i}) + suffix;
         info_name = CONFIG.seq_params.scanner_dcms{image_i};
         save_dicom(CONFIG, images{image_i}, info_name, cname);
     end
 
-    % Black blood
+    % Write black blood DICOM
     if (length(images) == 2) && isstruct(CONFIG.seq_params.bb)
         bb = CONFIG.seq_params.bb;
         deno_blackblood = abs(images{2}) - abs(images{1});
-        save_dicom(CONFIG, deno_blackblood, bb.scanner_dcm, bb.contrast_name);
+        bb_name = string(bb.contrast_name) + suffix;
+        save_dicom(CONFIG, deno_blackblood, bb.scanner_dcm, bb_name);
     end
 end
 

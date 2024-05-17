@@ -78,6 +78,8 @@
         // non_rigid only params:
         "n_bins": 4, // number of respiratory bins
         "ref_bin": 4, // 1: inspiration, end: expiration
+            // provide a list to reconstruct using a different bin as reference, e.g. [1, 2, 3, 4]
+            // set to 0 to reconstruct to all bins
         "bin_recon_type": "it_sense", // it_sense, orcca
         "soft_fn": "bin_range_scaled", // choose exponential decay function, one of bins_avg, bin_range, bin_range_scaled
         "soft_decay": 1, // exponential decay for the soft binning
