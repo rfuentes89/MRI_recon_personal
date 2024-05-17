@@ -17,8 +17,6 @@ function x = CSL1NlCg_ORCCA(params)
     % Ricardo Otazo 2008
     %
 
-    warning('off','backtrace');
-
     fprintf('\n Non-linear conjugate gradient algorithm')
     fprintf('\n ---------------------------------------\n')
 

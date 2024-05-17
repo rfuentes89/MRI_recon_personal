@@ -8,9 +8,10 @@
 %
 % Authors: Alina Schneider, Camila Munoz, Carlos Velasco, Donovan Tripp, Lina Felsner (2022)
 
-addpath(genpath("./"))
+addpath(genpath("./"));
 
-assert(~isempty(getenv('NIFTY_PATH')))
+assert(~isempty(getenv('NIFTY_PATH')));
+warning('off','backtrace');
 
 % Choose your config file here
 %config_fname = "configs/example_recon.json";
