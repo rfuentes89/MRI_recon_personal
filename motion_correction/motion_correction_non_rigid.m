@@ -7,18 +7,12 @@ function data = motion_correction_non_rigid(data, motion_curves, csm, params)
     assert(params.ref_bin <= params.n_bins);
 
     n_contrasts = size(data.sampling_masks);
-
     data.displacement_fields = cell(n_contrasts);
     data.k_spaces_corrected = cell(n_contrasts);
     data.binned_sampling_masks = cell(n_contrasts);
 
-    % One contrast can be chosen to compute disp fields
+    % Chosen contrast to compute displacement fields
     df_contrast = params.selected_contrast_for_disp_fields;
-    if df_contrast.echo < 1 || df_contrast.set < 1 || df_contrast.repetition < 1
-        df_contrast.echo = -1;
-        df_contrast.set = -1;
-        df_contrast.repetition = -1;
-    end
 
     for repetition = 1:n_repetitions
         for set = 1:n_sets
@@ -38,7 +32,7 @@ function data = motion_correction_non_rigid(data, motion_curves, csm, params)
                     bin_limits, ...
                     params.intrabin_TL_corr);
 
-                % Only compute needed bin images
+                % Skip computing not-needed bin images
                 if df_contrast.echo ~= -1
                     if df_contrast.echo ~= echo || df_contrast.set ~= set || df_contrast.repetition ~= repetition
                         continue;

@@ -20,16 +20,7 @@ warning('off','backtrace');
 assert(exist("config_fname", "var"), "config_fname variable must exist");
 
 CONFIG = load_config(config_fname);
-
-if CONFIG.debug_ksize > 0
-    CONFIG.run_name = string(CONFIG.run_name) + "_DEBUG";
-end
-
-if isfield(CONFIG, "run_name_prepend_datestamp") && CONFIG.run_name_prepend_datestamp
-    CONFIG.run_name = string(datetime("now"), "yyyy-MM-dd") + "_" + CONFIG.run_name;
-end
-
-CONFIG.run_folder = fullfile(CONFIG.acq_folder, "recons", CONFIG.run_name);
+CONFIG = clean_config_recon(CONFIG);
 
 %% Step 0.1: Check if run exists
 if exist(CONFIG.run_folder, "dir")
@@ -128,8 +119,8 @@ if CONFIG.motion_correction_params.type ~= "none" && CONFIG.zero_rl_motion
         motion_curves{i_contrast}.rl = zeros(size(motion_curves{i_contrast}.fh));
     end
 end
-%% STEP 5.2: Reduce data for debugging
 
+%% STEP 5.2: Reduce data for debugging
 if isfield(CONFIG, "debug_ksize") && CONFIG.debug_ksize > 0
     warning("Reducing data for debugging: " + string(CONFIG.debug_ksize));
     new_size = CONFIG.debug_ksize;
@@ -148,15 +139,6 @@ end
 
 
 %% STEP 6: Motion Correction
-% Uncorrected
-% Rigid
-%   - Autofocus YES/NO
-%   - Translational (3D)
-% Non-Rigid
-%   - Binning
-%   - Image-bin reconstruction
-%   - NR Image registration
-
 if CONFIG.motion_correction_params.type ~= "none"
     disp("step 6: correcting motion")
     motion_corrected_data = correct_motion(data, motion_curves, csm, CONFIG.motion_correction_params);
@@ -166,13 +148,29 @@ end
 
 save_variable_if_config(CONFIG, "motion_corrected_data", CONFIG.save_data);
 
+%% Save bin images
+if CONFIG.save_dcm_intrabin && isfield(motion_corrected_data, "bin_images")
+    for i_contrast = 1:numel(motion_corrected_data.bin_images)
+        cname = string(CONFIG.seq_params.contrast_names{i_contrast});
+        info_name = string(CONFIG.seq_params.scanner_dcms{i_contrast});
+        for i_bin = 1:numel(motion_corrected_data.bin_images{i_contrast})
+            save_dicom( ...
+                CONFIG, ...
+                motion_corrected_data.bin_images{i_contrast}{i_bin}, ...
+                info_name, ...
+                cname + "-bin" + sprintf("%02d", i_bin))
+        end
+    end
+end
+
 %% Save disp fields
 if CONFIG.motion_correction_params.type ~= "none" && isfield(motion_corrected_data, "displacement_fields")
     displacement_fields = motion_corrected_data.displacement_fields;
     save_variable_if_config(CONFIG, "displacement_fields", CONFIG.save_disp_fields);
     clear displacement_fields;
 end
-%% STEP 7: Reconstructions:
+
+%% STEP 7: Reconstruction
 disp("step 7: reconstructing images")
 images = reconstruct_images( ...
     motion_corrected_data, ...
@@ -185,57 +183,30 @@ images = reconstruct_images( ...
 save_variable_if_config(CONFIG, "images", CONFIG.save_images);
 
 %% STEP 8: PROST Denoising
-
 if CONFIG.denoising_type ~= "none"
     disp("step 8: PROST denoising")
-    denoised_images = denoising_HD_PROST(images, CONFIG.prost_params);
+    images = denoising_HD_PROST(images, CONFIG.prost_params);
 
     disp("PROST done")
-else
-    denoised_images = images;
 end
 
-
-%% Remove borders
-% for image_i = 1:length(denoised_images)
-%     denoised_images{image_i} = denoised_images{image_i}(10:200,40:247,9:96);
-% end
-
-%% Set default contrast names
-if length(CONFIG.seq_params.contrast_names) < length(denoised_images)
-    CONFIG.seq_params.contrast_names = ["HB1", "HB2"];
-end
 
 %% Write main DICOM
 if CONFIG.save_dcm
-    for image_i = 1:length(denoised_images)
+    for image_i = 1:length(images)
         cname = CONFIG.seq_params.contrast_names{image_i};
         info_name = CONFIG.seq_params.scanner_dcms{image_i};
-        save_dicom(CONFIG, denoised_images{image_i}, info_name, cname);
+        save_dicom(CONFIG, images{image_i}, info_name, cname);
     end
 
     % Black blood
-    if (length(denoised_images) == 2) && isstruct(CONFIG.seq_params.bb)
-	bb = CONFIG.seq_params.bb;
-        deno_blackblood = abs(denoised_images{2}) - abs(denoised_images{1});
+    if (length(images) == 2) && isstruct(CONFIG.seq_params.bb)
+        bb = CONFIG.seq_params.bb;
+        deno_blackblood = abs(images{2}) - abs(images{1});
         save_dicom(CONFIG, deno_blackblood, bb.scanner_dcm, bb.contrast_name);
     end
 end
 
-%% Write Bin images
-if CONFIG.save_dcm_intrabin && isfield(motion_corrected_data, "bin_images")
-    for i_contrast = 1:numel(motion_corrected_data.bin_images)
-        cname = string(CONFIG.seq_params.contrast_names{i_contrast});
-        info_name = string(CONFIG.seq_params.scanner_dcms{i_contrast});
-        for i_bin = 1:numel(motion_corrected_data.bin_images{i_contrast})
-            save_dicom( ...
-                CONFIG, ...
-                motion_corrected_data.bin_images{i_contrast}{i_bin}, ...
-		info_name, ...
-                cname + "-bin" + sprintf("%02d", i_bin))
-        end
-    end
-end
 
 %% Write config at end
 CONFIG.timestamp_end = string(datetime("now"), "yyyy-MM-dd_HH:mm:ss");
