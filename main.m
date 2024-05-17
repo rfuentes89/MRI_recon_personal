@@ -171,12 +171,19 @@ for i_ref_bin = 1:n_ref_bins
     ref_bin = CONFIG.motion_correction_params.ref_bin(i_ref_bin);
     fprintf("Reconstructing with ref_bin=%d (recon %d/%d)\n", ref_bin, i_ref_bin, n_ref_bins);
 
+    suffix = ternary(n_ref_bins > 1, sprintf("_refpos%02d", ref_bin), "");
+
     if CONFIG.motion_correction_params.type == "non_rigid"
         fprintf("\tCalculating displacement fields\n");
         motion_corrected_data = calculate_disp_fields( ...
             motion_corrected_data, ...
             CONFIG.motion_correction_params.selected_contrast_for_disp_fields, ...
             ref_bin);
+
+        % Save to .mat file
+        displacement_fields = motion_corrected_data.displacement_fields;
+        save_variable_if_config(CONFIG, "displacement_fields", CONFIG.save_disp_fields, suffix);
+        clear displacement_fields;
     end
 
     fprintf("\tReconstructing images\n");
@@ -188,6 +195,8 @@ for i_ref_bin = 1:n_ref_bins
         CONFIG.cg_params, ...
         CONFIG.prost_params);
 
+    save_variable_if_config(CONFIG, "images", CONFIG.save_images, suffix);
+
     % STEP 8: PROST Denoising
     if CONFIG.denoising_type ~= "none"
         fprintf("\tPROST denoising\n");
@@ -195,8 +204,6 @@ for i_ref_bin = 1:n_ref_bins
     end
 
     if ~CONFIG.save_dcm, continue; end
-
-    suffix = ternary(n_ref_bins > 1, sprintf("_refpos%02d", ref_bin), "");
 
     % Write main DICOM
     for image_i = 1:length(images)
@@ -242,10 +249,9 @@ function save_dicom(config, image, input_info_name, contrast_name)
     write_dicom_volume(abs(image), filename, info_base, config.dicom_params);
 end
 
-function save_variable_if_config(config, var_name, should_save)
-    if ~should_save
-        return;
-    end
+function save_variable_if_config(config, var_name, should_save, suffix)
+    if ~should_save, return; end
+    if nargin < 4, suffix = ""; end
 
     var_name = string(var_name);
 
@@ -257,7 +263,7 @@ function save_variable_if_config(config, var_name, should_save)
         return;
     end
 
-    filename = fullfile(config.run_folder, var_name + ".mat");
+    filename = fullfile(config.run_folder, var_name + suffix + ".mat");
     save(filename, var_name);
     disp("Saved " + var_name + " to " + filename);
 end
