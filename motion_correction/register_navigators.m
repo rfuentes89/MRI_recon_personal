@@ -37,7 +37,7 @@ function [fh_displacements, rl_displacements] = register_navigators(navigators, 
             return
         end
         p = ROI.Position;
-        if exist(base_fname, "var")
+        if exist("base_fname", "var")
             saveas(gcf, base_fname + "_selection.png")
         end
         delete(gcf)

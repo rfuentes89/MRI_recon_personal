@@ -18,7 +18,7 @@ function motion_curves = estimate_motion_curves(twix, selected, base_fname)
 
     xlabel("motion in time (" + string(numel(motion_curves)) + " contrasts concatenated)");
 
-    if exist(base_fname, "var")
+    if exist("base_fname", "var")
         saveas(gcf, base_fname + "_curve.png");
     end
 
