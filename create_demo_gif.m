@@ -17,21 +17,28 @@ CONFIG = load_config(config_fname);
 %% Prepare DCM filenames
 base_recons_folder = fullfile(CONFIG.acq_folder, "recons");
 
+requires_more_than_one = false;
 switch CONFIG.mode
     case "png_final_recon"
-        assert(length(CONFIG.recon_name) == 1, "mode png_final_recon requires exactly 1 recon_name");
-        dcm_fpaths = get_final_dcm_filepaths(base_recons_folder, CONFIG.recon_name, CONFIG.contrast_name);
+        get_filepaths = @get_final_dcm_filepaths;
     case "gif_bin_images"
-        assert(length(CONFIG.recon_name) == 1, "mode gif_bin_images requires exactly 1 recon_name");
-        dcm_fpaths = get_bin_dcm_filepaths(base_recons_folder, CONFIG.recon_name, CONFIG.contrast_name);
+        get_filepaths = @get_bin_dcm_filepaths;
     case "gif_final_recons"
-        assert(length(CONFIG.recon_name) > 1, "mode gif_final_recons requires more than 1 recon_name");
-        dcm_fpaths = get_final_dcm_filepaths(base_recons_folder, CONFIG.recon_name, CONFIG.contrast_name);
+        requires_more_than_one = true;
+        get_filepaths = @get_final_dcm_filepaths;
     otherwise
-        error("Mode not recognized: " + string(CONFIG.mode));
+        error("Mode not recognized: %s", CONFIG.mode);
 end
 
-% Build output folder (for png/gif files)
+% Get filepaths
+if requires_more_than_one
+    assert(length(CONFIG.recon_name) > 1, "mode %s requires more than 1 recon_name", CONFIG.mode);
+else
+    assert(length(CONFIG.recon_name) == 1, "mode %s requires exactly 1 recon_name", CONFIG.mode);
+end
+dcm_fpaths = get_filepaths(base_recons_folder, CONFIG.recon_name, CONFIG.contrast_name);
+
+% Build output folder
 folder_name = extractBefore(CONFIG.mode, 4); % i.e. "gif" or "png"
 output_name = extractAfter(CONFIG.mode, 4);
 if strlength(CONFIG.name_suffix) > 0
@@ -132,40 +139,26 @@ disp(string(n_slices) + " " + extension + "s saved in " + string(folder_output))
 
 %% Utils
 function targets = get_bin_dcm_filepaths(base_recons_folder, recon_name, contrast_name)
-%get_bin_dcm_filepaths Get bin images filepaths
+%get_bin_dcm_filepaths Get bin images filepaths for a given recon
 
     dcm_folder = fullfile(base_recons_folder, recon_name, "dcm");
-    if ~isfolder(dcm_folder)
-        error("Recon folder does not exist: " + string(dcm_folder));
-    end
+    assert(isfolder(dcm_folder), "Recon folder does not exist: %s", dcm_folder);
 
-    subfiles = dir(dcm_folder);
     prefix = string(contrast_name) + "-bin";
-    i_target = 1;
+    targets = get_filepaths_with_prefix(dcm_folder, prefix);
 
-    for i_subfile = 1:length(subfiles)
-        subfile = subfiles(i_subfile);
-        if startsWith(subfile.name, prefix)
-            targets{i_target} = fullfile(subfile.folder, subfile.name);
-            i_target = i_target + 1;
-        end
-    end
-    if ~exist("targets", "var")
-        error("No DCM with prefix " + prefix + " found in " + dcm_folder);
-    end
+    assert(numel(targets) > 0, "No DCM with prefix %s found in %s", prefix, dcm_folder);
 
     targets = sort(targets);
 end
 
 function targets = get_final_dcm_filepaths(base_recons_folder, recon_names, contrast_name)
-%get_final_dcm_filepaths Get final recon filepaths
+%get_final_dcm_filepaths Get final recon filepaths for a set of recons
 
     n_recons = length(recon_names);
     contrast_name = string(contrast_name);
 
-    if ~isfolder(base_recons_folder)
-        error("Recons folder does not exist: " + string(base_recons_folder));
-    end
+    assert(isfolder(base_recons_folder), "Recons folder does not exist: %s", base_recons_folder);
 
     i_target = 1;
     for i_recon = 1:n_recons
@@ -181,7 +174,15 @@ function targets = get_final_dcm_filepaths(base_recons_folder, recon_names, cont
         end
     end
 
-    if ~exist("targets", "var")
-        error("No DCM for contrast " + contrast_name + " for recons");
-    end
+    assert(exist("targets", "var"), "No DCM for contrast %s for recons", contrast_name);
+end
+
+function filepaths = get_filepaths_with_prefix(folder_name, prefix)
+    folder_and_prefix = fullfile(folder_name, prefix);
+    raw_filepaths = dir([convertStringsToChars(folder_and_prefix), '*']);
+
+    concat_folder_with_name = @(fpath) fullfile(fpath.folder, fpath.name);
+    filepaths = arrayfun( ...
+        concat_folder_with_name, raw_filepaths, ...
+        "UniformOutput", false);
 end
