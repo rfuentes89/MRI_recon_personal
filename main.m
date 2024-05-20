@@ -89,7 +89,11 @@ end
 disp("step 4: estimating coil maps")
 csm = get_csm(data, CONFIG.coil_params.csm_algorithm, CONFIG.selected_contrasts_for_rating);
 
-save_variable_if_config(CONFIG, "csm", CONFIG.save_csm)
+if CONFIG.save_csm
+    filename = fullfile(CONFIG.run_folder, "csm.mat");
+    save(filename, "csm");
+    disp("Saved csm to " + filename);
+end
 
 %% STEP 5: Reading iNavs
 
@@ -146,8 +150,6 @@ else
     motion_corrected_data = data;
 end
 
-save_variable_if_config(CONFIG, "motion_corrected_data", CONFIG.save_data);
-
 %% Save bin images
 if CONFIG.save_dcm_intrabin && isfield(motion_corrected_data, "bin_images")
     for i_contrast = 1:numel(motion_corrected_data.bin_images)
@@ -181,9 +183,11 @@ for i_ref_bin = 1:n_ref_bins
             ref_bin);
 
         % Save to .mat file
-        displacement_fields = motion_corrected_data.displacement_fields;
-        save_variable_if_config(CONFIG, "displacement_fields", CONFIG.save_disp_fields, suffix);
-        clear displacement_fields;
+        if CONFIG.save_disp_fields
+            filename = fullfile(CONFIG.run_folder, "displacement_fields" + suffix + ".mat");
+            save(filename, "-struct", "motion_corrected_data", "displacement_fields");
+            disp("\tSaved DFs to " + filename);
+        end
     end
 
     fprintf("\tReconstructing images\n");
@@ -194,8 +198,6 @@ for i_ref_bin = 1:n_ref_bins
         CONFIG.motion_correction_params.type, ...
         CONFIG.cg_params, ...
         CONFIG.prost_params);
-
-    save_variable_if_config(CONFIG, "images", CONFIG.save_images, suffix);
 
     % STEP 8: PROST Denoising
     if CONFIG.denoising_type ~= "none"
@@ -220,7 +222,6 @@ for i_ref_bin = 1:n_ref_bins
         save_dicom(CONFIG, deno_blackblood, bb.scanner_dcm, bb_name);
     end
 end
-
 
 %% Write config at end
 CONFIG.timestamp_end = string(datetime("now"), "yyyy-MM-dd_HH:mm:ss");
@@ -247,23 +248,4 @@ function save_dicom(config, image, input_info_name, contrast_name)
     if ~exist(folder, "dir"), mkdir(folder), end
     filename = fullfile(folder, contrast_name + ".dcm");
     write_dicom_volume(abs(image), filename, info_base, config.dicom_params);
-end
-
-function save_variable_if_config(config, var_name, should_save, suffix)
-    if ~should_save, return; end
-    if nargin < 4, suffix = ""; end
-
-    var_name = string(var_name);
-
-    % HACK: make variable available inside function
-    eval("global " + var_name)
-
-    if ~exist(var_name, "var")
-        warning("Variable does not exist, cannot save: " + var_name);
-        return;
-    end
-
-    filename = fullfile(config.run_folder, var_name + suffix + ".mat");
-    save(filename, var_name);
-    disp("Saved " + var_name + " to " + filename);
 end

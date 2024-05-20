@@ -110,10 +110,8 @@ acquisitions/2024-01-01_HV1_BOOST/    # Acquisition folder
                 final_recon/
 
             # Other MATLAB variables:
-            csm.mat                   # Coil sensitivies, if save_csm = true
+            csm.mat                   # Coil sensitivities, if save_csm = true
             displacement_fields.mat   # 3D displacement fields, if save_disp_fields = true
-            images.mat                # Images before denoising, if save_images = true
-            motion_corrected_data.mat # Struct storing full data, if save_data = true
 
         RUN_2/
         ...
