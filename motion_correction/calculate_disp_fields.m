@@ -1,22 +1,24 @@
-function data = calculate_disp_fields(data, selected_df_contrast, ref_bin)
+function data = calculate_disp_fields(data, df_contrast, ref_bin)
 %CALCULATE_DISP_FIELDS Calculate non-rigid displacement fields from
 %bin_images
     assert(isfield(data, "bin_images"), ...
         "bin_images not present, check selected_contrast_for_disp_fields is correct")
 
-    n_bins = numel(data.bin_images{1});
-    assert(ref_bin <= n_bins);
+    n_bins = numel(data.bin_images{df_contrast.echo,df_contrast.set,df_contrast.repetition});
+    assert(n_bins > 0, "found zero bin images in selected contrast");
+    assert(ref_bin <= n_bins, "refbin=%d cannot be higher than n_bins=%d", ref_bin, n_bins);
 
     [n_echoes, n_sets, n_repetitions] = size(data.k_spaces);
 
     % Choose selected to compute disp fields
-    if selected_df_contrast.echo ~= -1
-        is_chosen_contrast = @(echo, set, rep) echo == selected_df_contrast.echo && set == selected_df_contrast.set && rep == selected_df_contrast.repetition;
+    if df_contrast.echo ~= -1
+        is_chosen_contrast = @(echo, set, rep) echo == df_contrast.echo && set == df_contrast.set && rep == df_contrast.repetition;
     else
         is_chosen_contrast = @(echo, set, rep) true;
     end
 
     % Calculate displacement fields
+    data.displacement_fields = cell(n_echoes, n_sets, n_repetitions);
     for repetition = 1:n_repetitions
         for set = 1:n_sets
             for echo = 1:n_echoes
@@ -30,14 +32,14 @@ function data = calculate_disp_fields(data, selected_df_contrast, ref_bin)
     end
 
     % Point displacement fields to chosen DF
-    if selected_df_contrast.echo ~= -1
+    if df_contrast.echo ~= -1
         for repetition = 1:n_repetitions
             for set = 1:n_sets
                 for echo = 1:n_echoes
                     data.displacement_fields{echo,set,repetition} = data.displacement_fields{...
-                        selected_df_contrast.echo,...
-                        selected_df_contrast.set,...
-                        selected_df_contrast.repetition};
+                        df_contrast.echo,...
+                        df_contrast.set,...
+                        df_contrast.repetition};
                 end
             end
         end
