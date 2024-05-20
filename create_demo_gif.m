@@ -26,6 +26,8 @@ switch CONFIG.mode
     case "gif_final_recons"
         requires_more_than_one = true;
         get_filepaths = @get_final_dcm_filepaths;
+    case "gif_refpos"
+        get_filepaths = @get_refpos_dcm_filepaths;
     otherwise
         error("Mode not recognized: %s", CONFIG.mode);
 end
@@ -187,6 +189,19 @@ function targets = get_final_dcm_filepaths(base_recons_folder, recon_names, cont
     end
 
     assert(exist("targets", "var"), "No DCM for contrast %s for recons", contrast_name);
+end
+
+function targets = get_refpos_dcm_filepaths(base_recons_folder, recon_name, contrast_name)
+%get_refpos_dcm_filepaths Get filepaths for final recons with different ref
+%positions (for a given recon)
+    dcm_folder = fullfile(base_recons_folder, recon_name, "dcm");
+    assert(isfolder(dcm_folder), "Recon folder does not exist: %s", dcm_folder);
+
+    prefix = string(contrast_name) + "_refpos";
+    targets = get_filepaths_with_prefix(dcm_folder, prefix);
+    assert(numel(targets) > 0, "No DCM with prefix %s found in %s", prefix, dcm_folder);
+
+    targets = sort(targets);
 end
 
 function filepaths = get_filepaths_with_prefix(folder_name, prefix)
