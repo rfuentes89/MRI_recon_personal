@@ -70,18 +70,30 @@ images = cell(n_targets,1);
 for i_dcm = 1:n_targets
     dcm_filepath = dcm_fpaths{i_dcm};
     images{i_dcm} = double(squeeze(dicomread(dcm_filepath)));
+end
 
-    if CONFIG.lut_params.apply
-        window = CONFIG.lut_params.window(i_dcm);
-        level = CONFIG.lut_params.level(i_dcm);
-        images{i_dcm} = apply_window_level(images{i_dcm}, window, level);
-    end
+%% Normalize to same brightness
+if CONFIG.norm_brightness_params.apply
+    images = norm_image_brightness(images, CONFIG.norm_brightness_params.target);
+end
 
-    if CONFIG.mip_params.apply
-        images{i_dcm} = calc_mip_image(images{i_dcm}, CONFIG.mip_params);
+%% Apply LUT
+if CONFIG.lut_params.apply
+    for i_image = 1:numel(images)
+        window = CONFIG.lut_params.window(i_image);
+        level = CONFIG.lut_params.level(i_image);
+        images{i_image} = apply_window_level(images{i_image}, window, level);
     end
 end
 
+%% Apply MIP
+if CONFIG.mip_params.apply
+    for i_image = 1:numel(images)
+        images{i_image} = calc_mip_image(images{i_image}, CONFIG.mip_params);
+    end
+end
+
+%% Concatenate images into one array
 images = cat(4, images{:});
 
 if CONFIG.verbose
