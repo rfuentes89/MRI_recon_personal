@@ -5,13 +5,6 @@ function displacement_fields = register_bins(bin_images, ref_bin_idx)
     assert(ref_bin_idx <= n_bins);
     reference_image = bin_images{ref_bin_idx};
 
-
-
-    % NiftiReg likes to run in its own folder
-    assert(~isempty(getenv('NIFTY_PATH')), 'You must set NIFTY_PATH environment variable first')
-    main_directory = cd(getenv('NIFTY_PATH'));
-    go_back = onCleanup(@() cd(main_directory));
-
     % TODO: it would be nice to structure `displacement_fields` properly,
     % but as it gets passed directly to `Cruz_E_3D_CART_BATCH` I'm leaving
     % it for now
@@ -23,7 +16,6 @@ function displacement_fields = register_bins(bin_images, ref_bin_idx)
             ' --nmi -be 0.0005 -sx 14', ...
             fullfile(getenv("WORKSPACE"), ".nifty-tmp"));
         displacement_fields(:,:,:,:,bin) = displacement_field;
-
     end
 
     % DFs must be flipped for NR recon to work
