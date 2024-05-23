@@ -26,6 +26,9 @@ function displacement_fields = register_bins(bin_images, ref_bin_idx)
 
     end
 
+    % DFs must be flipped for NR recon to work
+    displacement_fields = flip(flip(flip(displacement_fields, 1), 2), 3);
+
     displacement_fields = Add_mesh_to_DF(displacement_fields);
 
 end
