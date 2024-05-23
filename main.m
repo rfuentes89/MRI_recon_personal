@@ -199,7 +199,10 @@ for i_ref_bin = 1:n_ref_bins
         CONFIG.cg_params, ...
         CONFIG.prost_params);
 
-    % STEP 8: PROST Denoising
+    % Check for nan and inf
+    images = fix_nan_and_inf(images);
+
+    % PROST Denoising
     if CONFIG.denoising_type ~= "none"
         fprintf("\tPROST denoising\n");
         images = denoising_HD_PROST(images, CONFIG.prost_params);
