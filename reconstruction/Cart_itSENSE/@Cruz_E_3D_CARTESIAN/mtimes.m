@@ -12,25 +12,11 @@ if a.adjoint % EH operation
     for coil = 1:size(a.coils, 4) % number of coils
         % Sampling
         b_sample = b(:,:,:,coil).*At;
+
         % 3D FFT
-%         b_sample = fftshift(ifft(ifftshift(b_sample,1),[],1),1)*sqrt(size(b_sample,1));
-%         b_sample = fftshift(ifft(ifftshift(b_sample,2),[],2),2)*sqrt(size(b_sample,2));
-%         b_sample = fftshift(ifft(ifftshift(b_sample,3),[],3),3)*sqrt(size(b_sample,3));
-
-%         b_sample = ifft(b_sample,[],1);
-%         b_sample = ifft(b_sample,[],2);
-%         b_sample = ifft(b_sample,[],3);
-
-%         b_sample = ifftn(b_sample); 
-%         
-%           b_sample = fftshift(ifft(ifftshift(b_sample,1),[],1));
-%           b_sample = fftshift(ifft(ifftshift(b_sample,2),[],2));
-%           b_sample = fftshift(ifft(ifftshift(b_sample,3),[],3));
-
-        b_sample = sqrt(size(b_sample,1)).* fftshift( ifft(ifftshift(b_sample ,1),[],1), 1);
-        b_sample = sqrt(size(b_sample,2)).* fftshift( ifft(ifftshift(b_sample ,2),[],2), 2);
-        b_sample = sqrt(size(b_sample,3)).* fftshift( ifft(ifftshift(b_sample ,3),[],3), 3);
-
+        b_sample = 1/sqrt(size(b_sample,1)).* fftshift( ifft(ifftshift(b_sample ,1),[],1), 1);
+        b_sample = 1/sqrt(size(b_sample,2)).* fftshift( ifft(ifftshift(b_sample ,2),[],2), 2);
+        b_sample = 1/sqrt(size(b_sample,3)).* fftshift( ifft(ifftshift(b_sample ,3),[],3), 3);
             
         % Coil weights
         res_coils(:,:,:,coil) = b_sample.*conj(coils(:,:,:,coil)); 
@@ -51,15 +37,8 @@ else % E operation
     for coil = 1:size(a.coils, 4) % number of coils
         % Coil weights
         b_sample = b.*coils(:,:,:,coil);
+
         % 3D FFT
-%         b_sample = fftshift(fft(ifftshift(b_sample,1),[],1),1)/sqrt(size(b_sample,1));
-%         b_sample = fftshift(fft(ifftshift(b_sample,2),[],2),2)/sqrt(size(b_sample,2));
-%         b_sample = fftshift(fft(ifftshift(b_sample,3),[],3),3)/sqrt(size(b_sample,3));
-
-%           b_sample = fftshift(fft(ifftshift(b_sample,1),[],1));
-%           b_sample = fftshift(fft(ifftshift(b_sample,2),[],2));
-%           b_sample = fftshift(fft(ifftshift(b_sample,3),[],3));
-
         b_sample = 1/sqrt(size(b_sample,1))*fftshift(fft(ifftshift( b_sample, 1 ),[],1),1);
         b_sample = 1/sqrt(size(b_sample,2))*fftshift(fft(ifftshift( b_sample, 2 ),[],2),2);
         b_sample = 1/sqrt(size(b_sample,3))*fftshift(fft(ifftshift( b_sample, 3 ),[],3),3);

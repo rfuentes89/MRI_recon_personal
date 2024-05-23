@@ -32,9 +32,9 @@ if a.adjoint % EH operation
             b_sample = b_aux(:,:,:,coil).*Bin_At;
 
             % FFT
-            b_sample = sqrt(size(b_sample,1)).* fftshift( ifft(ifftshift(b_sample ,1),[],1), 1);
-            b_sample = sqrt(size(b_sample,2)).* fftshift( ifft(ifftshift(b_sample ,2),[],2), 2);
-            b_sample = sqrt(size(b_sample,3)).* fftshift( ifft(ifftshift(b_sample ,3),[],3), 3);
+            b_sample = 1/sqrt(size(b_sample,1))*fftshift( ifft(ifftshift(b_sample ,1),[],1), 1);
+            b_sample = 1/sqrt(size(b_sample,2))*fftshift( ifft(ifftshift(b_sample ,2),[],2), 2);
+            b_sample = 1/sqrt(size(b_sample,3))*fftshift( ifft(ifftshift(b_sample ,3),[],3), 3);
             % Coil weights
             res_coils(:,:,:,coil) = b_sample.*conj(coils(:,:,:,coil));
 	     %res_coils(:,:,:,coil) = complex(matrix_interpolation(real(res_coils(:,:,:,coil)),curr_mf'),matrix_interpolation(imag(res_coils(:,:,:,coil)),curr_mf'));
