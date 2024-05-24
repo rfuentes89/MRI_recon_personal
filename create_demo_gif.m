@@ -162,8 +162,6 @@ function targets = get_bin_dcm_filepaths(base_recons_folder, recon_name, contras
     targets = get_filepaths_with_prefix(dcm_folder, prefix);
 
     assert(numel(targets) > 0, "No DCM with prefix %s found in %s", prefix, dcm_folder);
-
-    targets = sort(targets);
 end
 
 function targets = get_final_dcm_filepaths(base_recons_folder, recon_names, contrast_name)
@@ -177,9 +175,16 @@ function targets = get_final_dcm_filepaths(base_recons_folder, recon_names, cont
     i_target = 1;
     for i_recon = 1:n_recons
         recon_name = recon_names(i_recon);
+        dcm_folder = fullfile(base_recons_folder, recon_name, "dcm");
 
-        dcm_fname = contrast_name + ".dcm";
-        dcm_fpath = fullfile(base_recons_folder, recon_name, "dcm", dcm_fname);
+        dcm_fpath = fullfile(dcm_folder, contrast_name + ".dcm");
+        if ~isfile(dcm_fpath)
+            % Try with suffix _refpos
+            fpaths = get_filepaths_with_prefix(dcm_folder, contrast_name + "_refpos");
+            dcm_fpath = fpaths{end};
+            fprintf("Chose DCM with refpos: %s\n", dcm_fpath);
+        end
+
         if isfile(dcm_fpath)
             targets{i_target} = dcm_fpath;
             i_target = i_target + 1;
@@ -200,8 +205,6 @@ function targets = get_refpos_dcm_filepaths(base_recons_folder, recon_name, cont
     prefix = string(contrast_name) + "_refpos";
     targets = get_filepaths_with_prefix(dcm_folder, prefix);
     assert(numel(targets) > 0, "No DCM with prefix %s found in %s", prefix, dcm_folder);
-
-    targets = sort(targets);
 end
 
 function filepaths = get_filepaths_with_prefix(folder_name, prefix)
@@ -212,4 +215,6 @@ function filepaths = get_filepaths_with_prefix(folder_name, prefix)
     filepaths = arrayfun( ...
         concat_folder_with_name, raw_filepaths, ...
         "UniformOutput", false);
+
+    filepaths = sort(filepaths);
 end
