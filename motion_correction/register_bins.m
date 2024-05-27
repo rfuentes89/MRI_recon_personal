@@ -5,9 +5,6 @@ function displacement_fields = register_bins(bin_images, ref_bin_idx)
     assert(ref_bin_idx <= n_bins);
     reference_image = bin_images{ref_bin_idx};
 
-    % TODO: it would be nice to structure `displacement_fields` properly,
-    % but as it gets passed directly to `Cruz_E_3D_CART_BATCH` I'm leaving
-    % it for now
     displacement_fields = nan([size(bin_images{1}, 1:3), 3, numel(bin_images)]);
     for bin = 1:n_bins
         [~, displacement_field] = nifty_reg( ...

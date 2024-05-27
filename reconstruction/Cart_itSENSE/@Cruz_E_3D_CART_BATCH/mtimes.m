@@ -13,13 +13,7 @@ if a.adjoint % EH operation
     for bin = 1:nbins
         res_coils = zeros(a.siz(1),a.siz(2),a.siz(3),size(a.coils, 4)); % init
         Bin_At = double(At(:,:,:,bin));
-        curr_mf = a.MF;
-        % Generate a sparse matrix either way
-        if iscell(curr_mf)
-            curr_mf = curr_mf{bin};
-        else
-            curr_mf = resampleMatrix(zeros(a.siz),curr_mf(:,:,:,:,bin));
-        end
+        curr_mf = a.interpolation_matrices{bin};
 
         if ndims(b) == 5
             b_aux = b(:,:,:,:,bin);
@@ -74,13 +68,7 @@ else % E operation
     b(isnan(b)) = 0;
 
     for bin = 1:nbins
-        curr_mf = a.MF;
-        % Generate a sparse matrix either way
-        if iscell(curr_mf)
-            curr_mf = curr_mf{bin};
-        else
-            curr_mf = resampleMatrix(zeros(a.siz),curr_mf(:,:,:,:,bin));
-        end
+        curr_mf = a.interpolation_matrices{bin};
 
 	    warp_b = complex(matrix_interpolation(real(b),curr_mf),matrix_interpolation(imag(b),curr_mf));
 

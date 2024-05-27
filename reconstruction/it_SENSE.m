@@ -13,6 +13,5 @@ function image = it_SENSE(k_space, sampling_mask, csm)
     
     result = Cart_itSENSE(k_space, operator, n_iter, verbose);
     image = flip(flip(flip(result, 1), 2), 3);
-
 end
 

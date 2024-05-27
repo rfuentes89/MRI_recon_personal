@@ -1,4 +1,8 @@
 function images = reconstruction_admm(data, csm, params_CG, params_PROST)
+    assert(isfield(data, "k_spaces_corrected"), "ADMM requires k_spaces_corrected");
+    assert(isfield(data, "binned_sampling_masks"), "ADMM requires binned_sampling_masks");
+    assert(isfield(data, "interpolation_matrix"), "ADMM requires interpolation_matrix");
+
     if ~exist('params_PROST', 'var')
         params_PROST.sig         =  0.055;
         params_PROST.patch_sz    =  5;
@@ -19,7 +23,7 @@ function images = reconstruction_admm(data, csm, params_CG, params_PROST)
         params_CG.CG_lambda     = 0.01;
     end
 
-    [n_echoes, n_sets, n_repetitions] = size(data.k_spaces);
+    [n_echoes, n_sets, n_repetitions] = size(data.k_spaces_corrected);
     params_CG.E_CSbins = cell(size(data.sampling_masks));
 
     for repetition = 1:n_repetitions

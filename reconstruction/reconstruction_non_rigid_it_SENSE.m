@@ -1,4 +1,7 @@
 function  images = reconstruction_non_rigid_it_SENSE(data, csm)
+    assert(isfield(data, "k_spaces_corrected"), "NR recon requires k_spaces_corrected");
+    assert(isfield(data, "binned_sampling_masks"), "NR recon requires binned_sampling_masks");
+    assert(isfield(data, "interpolation_matrix"), "NR recon requires interpolation_matrix");
 
     images = cell(size(data.k_spaces_corrected));
 
