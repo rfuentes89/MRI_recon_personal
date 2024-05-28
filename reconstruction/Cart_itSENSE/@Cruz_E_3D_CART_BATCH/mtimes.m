@@ -14,6 +14,7 @@ if a.adjoint % EH operation
         res_coils = zeros(a.siz(1),a.siz(2),a.siz(3),size(a.coils, 4)); % init
         Bin_At = double(At(:,:,:,bin));
         curr_mf = a.interpolation_matrices{bin};
+        curr_mf_t = curr_mf';
 
         if ndims(b) == 5
             b_aux = b(:,:,:,:,bin);
@@ -26,19 +27,19 @@ if a.adjoint % EH operation
             b_sample = b_aux(:,:,:,coil).*Bin_At;
 
             % FFT
-            b_sample = 1/sqrt(size(b_sample,1))*fftshift( ifft(ifftshift(b_sample ,1),[],1), 1);
-            b_sample = 1/sqrt(size(b_sample,2))*fftshift( ifft(ifftshift(b_sample ,2),[],2), 2);
-            b_sample = 1/sqrt(size(b_sample,3))*fftshift( ifft(ifftshift(b_sample ,3),[],3), 3);
+            b_sample = sqrt(size(b_sample,1))*fftshift( ifft(ifftshift(b_sample ,1),[],1), 1);
+            b_sample = sqrt(size(b_sample,2))*fftshift( ifft(ifftshift(b_sample ,2),[],2), 2);
+            b_sample = sqrt(size(b_sample,3))*fftshift( ifft(ifftshift(b_sample ,3),[],3), 3);
+
             % Coil weights
             res_coils(:,:,:,coil) = b_sample.*conj(coils(:,:,:,coil));
-	     %res_coils(:,:,:,coil) = complex(matrix_interpolation(real(res_coils(:,:,:,coil)),curr_mf'),matrix_interpolation(imag(res_coils(:,:,:,coil)),curr_mf'));
         end
 
         res_bin = sum(res_coils,4);
-        res_bin = complex(matrix_interpolation(real(res_bin),curr_mf'),matrix_interpolation(imag(res_bin),curr_mf'));
+        res_bin = complex(matrix_interpolation(real(res_bin),curr_mf_t),matrix_interpolation(imag(res_bin),curr_mf_t));
 
         % normalisation of motion fields
-        motion_norm = matrix_interpolation(ones(size(res_bin)),curr_mf);
+        motion_norm = matrix_interpolation(ones(size(res_bin)),curr_mf_t);
         res_bin = res_bin./motion_norm;
         res_bin(isnan(res_bin)) = 0; res_bin(isinf(res_bin)) = 0;
 

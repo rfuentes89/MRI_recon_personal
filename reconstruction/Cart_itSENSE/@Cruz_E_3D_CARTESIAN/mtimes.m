@@ -1,7 +1,5 @@
 function [res] = mtimes(a,b)
 
-% a = encoding operator, 
-
 if a.adjoint % EH operation
 % b = full_k_data : (Ny,Nx,Nz,Nc) -> (Ny,Nx,Nz) when applying EH
 
@@ -14,26 +12,26 @@ if a.adjoint % EH operation
         b_sample = b(:,:,:,coil).*At;
 
         % 3D FFT
-        b_sample = 1/sqrt(size(b_sample,1)).* fftshift( ifft(ifftshift(b_sample ,1),[],1), 1);
-        b_sample = 1/sqrt(size(b_sample,2)).* fftshift( ifft(ifftshift(b_sample ,2),[],2), 2);
-        b_sample = 1/sqrt(size(b_sample,3)).* fftshift( ifft(ifftshift(b_sample ,3),[],3), 3);
-            
+        b_sample = sqrt(size(b_sample,1)).* fftshift( ifft(ifftshift(b_sample ,1),[],1), 1);
+        b_sample = sqrt(size(b_sample,2)).* fftshift( ifft(ifftshift(b_sample ,2),[],2), 2);
+        b_sample = sqrt(size(b_sample,3)).* fftshift( ifft(ifftshift(b_sample ,3),[],3), 3);
+
         % Coil weights
         res_coils(:,:,:,coil) = b_sample.*conj(coils(:,:,:,coil)); 
     end
 
     res = sum(res_coils,4);
     res(isnan(res)) = 0;
-    
+
 else % E operation
 % b = full_image_data : (Ny,Nx,Nz) -> (Ny,Nx,Nz,Nc) when applying E
-    
+
     res = zeros(a.Ksiz(1),a.Ksiz(2),a.Ksiz(3),size(a.coils, 4));
     At = a.At;
     coils = a.coils;
-    
+
     b(isnan(b)) = 0;
-    
+
     for coil = 1:size(a.coils, 4) % number of coils
         % Coil weights
         b_sample = b.*coils(:,:,:,coil);
