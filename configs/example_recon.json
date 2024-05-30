@@ -82,6 +82,19 @@
         "soft_fn": "bin_range_scaled", // choose exponential decay function, one of bins_avg, bin_range, bin_range_scaled
         "soft_decay": 1, // exponential decay for the soft binning
         "intrabin_TL_corr": true, // whether or not to apply intrabin translational correction
+        "bin_denoise": false, // whether or not to apply HD PROST denoising to bin images
+        "bin_prost_params": {
+            // Same parameters as prost_params below
+            "sig": 0.055,
+            "patch_sz": 5,
+            "max_patch": 20,
+            "win": 20,
+            "offset": 4,
+            "debug": 0,
+            "recon_mode": 6,
+            "sharpness": 0,
+            "type": 0,
+        },
         "orcca_params": { // only used if bin_recon_type == orcca
             // if weight_scale > 0, other weights are scaled with the data,
             // i.e. weight_X = weight_X * weight_scale * max(data)
