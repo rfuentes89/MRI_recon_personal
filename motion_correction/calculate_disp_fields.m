@@ -17,16 +17,26 @@ function data = calculate_disp_fields(data, df_contrast, ref_bin)
         is_chosen_contrast = @(echo, set, rep) true;
     end
 
-    % Calculate displacement fields
+    % Calculate displacement fields (and interpolation matrices)
     data.displacement_fields = cell(n_echoes, n_sets, n_repetitions);
+    data.interpolation_matrix = cell(n_echoes, n_sets, n_repetitions);
     for repetition = 1:n_repetitions
         for set = 1:n_sets
             for echo = 1:n_echoes
-                if is_chosen_contrast(echo, set, repetition)
-                    data.displacement_fields{echo,set,repetition} = register_bins( ...
-                        data.bin_images{echo,set,repetition}, ...
-                        ref_bin);
+                if ~is_chosen_contrast(echo, set, repetition), continue; end
+
+                % Calculate displacement fields
+                dfs = register_bins(data.bin_images{echo,set,repetition}, ref_bin);
+                dfs = post_process_dfs(dfs);
+                data.displacement_fields{echo,set,repetition} = dfs;
+
+                % Pre-compute interpolation matrices
+                img_size = zeros(size(dfs,1), size(dfs,2), size(dfs,3));
+                matrices = cell(1,n_bins);
+                for i_bin = 1:n_bins
+                    matrices{i_bin} = resampleMatrix(img_size, dfs(:,:,:,:,i_bin));
                 end
+                data.interpolation_matrix{echo,set,repetition} = matrices;
             end
         end
     end
@@ -40,26 +50,31 @@ function data = calculate_disp_fields(data, df_contrast, ref_bin)
                         df_contrast.echo,...
                         df_contrast.set,...
                         df_contrast.repetition};
+
+                    data.interpolation_matrix{echo,set,repetition} = data.interpolation_matrix{...
+                        df_contrast.echo,...
+                        df_contrast.set,...
+                        df_contrast.repetition};
                 end
             end
         end
     end
+end
 
-    % Pre-calculate interpolation matrices
-    df = data.displacement_fields{1};
-    img_size = zeros(size(df,1), size(df,2), size(df,3));
+function dfs = post_process_dfs(dfs)
+% POST_PROCESS_DFS Apply several post-processing to raw DFs
+    % DFs need to be flipped for recon to work. Details:
+    % - kspace from scanner comes flipped, i.e. in the "wrong-orientation"
+    % - bin images are reconstructed from the wrong-orientation kspace
+    %   and then flipped to be in the correct-orientation
+    %   (see it_SENSE() and orcca() functions)
+    % - thus, DFs are calculated in the correct-orientation
+    % - then in the NR recon, DFs need to be in the wrong-orientation
+    %   to be multiplied with the original wrong-oriented kspace
+    % TODO(pdpino): fix this? idea: flipping once at the beginning?
+    dfs = flip(flip(flip(dfs, 1), 2), 3);
 
-    data.interpolation_matrix = cell(size(data.sampling_masks));
-    for repetition = 1:n_repetitions
-        for set = 1:n_sets
-            for echo = 1:n_echoes
-                matrices = cell(1,n_bins);
-                for i_bin = 1:n_bins
-                    matrices{i_bin} = resampleMatrix( ...
-                        img_size, data.displacement_fields{echo,set,repetition}(:,:,:,:,i_bin));
-                end
-                data.interpolation_matrix{echo,set,repetition} = matrices;
-            end
-        end
-    end
+
+    % Operation needed for interp-matrices to work
+    dfs = Add_mesh_to_DF(dfs);
 end

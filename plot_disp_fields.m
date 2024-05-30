@@ -7,10 +7,10 @@ addpath(genpath("./"))
 % Params: choose recon
 CONFIG.acq_folder = fullfile(getenv("WORKSPACE"), "acquisitions/2024-01-01_JR_BOOST");
 CONFIG.run_name = "2024-05-22_itsense_n-intraTL_decayINF_DFbefore-flip";
-CONFIG.run_folder = fullfile(CONFIG.acq_folder, "recons", CONFIG.run_name);
 contrast_name = "HB1";
 
 %% Load bin images
+CONFIG.run_folder = fullfile(CONFIG.acq_folder, "recons", CONFIG.run_name);
 prefix = fullfile(CONFIG.run_folder, "dcm", contrast_name + "-bin");
 fpaths = dir([convertStringsToChars(prefix), '*', '.dcm']);
 
@@ -26,79 +26,37 @@ fprintf("Loaded %d bin images\n", numel(bin_images));
 
 %% Calculate DFs
 % Params
-ref_bin = 4;
-target_bin = 1;
+ref_bin = 1;
 
 % Call Nifty
-reference_image = bin_images{ref_bin};
-target_image = bin_images{target_bin};
-[reg_image, out_df] = nifty_reg( ...
-            rescale(abs(reference_image),0,1), ...
-            rescale(abs(target_image),0,1), ...
-            ' --nmi -be 0.0005 -sx 14', ...
-            fullfile(getenv("WORKSPACE"), ".nifty-tmp"));
+dfs = register_bins(bin_images, ref_bin);
+% size: n_x, n_y, n_z, 3, n_bins
 
-out_df = squeeze(out_df);
-
-% Post-process (see register_bins.m)
-flipped_df = flip(flip(flip(out_df, 1), 2), 3);
-out_df_withmesh = Add_mesh_to_DF(out_df);
-
-fprintf("Finished nifty_reg()\n");
-
-%% Plot images and DF
-% Params
-i_slice = 40;
-downsample_factor = 0.3;
-
-% Subplot grid
-n_rows = 2;
-n_cols = 3;
-
-subplot(n_rows, n_cols, 1)
-plot_image(reference_image(:,:,i_slice));
-title(sprintf("Reference image (bin %d)", ref_bin));
-
-subplot(n_rows, n_cols, 2)
-plot_image(target_image(:,:,i_slice));
-title(sprintf("Target image (bin %d)", target_bin));
-
-subplot(n_rows, n_cols, 3)
-plot_image(reg_image(:,:,i_slice));
-title("Registered image")
-
-subplot(n_rows, n_cols, 4)
-plot_disp_field_2d(out_df, i_slice, downsample_factor);
-title("original DF");
-
-subplot(n_rows, n_cols, 5)
-plot_disp_field_2d(flipped_df, i_slice, downsample_factor);
-title("DF flipped");
-
-subplot(n_rows, n_cols, 6)
-plot_disp_field_2d(out_df_withmesh, i_slice, downsample_factor);
-title("DF after add_mesh_to_DF", 'Interpreter', 'none');
+fprintf("Finished register_bins()\n");
 
 %% Plot image with DF on top
 % Params
+target_bin = 4;
 i_slice = 40;
 downsample_factor = 0.1;
+
+bin_df = dfs(:,:,:,:,target_bin);
 
 % Subplot grid
 n_rows = 1;
 n_cols = 2;
 
 subplot(n_rows, n_cols, 1);
-plot_image(reference_image(:,:,i_slice));
+plot_image(bin_images{ref_bin}(:,:,i_slice));
 hold on;
-plot_disp_field_2d(out_df, i_slice, downsample_factor);
+plot_disp_field_2d(bin_df, i_slice, downsample_factor);
 title(sprintf("Reference image (bin %d) with DF", ref_bin))
 hold off;
 
 subplot(n_rows, n_cols, 2);
-plot_image(target_image(:,:,i_slice));
+plot_image(bin_images{target_bin}(:,:,i_slice));
 hold on;
-plot_disp_field_2d(out_df * -1, i_slice, downsample_factor);
+plot_disp_field_2d(bin_df * -1, i_slice, downsample_factor);
 title(sprintf("Target image (bin %d) with DF * -1", target_bin))
 
 %% Util functions
