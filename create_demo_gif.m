@@ -41,19 +41,7 @@ end
 dcm_fpaths = get_filepaths(base_recons_folder, CONFIG.recon_name, CONFIG.contrast_name);
 
 % Build output folder
-folder_name = extractBefore(CONFIG.mode, 4); % i.e. "gif" or "png"
-output_name = extractAfter(CONFIG.mode, 4);
-if strlength(CONFIG.name_suffix) > 0
-    output_name = output_name + "_" + string(CONFIG.name_suffix);
-end
-folder_output = fullfile( ...
-    CONFIG.acq_folder, ...
-    "recons", ...
-    CONFIG.recon_name(end), ... % always save in the last recon
-    folder_name, ...
-    output_name);
-
-if ~exist(folder_output, "dir"), mkdir(folder_output); end
+folder_output = build_output_folder(CONFIG);
 
 %% Use arrays in window and level
 n_targets = length(dcm_fpaths);
@@ -152,6 +140,34 @@ save_config(folder_output, CONFIG, CONFIG.verbose);
 disp(string(n_slices) + " " + extension + "s saved in " + string(folder_output));
 
 %% Utils
+function folder_output = build_output_folder(config)
+    folder_name = extractBefore(config.mode, 4); % i.e. "gif" or "png"
+    switch folder_name
+        case "gif"
+            axis = config.gif_params.axis;
+        case "png"
+            axis = config.png_params.axis;
+    end
+
+    output_name = sprintf("%s_%s_%s", ...
+        extractAfter(config.mode, 4), ...
+        config.contrast_name, ...
+        axis);
+
+    if strlength(config.name_suffix) > 0
+        output_name = output_name + "_" + string(config.name_suffix);
+    end
+
+    folder_output = fullfile( ...
+        config.acq_folder, ...
+        "recons", ...
+        config.recon_name(end), ... % save in the last recon if >1
+        folder_name, ...
+        output_name);
+
+    if ~exist(folder_output, "dir"), mkdir(folder_output); end
+end
+
 function targets = get_bin_dcm_filepaths(base_recons_folder, recon_name, contrast_name)
 %get_bin_dcm_filepaths Get bin images filepaths for a given recon
 
