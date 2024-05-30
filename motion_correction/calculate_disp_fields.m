@@ -27,7 +27,9 @@ function data = calculate_disp_fields(data, df_contrast, ref_bin)
 
                 % Calculate displacement fields
                 dfs = register_bins(data.bin_images{echo,set,repetition}, ref_bin);
-                dfs = post_process_dfs(dfs);
+                dfs = post_process_dfs( ...
+                    dfs, ...
+                    size(data.k_spaces_corrected{echo, set, repetition}, 1:3));
                 data.displacement_fields{echo,set,repetition} = dfs;
 
                 % Pre-compute interpolation matrices
@@ -61,7 +63,7 @@ function data = calculate_disp_fields(data, df_contrast, ref_bin)
     end
 end
 
-function dfs = post_process_dfs(dfs)
+function dfs = post_process_dfs(dfs, original_size)
 % POST_PROCESS_DFS Apply several post-processing to raw DFs
     % DFs need to be flipped for recon to work. Details:
     % - kspace from scanner comes flipped, i.e. in the "wrong-orientation"
@@ -73,6 +75,28 @@ function dfs = post_process_dfs(dfs)
     %   to be multiplied with the original wrong-oriented kspace
     % TODO(pdpino): fix this? idea: flipping once at the beginning?
     dfs = flip(flip(flip(dfs, 1), 2), 3);
+
+
+    % Interpolate to correct resolution.
+    % bin_images can optionally be reduced in dimension (see
+    % motion_correct_non_rigid() function). Here DFs need to be resized to
+    % the original resolution.
+    df_size = size(dfs, 1:3);
+    if any(original_size ~= df_size)
+        % AFAIK imresize3() cannot be called with extra dimensions,
+        % so we need to loop over extra dimensions
+        n_dims = 3;
+        n_bins = size(dfs, 5);
+        resized_df = zeros([original_size, n_dims, n_bins]);
+        for i_dim = 1:n_dims
+            pixel_factor = original_size(i_dim) / df_size(i_dim);
+            for i_bin = 1:n_bins
+                scaled_df = dfs(:,:,:,i_dim,i_bin) * pixel_factor;
+                resized_df(:,:,:,i_dim,i_bin) = imresize3(scaled_df, original_size);
+            end
+        end
+        dfs = resized_df;
+    end
 
 
     % Operation needed for interp-matrices to work
