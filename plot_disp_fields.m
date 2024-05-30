@@ -76,7 +76,7 @@ function plot_disp_field_2d(df, i_slice, downsample_factor)
     [mesh_x, mesh_y] = meshgrid( ...
         linspace(1, n_y, n_y_ds), ...
         linspace(1, n_x, n_x_ds));
-    quiver(mesh_x, mesh_y, df_u, df_v);
+    quiver(mesh_x, mesh_y, df_u, df_v, 'linewidth', 2, 'Color', 'red');
     xlim([1 n_y]);
     ylim([1 n_x]);
     title(sprintf("Disp field slice=%d, ds=%.1f", i_slice, downsample_factor));
