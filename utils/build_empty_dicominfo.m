@@ -1,8 +1,7 @@
-function info = build_empty_dicominfo(image)
+function info = build_empty_dicominfo()
 %BUILD_EMPTY_DICOMINFO Creates a dummy dicominfo
 %
 %   - Uses a random number as SeriesNumber
-%   - If provided, fills image info as well (height, width, max-pixel-value)
 
     %if(exist('volscale','var')==0), volscale=[1 1 1]; end
 
@@ -20,6 +19,7 @@ function info = build_empty_dicominfo(image)
     info.Manufacturer='Matlab Convert';
 
     info.SOPClassUID='1.2.840.10008.5.1.4.1.1.4'; %MRI UID
+    warning('off', 'images:dicomwrite:inconsistentIODAndCreateModeOptions');
 
     %Geometry
     info.PatientPosition='HFS';
@@ -29,10 +29,5 @@ function info = build_empty_dicominfo(image)
     %info.SliceThickness=volscale(3);
     %info.SpacingBetweenSlices=volscale(3);
     info.LargestImagePixelValue = 2^16 - 1;
-
-    if nargin >= 1
-        info.Width = size(image,1);
-        info.Height = size(image,2);
-    end
 end
 

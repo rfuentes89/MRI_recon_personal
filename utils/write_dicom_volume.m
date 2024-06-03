@@ -7,6 +7,8 @@ function write_dicom_volume(image, filename, info, options)
     if ~isfield(options, 'min_perc'), options.min_perc = 10; end
     if ~isfield(options, 'max_perc'), options.max_perc = 100; end
 
+    info = clean_dicom_info(image, info);
+
     % Compute min and max percentiles
     if isfield(info, 'LargestImagePixelValue')
         max_value = info.LargestImagePixelValue;
@@ -47,6 +49,27 @@ function write_dicom_volume(image, filename, info, options)
             % Matrix index is out of range for deletion.
             % Error in dicom_generate_uid>guid_to_uid (line 125)
             % guid(13) = '';
+        end
+    end
+end
+
+function info = clean_dicom_info(image, info)
+% CLEAN_DICOM_INFO Removes unnecessary fields from dicominfo
+    [image_height, image_width, image_depth] = size(image, 1:3);
+
+    info_width = get_field(info, 'Width');
+    info_height = get_field(info, 'Height');
+    info_depth = get_field(info, 'NumberOfFrames');
+
+    if info_width ~= image_width || info_height ~= image_height || info_depth ~= image_depth
+        % These fields contain info per frame
+        % If the generated image has a different size, these fields might
+        % produce an error
+        if isfield(info, 'PerFrameFunctionalGroupsSequence')
+            info = rmfield(info, 'PerFrameFunctionalGroupsSequence');
+        end
+        if isfield(info, 'SharedFunctionalGroupsSequence')
+            info = rmfield(info, 'SharedFunctionalGroupsSequence');
         end
     end
 end

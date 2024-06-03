@@ -239,7 +239,7 @@ function save_dicom(config, image, input_info_name, contrast_name)
     if isfile(info_fpath)
         info_base = dicominfo(info_fpath);
     else
-        info_base = build_empty_dicominfo(image);
+        info_base = build_empty_dicominfo();
     end
 
     % Replace SeriesDescription
