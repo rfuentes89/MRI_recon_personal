@@ -126,19 +126,7 @@ end
 
 %% STEP 5.2: Reduce data for debugging
 if isfield(CONFIG, "debug_ksize") && CONFIG.debug_ksize > 0
-    warning("Reducing data for debugging: " + string(CONFIG.debug_ksize));
-    new_size = CONFIG.debug_ksize;
-    data.padded_dimensions = [new_size, new_size, new_size];
-    data.specified_image_dimensions = [new_size, new_size, new_size];
-    n_contrasts = numel(data.k_spaces);
-    for i_contrast = 1:n_contrasts
-        data.k_spaces{i_contrast} = data.k_spaces{i_contrast}(1:new_size, 1:new_size, 1:new_size, :);
-        data.sampling_masks{i_contrast} = data.sampling_masks{i_contrast}(1:new_size, 1:new_size, 1:new_size);
-        data.segment_masks{i_contrast} = data.segment_masks{i_contrast}(1:new_size, 1:new_size, 1:new_size, :);
-    end
-
-    csm.coil_sensitivity_maps = csm.coil_sensitivity_maps(1:new_size, 1:new_size, 1:new_size, :);
-    csm.coil_sensitivity_maps_raw = csm.coil_sensitivity_maps_raw(1:new_size, 1:new_size, 1:new_size);
+    [data, csm] = reduce_data_debug(data, csm, CONFIG.debug_ksize);
 end
 
 
