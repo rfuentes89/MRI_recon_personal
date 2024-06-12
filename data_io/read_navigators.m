@@ -35,13 +35,14 @@ set_at_readout = double(twix.RTfeedback.Set);
 echo_at_readout = double(twix.RTfeedback.Eco);
 repetition_at_readout = double(twix.RTfeedback.Rep);
 
-if isempty(selected.sets)
+if nargin < 2, selected = struct(); end
+if ~isfield(selected, 'sets') || isempty(selected.sets)
     selected.sets = 1:n_sets;
 end
-if isempty(selected.echoes)
+if ~isfield(selected, 'echoes') || isempty(selected.echoes)
     selected.echoes = 1:n_echoes;
 end
-if isempty(selected.repetitions)
+if ~isfield(selected, 'repetitions') ||isempty(selected.repetitions)
     selected.repetitions = 1:n_repetitions;
 end
 
