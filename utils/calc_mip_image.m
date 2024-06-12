@@ -20,7 +20,7 @@ function mip_image = calc_mip_image(image, params)
             mip_dim = 3;
             get_slab = @(min_idx, max_idx) image(:,:,min_idx:max_idx);
         otherwise
-            error("MIP axis not recognized: "+ string(params.axis));
+            error("MIP axis not recognized: %s", params.axis);
     end
 
     % Initialize empty image
@@ -42,7 +42,7 @@ function mip_image = calc_mip_image(image, params)
             case "z"
                 mip_image(:,:,i_slice) = miped_slice;
             otherwise
-                error("MIP axis not recognized: "+ string(params.axis));
+                error("MIP axis not recognized: %s", params.axis);
         end
     end
 end

@@ -112,7 +112,7 @@ elseif startsWith(CONFIG.mode, "gif")
 
     write_output = @(volume, fname) save_gif(volume, fname, params);
 else
-    error("Mode not png or gif: " + string(CONFIG.mode))
+    error("Mode not png or gif: %s", CONFIG.mode);
 end
 
 switch axis
@@ -126,7 +126,7 @@ switch axis
         n_slices = size(images, 3);
         get_slice = @(idx) squeeze(images(:,:,idx,:));
     otherwise
-        error("Axis not recognized: "+ string(axis));
+        error("Axis not recognized: %s", axis);
 end
 
 for i_slice = 1:n_slices
@@ -205,7 +205,7 @@ function targets = get_final_dcm_filepaths(base_recons_folder, recon_names, cont
             targets{i_target} = dcm_fpath;
             i_target = i_target + 1;
         else
-            warning("Contrast not found for recon " + string(dcm_fpath));
+            warning("Contrast not found for recon %s", dcm_fpath);
         end
     end
 

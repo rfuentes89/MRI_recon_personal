@@ -18,7 +18,7 @@ function bin_images = reconstruct_bin_images( ...
                 motion_curve, ...
                 params_moco);
         otherwise
-            error("unknown bin reconstruction method: " + string(params_moco.bin_recon_type))
+            error("unknown bin reconstruction method: %s", params_moco.bin_recon_type);
     end
 end
 

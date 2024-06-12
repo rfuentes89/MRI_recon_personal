@@ -43,7 +43,7 @@ function save_gif(images, filename, options)
           n_slices = nz;
           get_slice = @(volume, idx) squeeze(volume(:,:,idx));
        otherwise
-          error("axis not recognized: " + string(options.axis))
+          error("axis not recognized: %s", options.axis);
     end
 
     % Write GIF

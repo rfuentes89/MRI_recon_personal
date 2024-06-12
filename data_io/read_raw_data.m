@@ -104,7 +104,7 @@ function data = read_raw_data(twix, selected_contrasts, selected_coils)
                     case "syngo MR XA50" % Free.Max
                         used_offsets = base_offset;
                     otherwise
-                        warning("unrecognised scanner software version, defaulting to XA50 behaviour")
+                        warning("unrecognised scanner: %s, defaulting to XA50 behaviour", scanner_software_version);
                         used_offsets = base_offset;
                 end
 

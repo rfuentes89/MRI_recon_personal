@@ -20,7 +20,7 @@ function [weighted_k_spaces, weighted_sampling_masks, bin_weights] = soft_binnin
         case "bin_range_scaled"
             calculate_weights_fn = @(dev, bin_range) exp(-params.soft_decay * (dev / bin_range - 1));
         otherwise
-            error("Soft gating function not recognized: " + string(params.soft_fn));
+            error("Soft gating function not recognized: %s", params.soft_fn);
     end
 
     weighted_k_spaces = cell(size(bin_limits));

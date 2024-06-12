@@ -25,9 +25,9 @@ CONFIG = clean_config_recon(CONFIG);
 %% Step 0.1: Check if run exists
 if exist(CONFIG.run_folder, "dir")
     if CONFIG.override_if_exists
-        warning("Will override run " + CONFIG.run_name);
+        warning("Will override run %s", CONFIG.run_name);
     else
-        error("Won't override run " + CONFIG.run_name);
+        error("Won't override run %s", CONFIG.run_name);
     end
 else
     mkdir(CONFIG.run_folder);

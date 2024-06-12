@@ -13,6 +13,6 @@ function images = reconstruct_images( ...
                 "ADMM only supported for non-rigid motion correction");
             images = reconstruction_admm(data, coil_sensitivity_maps, params_CG, params_PROST);
         otherwise
-            error("unknown reconstruction method: " + string(reconstruction_type))
+            error("unknown reconstruction method: %s", reconstruction_type);
     end
 end

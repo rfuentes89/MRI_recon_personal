@@ -6,7 +6,7 @@ function data = correct_motion(data, motion_curves, csm, params)
         case "non_rigid"
             data = motion_correction_non_rigid(data, motion_curves, csm, params);
         otherwise
-            error("unknown reconstruction type: " + string(params.type))
+            error("unknown reconstruction type: %s", params.type);
     end
 end
 
