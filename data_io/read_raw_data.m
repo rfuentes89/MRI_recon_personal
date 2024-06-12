@@ -83,7 +83,7 @@ function data = read_raw_data(twix, selected_contrasts, selected_coils)
     % need to pad the kSpace & At matrices, so that centre of k-space is 
     % located in (Nx / 2 + 1, Ny / 2 + 1, Nz / 2 + 1)
     padded_k_space_dimensions = 2 * max(k_space_dimensions - k_space_centre + 1, k_space_centre - 1); % Size of the padded k-space
-    offset = padded_k_space_dimensions / 2 - k_space_centre + 1;
+    base_offset = padded_k_space_dimensions / 2 - k_space_centre + 1;
 
     k_spaces = cell(n_selected_echoes, n_selected_sets, n_selected_repetitions);
     segment_masks = cell(n_selected_echoes, n_selected_sets, n_selected_repetitions);
@@ -98,33 +98,28 @@ function data = read_raw_data(twix, selected_contrasts, selected_coils)
                 % On Free.Max (ver. XA50), all echoes acquire the same side of k space (makes sense right) so padding is consistent
                 % On Aera/XMR (ver. E11C), odd and even echoes acquire different parts of k space (idk why), so padding is needed in different places
                 % Behaviour of other versions is currently unverified
-                % TODO: this switch should 100% occur outside of the loops
                 switch scanner_software_version
                     case "syngo MR E11" % Aera
-                        if mod(echo, 2) % is odd
-                            k_spaces{echo,set,repetition}(offset(1) + (1:n_k_x),offset(2) + (1:n_k_y),offset(3) + (1:n_k_z),:) ...
-                                = raw_k_space(:,:,:,:,selected_contrasts.echoes(echo),selected_contrasts.sets(set),selected_contrasts.repetitions(repetition));
-                            segment_masks{echo,set,repetition}(offset(1) + (1:n_k_x),offset(2) + (1:n_k_y),offset(3) + (1:n_k_z),:) ...
-                                = repmat(raw_segment_masks(1,:,:,:,selected_contrasts.echoes(echo),selected_contrasts.sets(set),selected_contrasts.repetitions(repetition)), n_k_x, 1);
-                        else           
-                            k_spaces{echo,set,repetition}(1:n_k_x,1:n_k_y,1:n_k_z,:) ...
-                                = raw_k_space(:,:,:,:,selected_contrasts.echoes(echo),selected_contrasts.sets(set),selected_contrasts.repetitions(repetition));
-                            segment_masks{echo,set,repetition}(1:n_k_x,1:n_k_y,1:n_k_z,:) ...
-                                = repmat(raw_segment_masks(1,:,:,:,selected_contrasts.echoes(echo),selected_contrasts.sets(set),selected_contrasts.repetitions(repetition)), n_k_x, 1);
-                        end
+                        used_offsets = ternary(mod(echo, 2), base_offset, [0, 0, 0]);
                     case "syngo MR XA50" % Free.Max
-                        k_spaces{echo,set,repetition}(offset(1) + (1:n_k_x),offset(2) + (1:n_k_y),offset(3) + (1:n_k_z),:) ...
-                            = raw_k_space(:,:,:,:,selected_contrasts.echoes(echo),selected_contrasts.sets(set),selected_contrasts.repetitions(repetition));
-                        segment_masks{echo,set,repetition}(offset(1) + (1:n_k_x),offset(2) + (1:n_k_y),offset(3) + (1:n_k_z),:) ...
-                            = repmat(raw_segment_masks(1,:,:,:,selected_contrasts.echoes(echo),selected_contrasts.sets(set),selected_contrasts.repetitions(repetition)), n_k_x, 1);
+                        used_offsets = base_offset;
                     otherwise
                         warning("unrecognised scanner software version, defaulting to XA50 behaviour")
-                        k_spaces{echo,set,repetition}(offset(1) + (1:n_k_x),offset(2) + (1:n_k_y),offset(3) + (1:n_k_z),:) ...
-                            = raw_k_space(:,:,:,:,selected_contrasts.echoes(echo),selected_contrasts.sets(set),selected_contrasts.repetitions(repetition));
-                        segment_masks{echo,set,repetition}(offset(1) + (1:n_k_x),offset(2) + (1:n_k_y),offset(3) + (1:n_k_z),:) ...
-                            = repmat(raw_segment_masks(1,:,:,:,selected_contrasts.echoes(echo),selected_contrasts.sets(set),selected_contrasts.repetitions(repetition)), n_k_x, 1);                            
+                        used_offsets = base_offset;
                 end
 
+                % Prepare aux variables
+                [x_offset, y_offset, z_offset] = used_offsets(:);
+                x_range = x_offset + (1:n_k_x);
+                y_range = y_offset + (1:n_k_y);
+                z_range = z_offset + (1:n_k_z);
+                sel_echo = selected_contrasts.echoes(echo);
+                sel_set = selected_contrasts.sets(set);
+                sel_rep = selected_contrasts.repetitions(repetition);
+
+                % Actually copy data
+                k_spaces{echo,set,repetition}(x_range,y_range,z_range,:) = raw_k_space(:,:,:,:,sel_echo,sel_set,sel_rep);
+                segment_masks{echo,set,repetition}(x_range,y_range,z_range,:) = repmat(raw_segment_masks(1,:,:,:,sel_echo,sel_set,sel_rep), n_k_x, 1);
                 sampling_masks{echo,set,repetition} = sum(segment_masks{echo,set,repetition}, 4);
             end
         end
