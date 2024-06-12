@@ -109,10 +109,9 @@ function data = read_raw_data(twix, selected_contrasts, selected_coils)
                 end
 
                 % Prepare aux variables
-                [x_offset, y_offset, z_offset] = used_offsets(:);
-                x_range = x_offset + (1:n_k_x);
-                y_range = y_offset + (1:n_k_y);
-                z_range = z_offset + (1:n_k_z);
+                x_range = used_offsets(1) + (1:n_k_x);
+                y_range = used_offsets(2) + (1:n_k_y);
+                z_range = used_offsets(3) + (1:n_k_z);
                 sel_echo = selected_contrasts.echoes(echo);
                 sel_set = selected_contrasts.sets(set);
                 sel_rep = selected_contrasts.repetitions(repetition);
