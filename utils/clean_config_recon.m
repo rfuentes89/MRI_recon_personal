@@ -2,6 +2,8 @@ function config = clean_config_recon(config)
 %CLEAN_RECON_PARAMS Pre-process recon config
     % Backward compatibility
     if ~isfield(config, 'save_images'), config.save_images = false; end
+    if ~isfield(config, 'save_stdout'), config.save_stdout = false; end
+    if ~isfield(config, 'debug_ksize'), config.debug_ksize = 0; end
 
     % Add _DEBUG for runs with debug_ksize set
     if config.debug_ksize > 0

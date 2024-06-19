@@ -34,7 +34,7 @@ else
 end
 
 %% Step 0.2: Setup diary
-if isfield(CONFIG, 'save_stdout') && CONFIG.save_stdout
+if CONFIG.save_stdout
     diary_fname = fullfile(CONFIG.run_folder, "stdout.txt");
     diary(diary_fname);
 end
@@ -125,7 +125,7 @@ if CONFIG.motion_correction_params.type ~= "none" && CONFIG.zero_rl_motion
 end
 
 %% STEP 5.2: Reduce data for debugging
-if isfield(CONFIG, "debug_ksize") && CONFIG.debug_ksize > 0
+if CONFIG.debug_ksize > 0
     [data, csm] = reduce_data_debug(data, csm, CONFIG.debug_ksize);
 end
 
