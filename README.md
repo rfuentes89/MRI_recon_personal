@@ -3,7 +3,7 @@
 
 ## Requirements
 
-1. Install MATLAB and include the following toolboxes:
+1. Install MATLAB (at least version R2023b) and include the following toolboxes:
     * _"Image Processing Toolbox"_ (required)
     * _"Parallel Processing Toolbox"_ (optional)
     * _"Optimization Toolbox"_ (optional)
