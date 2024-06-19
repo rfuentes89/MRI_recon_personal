@@ -14,6 +14,19 @@ function config = clean_config_recon(config)
     % Set run_folder to use later
     config.run_folder = fullfile(config.acq_folder, "recons", config.run_name);
 
+    % Handle null scanner_dcms
+    if anymissing(config.seq_params.scanner_dcms) || (numel(config.seq_params.scanner_dcms) ~= numel(config.seq_params.contrast_names))
+        config.seq_params.scanner_dcms = strings(numel(config.seq_params.contrast_names), 1);
+    end
+
+    % Null black-blood if any child is null
+    bb = config.seq_params.bb;
+    if isstruct(bb)
+        if ismissing(bb.scanner_dcm) || ismissing(bb.contrast_name)
+            config.seq_params.bb = false;
+        end
+    end
+
     % Set contrast to -1 if any of the number is -1
     df_contrast = config.motion_correction_params.selected_contrast_for_disp_fields;
     if df_contrast.echo < 1 || df_contrast.set < 1 || df_contrast.repetition < 1

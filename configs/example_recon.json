@@ -32,8 +32,13 @@
 
     // Options for the sequence
     "seq_params": {
-        "scanner_dcms": ["HB1", "HB2"], // Names of the input DCM files for each contrast
+        "scanner_dcms": ["HB1", "HB2"], // Names of the input DCM files for each contrast, set to null if not used
         "contrast_names": ["HB1", "HB2"], // contrast names, will be used to store output DCMs
+        // Note about order for multiple echoes (contrasts), sets (HBs) or repetitions (volumes):
+        // names will be iterated simulating this triple loop:
+        // for repetitions
+        //     for sets
+        //         for echoes
         "bb": { // set to null if not needed
 		    "scanner_dcm": "BB", // Name of the input DCM file for black blood
 		    "contrast_name": "BB", // Name for the BB output DCM

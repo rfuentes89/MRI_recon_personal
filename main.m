@@ -199,14 +199,14 @@ for i_ref_bin = 1:n_ref_bins
     if ~CONFIG.save_dcm, continue; end
 
     % Write main DICOM
-    for image_i = 1:length(images)
+    for image_i = 1:numel(images)
         cname = string(CONFIG.seq_params.contrast_names{image_i}) + suffix;
         info_name = CONFIG.seq_params.scanner_dcms{image_i};
         save_dicom(CONFIG, images{image_i}, info_name, cname);
     end
 
     % Write black blood DICOM
-    if (length(images) == 2) && isstruct(CONFIG.seq_params.bb)
+    if (numel(images) == 2) && isstruct(CONFIG.seq_params.bb)
         bb = CONFIG.seq_params.bb;
         deno_blackblood = abs(images{2}) - abs(images{1});
         bb_name = string(bb.contrast_name) + suffix;
