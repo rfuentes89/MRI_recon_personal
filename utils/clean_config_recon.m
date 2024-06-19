@@ -1,5 +1,7 @@
 function config = clean_config_recon(config)
 %CLEAN_RECON_PARAMS Pre-process recon config
+    % Backward compatibility
+    if ~isfield(config, 'save_images'), config.save_images = false; end
 
     % Add _DEBUG for runs with debug_ksize set
     if config.debug_ksize > 0

@@ -50,6 +50,7 @@
     "save_dcm_intrabin": false, // save reconstructed bin images as .dcm
     "save_csm": false, // save coil sensitivity maps as .mat
     "save_disp_fields": false, // save displacement_fields as .mat
+    "save_images": false, // save denoised images as .mat
     "save_stdout": true, // save console output to stdout.txt (prints, warnings, errors)
 
     // Output DICOM params

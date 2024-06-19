@@ -196,6 +196,12 @@ for i_ref_bin = 1:n_ref_bins
         images = denoising_HD_PROST(images, CONFIG.prost_params);
     end
 
+    if CONFIG.save_images
+        filename = fullfile(CONFIG.run_folder, sprintf("images%s.mat", suffix));
+        save(filename, "images");
+        disp("Saved denoised images to " + filename);
+    end
+
     if ~CONFIG.save_dcm, continue; end
 
     % Write main DICOM
