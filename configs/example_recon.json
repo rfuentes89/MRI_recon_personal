@@ -130,7 +130,6 @@
     },
     "reconstruction_type": "it_SENSE", // it_SENSE, admm
     "denoising_type": "HD_PROST", // none, HD_PROST
-    "water_fat_algorithm": "none",
     "prost_params": {
         "sig": 0.055,
         "patch_sz": 5,
