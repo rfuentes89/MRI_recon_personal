@@ -23,6 +23,7 @@ CONFIG = load_config(config_fname);
 CONFIG = clean_config_recon(CONFIG);
 
 %% Step 0.1: Check if run exists
+assert(isfolder(CONFIG.acq_folder), "acq_folder does not exist: %s", CONFIG.acq_folder);
 if exist(CONFIG.run_folder, "dir")
     if CONFIG.override_if_exists
         warning("Will override run %s", CONFIG.run_name);

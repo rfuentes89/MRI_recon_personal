@@ -46,7 +46,7 @@ function config = clean_config_recon(config)
         "ref_bin must be less than n_bins");
 
     % Parse ref_bin=0
-    if any(mc_params.ref_bin < 1)
+    if any(mc_params.ref_bin < 1) && mc_params.type == "non_rigid"
         config.motion_correction_params.ref_bin = 1:mc_params.n_bins;
     end
 
