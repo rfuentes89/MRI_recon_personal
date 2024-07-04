@@ -2,20 +2,23 @@ function data = calculate_disp_fields(data, df_contrast, ref_bin)
 %CALCULATE_DISP_FIELDS Calculate non-rigid displacement fields from
 %bin_images
     assert(isfield(data, "bin_images"), ...
-        "bin_images not present, check selected_contrast_for_disp_fields is correct")
+        "bin_images not present in data, " + ...
+        "check selected_contrast_for_disp_fields is correct " + ...
+        "and motion_correction_params.type is non_rigid");
 
-    n_bins = numel(data.bin_images{df_contrast.echo,df_contrast.set,df_contrast.repetition});
+    % Choose selected to compute disp fields
+    if df_contrast.echo ~= -1 % Only one contrast is chosen for all DFs
+        is_chosen_contrast = @(echo, set, rep) echo == df_contrast.echo && set == df_contrast.set && rep == df_contrast.repetition;
+        n_bins = numel(data.bin_images{df_contrast.echo,df_contrast.set,df_contrast.repetition});
+    else
+        is_chosen_contrast = @(echo, set, rep) true;
+        n_bins = numel(data.bin_images{1});
+    end
+
     assert(n_bins > 0, "found zero bin images in selected contrast");
     assert(ref_bin <= n_bins, "refbin=%d cannot be higher than n_bins=%d", ref_bin, n_bins);
 
     [n_echoes, n_sets, n_repetitions] = size(data.k_spaces);
-
-    % Choose selected to compute disp fields
-    if df_contrast.echo ~= -1
-        is_chosen_contrast = @(echo, set, rep) echo == df_contrast.echo && set == df_contrast.set && rep == df_contrast.repetition;
-    else
-        is_chosen_contrast = @(echo, set, rep) true;
-    end
 
     % Calculate displacement fields (and interpolation matrices)
     data.displacement_fields = cell(n_echoes, n_sets, n_repetitions);
