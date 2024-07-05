@@ -10,9 +10,9 @@ function images = reconstruction_admm(data, csm, params_CG, params_PROST)
         params_PROST.win         =  20;
         params_PROST.offset      =  4;
         params_PROST.debug       =  1;
-        params_PROST.recon_mode  =  6;% 3: 2D / 4: 3D
+        params_PROST.recon_mode  =  6;
         params_PROST.sharpness   =  0;
-        params_PROST.type        =  0;% 3: 2D / 4: 3D
+        params_PROST.type        =  0;
     end
 
     if ~exist('params_CG', 'var')

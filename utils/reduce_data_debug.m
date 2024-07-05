@@ -1,5 +1,6 @@
 function [data, csm] = reduce_data_debug(data, csm, new_size)
 %REDUCE_DATA_DEBUG Reduce data for debugging
+    if new_size <= 0, return; end
     warning("Reducing data for debugging: %d", new_size);
     data.padded_dimensions = [new_size, new_size, new_size];
     data.specified_image_dimensions = [new_size, new_size, new_size];
