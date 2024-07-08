@@ -105,12 +105,9 @@ elseif startsWith(CONFIG.mode, "gif")
     axis = CONFIG.gif_params.axis;
     extension = ".gif";
 
-    params = struct( ...
-        axis="z", ... % must be z (last dimension will be animated)
-        norm=false, ...
-        delay_time=CONFIG.gif_params.delay_time);
+    CONFIG.gif_params.axis = "z"; % must be z (last dimension will be animated)
 
-    write_output = @(volume, fname) save_gif(volume, fname, params);
+    write_output = @(volume, fname) save_gif(volume, fname, CONFIG.gif_params);
 else
     error("Mode not png or gif: %s", CONFIG.mode);
 end

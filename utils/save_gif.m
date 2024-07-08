@@ -9,12 +9,15 @@ function save_gif(images, filename, options)
 %    options.axis: which axis to use as time, one of "x", "y" or "z",
 %          defaults to z
 %    options.delay_time: seconds between frames in GIF, defaults to 0.02
+%    options.total_time: total seconds for all frames in GIF, overrides
+%          delay_time
 %    options.norm: whether or not to normalize to 0-255 range,
 %          defaults to true. Note: if false, values outside this range
 %          might be lost when casting to uint8.
 
     if ~exist('options', 'var'), options = struct(); end
     if ~isfield(options, 'delay_time'), options.delay_time = 0.2; end
+    if ~isfield(options, 'total_time'), options.total_time = 0; end
     if ~isfield(options, 'axis'), options.axis = "z"; end
     if ~isfield(options, 'norm'), options.norm = true; end
     if ~isfield(options, 'verbose'), options.verbose = false; end
@@ -33,6 +36,14 @@ function save_gif(images, filename, options)
     % Check axis input
     [slice_at_axis, axis_dim] = get_slicer(options.axis);
     n_slices = size(images, axis_dim);
+
+    % Check time input
+    if options.total_time > 0
+        options.delay_time = options.total_time / n_slices;
+    end
+    % NOTE: dont go below 0.02 as browsers cannot display it, see this answer:
+    % https://www.mathworks.com/matlabcentral/answers/183250-gif-speed-not-as-expected-help#comment_2717433
+    options.delay_time = max(options.delay_time, 0.02);
 
     % Write GIF
     for idx = 1:n_slices

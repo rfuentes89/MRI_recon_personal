@@ -64,6 +64,9 @@
   // Choose GIF generation params (for "gif_" modes only)
   "gif_params": {
     "delay_time": 0.2, // delay seconds between animated slices
+    "total_time": 0, // total GIF seconds, if >0 overrides delay_time
+    // tip: dont go below delay_time=0.02, as browsers cannot display it
+
     "axis": "z", // which axis to slice to generate GIFs, one of "x", "y", "z"
       // For a regular DCM:
       // "x" will generate transversal images
