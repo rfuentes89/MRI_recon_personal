@@ -13,10 +13,10 @@
   // "gif_xyz": use one final recon to create x, y and z GIFs
 
   // If mode other than "gif_final_recons" set 1 recon
-  //"recon_name": "RUN_1",
+  //"run_name": "RUN_1",
 
   // If mode == "gif_final_recons" set multiple recons
-  "recon_name": [
+  "run_name": [
     "RUN_1",
     "RUN_2",
     "RUN_3",

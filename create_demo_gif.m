@@ -36,11 +36,11 @@ end
 
 % Get filepaths
 if requires_more_than_one
-    assert(length(CONFIG.recon_name) > 1, "mode %s requires more than 1 recon_name", CONFIG.mode);
+    assert(length(CONFIG.run_name) > 1, "mode %s requires more than 1 recon_name", CONFIG.mode);
 else
-    assert(length(CONFIG.recon_name) == 1, "mode %s requires exactly 1 recon_name", CONFIG.mode);
+    assert(length(CONFIG.run_name) == 1, "mode %s requires exactly 1 recon_name", CONFIG.mode);
 end
-dcm_fpaths = get_filepaths(base_recons_folder, CONFIG.recon_name, CONFIG.contrast_name);
+dcm_fpaths = get_filepaths(base_recons_folder, CONFIG.run_name, CONFIG.contrast_name);
 
 % Build output folder
 folder_output = build_output_folder(CONFIG);
@@ -186,7 +186,7 @@ function folder_output = build_output_folder(config)
     folder_output = fullfile( ...
         config.acq_folder, ...
         "recons", ...
-        config.recon_name(end), ... % save in the last recon if >1
+        config.run_name(end), ... % save in the last recon if >1
         folder_name, ...
         output_name);
 
