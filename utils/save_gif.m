@@ -27,28 +27,16 @@ function save_gif(images, filename, options)
 
     % Check images input
     assert(numel(size(images)) == 3, "images must have 3 dimensions");
-    [nx, ny, nz] = size(images);
     if options.norm, images = rescale(images, 0, 255); end
     images = uint8(images);
 
     % Check axis input
-    switch options.axis
-       case "x"
-          n_slices = nx;
-          get_slice = @(volume, idx) squeeze(volume(idx,:,:));
-       case "y"
-          n_slices = ny;
-          get_slice = @(volume, idx) squeeze(volume(:,idx,:));
-        case "z"
-          n_slices = nz;
-          get_slice = @(volume, idx) squeeze(volume(:,:,idx));
-       otherwise
-          error("axis not recognized: %s", options.axis);
-    end
+    [slice_at_axis, axis_dim] = get_slicer(options.axis);
+    n_slices = size(images, axis_dim);
 
     % Write GIF
     for idx = 1:n_slices
-        im_slice = get_slice(images, idx);
+        im_slice = slice_at_axis(images, idx);
         if idx == 1
             imwrite(im_slice,filename,"gif","LoopCount",Inf,"DelayTime",options.delay_time);
         else

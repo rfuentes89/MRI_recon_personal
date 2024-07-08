@@ -115,22 +115,10 @@ else
     error("Mode not png or gif: %s", CONFIG.mode);
 end
 
-switch axis
-    case {"x", "tra", "transverse"}
-        n_slices = size(images, 1);
-        get_slice = @(idx) squeeze(images(idx,:,:,:));
-    case {"y", "sag", "sagittal"}
-        n_slices = size(images, 2);
-        get_slice = @(idx) squeeze(images(:,idx,:,:));
-    case {"z", "cor", "coronal"}
-        n_slices = size(images, 3);
-        get_slice = @(idx) squeeze(images(:,:,idx,:));
-    otherwise
-        error("Axis not recognized: %s", axis);
-end
-
+[slice_at_axis, axis_dim] = get_slicer(axis);
+n_slices = size(images, axis_dim);
 for i_slice = 1:n_slices
-    sliced_im = get_slice(i_slice);
+    sliced_im = slice_at_axis(images, i_slice);
     filename = fullfile(folder_output, "slice" +sprintf("%03d", i_slice)+ extension);
 
     write_output(sliced_im, filename);
