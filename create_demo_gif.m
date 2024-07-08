@@ -139,6 +139,10 @@ function folder_output = build_output_folder(config)
         config.contrast_name, ...
         axis);
 
+    if config.mip_params.apply
+        output_name = output_name + "_MIP";
+    end
+
     if strlength(config.name_suffix) > 0
         output_name = output_name + "_" + string(config.name_suffix);
     end
