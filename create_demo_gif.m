@@ -28,6 +28,8 @@ switch CONFIG.mode
         get_filepaths = @get_final_dcm_filepaths;
     case "gif_refpos"
         get_filepaths = @get_refpos_dcm_filepaths;
+    case "gif_xyz"
+        get_filepaths = @get_final_dcm_filepaths;
     otherwise
         error("Mode not recognized: %s", CONFIG.mode);
 end
@@ -77,7 +79,7 @@ if CONFIG.lut_params.apply
 end
 
 %% Apply MIP
-if CONFIG.mip_params.apply
+if CONFIG.mip_params.apply && ~contains(CONFIG.mode, "xyz")
     for i_image = 1:numel(images)
         images{i_image} = calc_mip_image(images{i_image}, CONFIG.mip_params);
     end
@@ -91,40 +93,76 @@ if CONFIG.verbose
     disp(size(images))
 end
 
-%% Normalize images for output
-images = rescale(images, 0, 255);
-images = uint8(images);
+%% Generate and save PNGs/GIFs
+if CONFIG.mode == "gif_xyz"
+    % Generate three 3D GIFs: through x, y and z
 
-%% Generate PNGs/GIFs
-if startsWith(CONFIG.mode, "png")
-    axis = CONFIG.png_params.axis;
-    extension = ".png";
+    CONFIG.gif_params.norm = true; % required for proper output
 
-    write_output = @(slice, fname) imwrite(slice, fname);
+    axes = ["x", "y", "z"];
+    for i_axis = 1:numel(axes)
+        axis = axes(i_axis);
+
+        fname = fullfile(folder_output, sprintf("3d_%s.gif", axis));
+        CONFIG.gif_params.axis = axis;
+
+        if CONFIG.mip_params.apply
+            CONFIG.mip_params.axis = axis;
+            mipped_images = calc_mip_image(images, CONFIG.mip_params);
+        else
+            mipped_images = images;
+        end
+
+        save_gif(mipped_images, fname, CONFIG.gif_params);
+    end
+    fprintf("%d .gifs saved in %s\n", numel(axes), folder_output);
+
+elseif startsWith(CONFIG.mode, "png")
+    % Generate one PNG per slice
+    write_png = @(slice, fname) imwrite(uint8(rescale(slice, 0, 255)), fname);
+
+    write_output_per_slice( ...
+        images, ...
+        write_png, ...
+        CONFIG.png_params.axis, ...
+        folder_output, ...
+        ".png");
 elseif startsWith(CONFIG.mode, "gif")
-    axis = CONFIG.gif_params.axis;
-    extension = ".gif";
+    % Generate one GIF per slice, across multiple DICOMs loaded
+    CONFIG.gif_params.norm = true; % required for proper output
 
-    CONFIG.gif_params.axis = "z"; % must be z (last dimension will be animated)
+    slice_axis = CONFIG.gif_params.axis;
+    CONFIG.gif_params.axis = "z";
+    % axis must be z, last dimension is animated (across multiple DCMs)
 
-    write_output = @(volume, fname) save_gif(volume, fname, CONFIG.gif_params);
-else
-    error("Mode not png or gif: %s", CONFIG.mode);
-end
+    write_gif = @(volume, fname) save_gif(volume, fname, CONFIG.gif_params);
 
-[slice_at_axis, axis_dim] = get_slicer(axis);
-n_slices = size(images, axis_dim);
-for i_slice = 1:n_slices
-    sliced_im = slice_at_axis(images, i_slice);
-    filename = fullfile(folder_output, "slice" +sprintf("%03d", i_slice)+ extension);
-
-    write_output(sliced_im, filename);
+    write_output_per_slice( ...
+        images, ...
+        write_gif, ...
+        slice_axis, ...
+        folder_output, ...
+        ".gif");
 end
 
 save_config(folder_output, CONFIG, CONFIG.verbose);
-disp(string(n_slices) + " " + extension + "s saved in " + string(folder_output));
 
 %% Utils
+function write_output_per_slice(volume, write_output, axis, folder_output, extension)
+% WRITE_OUTPUT_PER_SLICE Iterate slices in a volume executing write_output
+    [slice_at_axis, axis_dim] = get_slicer(axis);
+    n_slices = size(volume, axis_dim);
+
+    for i_slice = 1:n_slices
+        sliced_im = slice_at_axis(volume, i_slice);
+        filename = fullfile(folder_output, sprintf("slice%03d%s", i_slice, extension));
+
+        write_output(sliced_im, filename);
+    end
+
+    fprintf("%d %ss saved in %s\n", n_slices, extension, folder_output);
+end
+
 function folder_output = build_output_folder(config)
     folder_name = extractBefore(config.mode, 4); % i.e. "gif" or "png"
     switch folder_name
@@ -134,10 +172,13 @@ function folder_output = build_output_folder(config)
             axis = config.png_params.axis;
     end
 
-    output_name = sprintf("%s_%s_%s", ...
+    output_name = sprintf("%s_%s", ...
         extractAfter(config.mode, 4), ...
-        config.contrast_name, ...
-        axis);
+        config.contrast_name);
+
+    if ~contains(config.mode, "xyz")
+        output_name = output_name + "_" + axis;
+    end
 
     if config.mip_params.apply
         output_name = output_name + "_MIP";

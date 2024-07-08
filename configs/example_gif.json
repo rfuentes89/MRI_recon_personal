@@ -10,8 +10,9 @@
   // "png_final_recon": use one final recon to create PNGs
   // "gif_bin_images": use bin images from one recon to create GIFs
   // "gif_final_recons": use final reconstructions from multiple recons to create GIFs
+  // "gif_xyz": use one final recon to create x, y and z GIFs
 
-  // If mode == "png_final_recon" or "gif_bin_images" set 1 recon
+  // If mode other than "gif_final_recons" set 1 recon
   //"recon_name": "RUN_1",
 
   // If mode == "gif_final_recons" set multiple recons
