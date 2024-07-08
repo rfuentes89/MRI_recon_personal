@@ -48,13 +48,15 @@
 
   // Choose Lookup Table params
   "lut_params": {
-    "apply": true, // whether or not to apply window and level
+    "apply": false, // whether or not to apply window and level
     "window": 1399,
     "level": 391,
+  },
 
-    // Both window and level can be provided as a list to select a different value for each image, e.g.:
-    // "window": [1000, 1100, 1200, 1300],
-    // "level": [300, 310, 320, 330],
+  "percentile_params": {
+    "apply": true, // whether or not to clip percentiles
+    "min_perc": 1,
+    "max_perc": 99,
   },
 
   // Choose PNG generation params (for "png_" modes only)

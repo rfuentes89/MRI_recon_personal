@@ -45,21 +45,10 @@ dcm_fpaths = get_filepaths(base_recons_folder, CONFIG.recon_name, CONFIG.contras
 % Build output folder
 folder_output = build_output_folder(CONFIG);
 
-%% Use arrays in window and level
-n_targets = length(dcm_fpaths);
-
-if CONFIG.lut_params.apply
-    if length(CONFIG.lut_params.window) == 1
-        CONFIG.lut_params.window = repmat(CONFIG.lut_params.window, [n_targets, 1]);
-    end
-    if length(CONFIG.lut_params.level) == 1
-        CONFIG.lut_params.level = repmat(CONFIG.lut_params.level, [n_targets, 1]);
-    end
-end
-
 %% Load data into images array
-images = cell(n_targets,1);
-for i_dcm = 1:n_targets
+n_paths = numel(dcm_fpaths);
+images = cell(n_paths,1);
+for i_dcm = 1:n_paths
     dcm_filepath = dcm_fpaths{i_dcm};
     images{i_dcm} = double(squeeze(dicomread(dcm_filepath)));
 end
@@ -72,9 +61,15 @@ end
 %% Apply LUT
 if CONFIG.lut_params.apply
     for i_image = 1:numel(images)
-        window = CONFIG.lut_params.window(i_image);
-        level = CONFIG.lut_params.level(i_image);
-        images{i_image} = apply_window_level(images{i_image}, window, level);
+        images{i_image} = apply_window_level(images{i_image}, CONFIG.lut_params.window, CONFIG.lut_params.level);
+    end
+end
+
+%% Clip percentiles
+if CONFIG.percentile_params.apply
+    params = CONFIG.percentile_params;
+    for i_image = 1:numel(images)
+        images{i_image} = clip_percentiles(images{i_image}, params.min_perc, params.max_perc);
     end
 end
 
