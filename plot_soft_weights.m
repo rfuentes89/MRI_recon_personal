@@ -1,73 +1,69 @@
 %%% Plot soft gating weights
-% This script is intended to run with the main recon script in the MATLAB
-% editor in debugging mode
-%
-% Steps:
-% 1. Run the main recon script until right before the correct_motion step
-% 2. Run the correct_motion function in this script once
-% 3. Plot the weights
-% 4. If needed, change the soft_binning() params in this script and plot
-%    the weights again
 
-%% Run motion correction
+%% Imports
+addpath(genpath("./"));
+
+%% Config
+CONFIG.acq_folder = fullfile(getenv("WORKSPACE"), "acquisitions/2024-07-04_FE_CMRA");
+CONFIG.motion_curve_name = "inav-diaphragm";
+CONFIG.n_bins = 4;
+CONFIG.i_contrast = 1;
+
+%% Load motion curve
+curve_fname = fullfile(CONFIG.acq_folder, "motion_curves", CONFIG.motion_curve_name + ".mat");
+assert(isfile(curve_fname), "motion curves not found: %s", curve_fname);
+load(curve_fname, 'motion_curves');
+
+%plot_motion_curves(motion_curves);
+disp("Curves loaded");
+
+%% Calculate bin limits
+% NOTE: copied from motion_correction_non_rigid
+fh_motion = motion_curves{CONFIG.i_contrast}.fh;
+included = abs(fh_motion - mean(fh_motion)) <= 2 * std(fh_motion);
+bin_limits = hard_bin_limits(fh_motion(included), CONFIG.n_bins);
+
+%% Run soft gating
 % Change parameters as needed
-%CONFIG.motion_correction_params.n_bins = 8;
-CONFIG.motion_correction_params.bin_recon_type = "it_sense"; % faster than orcca
-CONFIG.motion_correction_params.intrabin_TL_corr = false; % faster
-motion_corrected_data = correct_motion(data, motion_curves, csm, CONFIG.motion_correction_params);
+params.soft_decay = 0.5;
+params.soft_fn = "bin_range_scaled";
 
-% Choose contrast
-i_contrast = 1;
-bins_info = motion_corrected_data.bins_info{i_contrast};
-
-disp("Finished correct_motion");
-
-%% Run soft gating again (to try different params)
-% re-run this as needed
-
-% Change parameters as needed
-CONFIG.motion_correction_params.soft_decay = 1;
-CONFIG.motion_correction_params.soft_fn = "bin_range";
-
-% Run soft_binning
-[~, ~, bins_info.soft_weights] = soft_binning( ...
-    motion_corrected_data.k_spaces_corrected{i_contrast}, ...
-    motion_corrected_data.segment_masks{i_contrast}, ...
-    motion_curves{i_contrast}.fh, ...
-    bins_info.limits, ...
-    CONFIG.motion_correction_params);
+[~, ~, soft_weights] = soft_binning( ...
+    zeros(10, 10, 10, 10, CONFIG.n_bins), ... % dummy k space
+    zeros(10, 10, 10, numel(fh_motion)), ... % dummy masks
+    fh_motion, ...
+    bin_limits, ...
+    params);
 
 disp("Finished soft_binning");
 
 %% Plot soft weights
 figure('position', [300, 300, 1600, 500]);
-fh_motion = motion_curves{i_contrast}.fh;
-
 subplot(1,2,1);
-plot_weights(fh_motion, bins_info, CONFIG.motion_correction_params, false);
+plot_weights(fh_motion, soft_weights, bin_limits, params, false);
 
 subplot(1,2,2);
-plot_weights(fh_motion, bins_info, CONFIG.motion_correction_params, true);
+plot_weights(fh_motion, soft_weights, bin_limits, params, true);
 
 
 %% Util plot functions
-function plot_weights(fh_motion, bins_info, used_params, plot_resp_positions)
-    n_bins = length(bins_info.soft_weights);
+function plot_weights(fh_motion, soft_weights, bin_limits, used_params, plot_resp_positions)
+    n_bins = length(soft_weights);
 
     [sorted_fh_motion, sorted_fh_idx] = sort(fh_motion);
     if plot_resp_positions
         x_range = sorted_fh_motion;
     else
-        x_range = 1:length(bins_info.soft_weights{1});
+        x_range = 1:length(soft_weights{1});
     end
 
     hold on
 
     for i_bin = 1:n_bins
-        ws = bins_info.soft_weights{i_bin}(sorted_fh_idx);
+        ws = soft_weights{i_bin}(sorted_fh_idx);
         plot(x_range, ws, 'DisplayName', "bin " + string(i_bin))
 
-        limits = bins_info.limits{i_bin};
+        limits = bin_limits{i_bin};
 
         plot_vline(x_range, sorted_fh_motion, limits.lower);
         plot_vline(x_range, sorted_fh_motion, limits.upper);
