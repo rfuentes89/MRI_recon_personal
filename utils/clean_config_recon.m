@@ -4,6 +4,8 @@ function config = clean_config_recon(config)
     if ~isfield(config, 'save_images'), config.save_images = false; end
     if ~isfield(config, 'save_stdout'), config.save_stdout = false; end
     if ~isfield(config, 'debug_ksize'), config.debug_ksize = 0; end
+    if ~isfield(config.motion_curve, 'zero_rl'), config.motion_curve.zero_rl = true; end
+    if ~isfield(config.motion_curve, 'zero_fh'), config.motion_curve.zero_fh = false; end
 
     % Add _DEBUG for runs with debug_ksize set
     if config.debug_ksize > 0

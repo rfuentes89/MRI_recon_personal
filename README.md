@@ -128,7 +128,7 @@ Create a JSON configuration with the reconstruction parameters
 
 ### Step 2: Save motion curves
 For each raw data to reconstruct you'll need to compute its motion curves. Follow these steps:
-1. Run the `main.m` script from the MATLAB editor up to the "Step 5: Reading iNAVs"
+1. Run the `calculate_motion_curves.m` script from the MATLAB editor
    * Set the `config_fname` variable in the first lines to the name of your configuration file
 2. You will be presented with an iNAV image, and will need to make a selection to track the movement
    * Motion curves will be calculated, plotted, and saved to the `motion_curves/` folder with the name indicated in the JSON param `"motion_curve"."name"`

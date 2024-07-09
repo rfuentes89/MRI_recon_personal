@@ -56,10 +56,32 @@ twix = read_twix(path_to_twix);
 disp("step 1: unpacking raw data")
 data = read_raw_data(twix, CONFIG.selected_contrasts, CONFIG.coil_params.use_only);
 
-%% STEP 2: Remove Oversampling
+%% STEP 1.2: Remove Oversampling
 
-disp("step 2: removing oversampling")
+disp("step 1.2: removing oversampling")
 data = remove_readout_oversampling(data);
+
+%% STEP 2: Read motion curves from file
+if CONFIG.motion_correction_params.type ~= "none"
+    motion_curves_file = fullfile(CONFIG.acq_folder, "motion_curves", CONFIG.motion_curve.name + ".mat");
+    assert(isfile(motion_curves_file), "motion_curves not found: %s", motion_curves_file);
+
+    disp("step 2: loading motion_curves");
+    load(motion_curves_file, 'motion_curves');
+
+    if CONFIG.motion_curve.zero_rl
+        disp("Zeroing right-left motion");
+        for i_contrast = 1:numel(motion_curves)
+            motion_curves{i_contrast}.rl = zeros(size(motion_curves{i_contrast}.rl));
+        end
+    end
+    if CONFIG.motion_curve.zero_fh
+        disp("Zeroing foot-head motion");
+        for i_contrast = 1:numel(motion_curves)
+            motion_curves{i_contrast}.fh = zeros(size(motion_curves{i_contrast}.fh));
+        end
+    end
+end
 
 %% STEP 3: Coil Rejection
 % Assume that if coils have already been specified then no further
@@ -96,36 +118,7 @@ if CONFIG.save_csm
     disp("Saved csm to " + filename);
 end
 
-%% STEP 5: Reading iNavs
-
-% TODO: only use coils that weren't rejected?
-% TODO: use iNavs from DICOM if available (not necessary)
-
-if CONFIG.motion_correction_params.type ~= "none"
-    motion_curves_folder = fullfile(CONFIG.acq_folder, "motion_curves");
-    motion_curves_file = fullfile(motion_curves_folder, CONFIG.motion_curve.name + ".mat");
-    if (~CONFIG.motion_curve.recompute && isfile(motion_curves_file))
-        disp("step 5: loading motion_curves")
-        load(motion_curves_file, 'motion_curves');
-    else
-        disp("step 5: estimating motion")
-        base_fname = fullfile(motion_curves_folder, CONFIG.motion_curve.name);
-        if ~exist(motion_curves_folder, 'dir'), mkdir(motion_curves_folder), end
-
-        motion_curves = estimate_motion_curves(twix, CONFIG.selected_contrasts, base_fname);
-        save(motion_curves_file, 'motion_curves')
-    end
-end
-
-%% Step 5.1: Ignore right-left motion
-if CONFIG.motion_correction_params.type ~= "none" && CONFIG.zero_rl_motion
-    disp("Zeroing right-left motion")
-    for i_contrast = 1:numel(motion_curves)
-        motion_curves{i_contrast}.rl = zeros(size(motion_curves{i_contrast}.fh));
-    end
-end
-
-%% STEP 5.2: Reduce data for debugging
+%% STEP 5: Reduce data for debugging
 if CONFIG.debug_ksize > 0
     [data, csm] = reduce_data_debug(data, csm, CONFIG.debug_ksize);
 end
