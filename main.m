@@ -234,6 +234,7 @@ function save_dicom(config, image, input_info_name, contrast_name)
     if isfile(info_fpath)
         info_base = dicominfo(info_fpath);
     else
+        if strlength(input_info_name) > 0, warning("dicom info not found: %s", input_info_name); end
         info_base = build_empty_dicominfo();
     end
 
