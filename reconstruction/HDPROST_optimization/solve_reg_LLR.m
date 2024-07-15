@@ -1,12 +1,6 @@
 function x = solve_reg_LLR(kdata,E,Rx,y,CG_lambda,CG_maxit,CG_minres,x0)
-
-    % Call CG 
-%     [nav_it,residuals] = reg_CG_MRF(kdata,E,R,y,CG_lambda,CG_maxit,CG_minres);
-    if nargin < 8
-        [nav_it,residuals] = Cart_itSENSE_dict_reg(kdata,E,Rx-y,CG_lambda,CG_maxit,CG_minres);
-    else
-        [nav_it,residuals] = Cart_itSENSE_reg_warm_start(kdata, E, Rx-y, CG_lambda, CG_maxit, CG_minres, x0);
-    end
+    % Call CG
+    [nav_it,residuals] = Cart_itSENSE_reg_warm_start(kdata, E, Rx-y, CG_lambda, CG_maxit, CG_minres, x0);
 
     if ndims(nav_it) == 4
         

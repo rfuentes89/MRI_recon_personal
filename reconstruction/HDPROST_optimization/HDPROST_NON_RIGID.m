@@ -70,7 +70,6 @@ kdata_OUT = Params_acqui.kdata_OUT;
 
 % Parameters for MR recon
 
-warm_start    = 1;
 ADMM_maxit    = Params_MR.ADMM_maxit;
 CG_minres     = Params_MR.CG_minres;
 CG_maxit_ini  = Params_MR.CG_maxit_ini;
@@ -138,17 +137,8 @@ for ttt = 1:ADMM_maxit
         else
 
             tic();
-            if warm_start
-
-                x(:,:,:,ccc) = solve_reg_LLR(kdata_OUT{ccc}, E_MR{ccc}, ...
-                    Rx(:,:,:,ccc), y(:,:,:,ccc), CG_lambda, CG_maxit, CG_minres, x_it(:,:,:,ccc,ttt-1));
-
-            else
-
-                x(:,:,:,ccc) = solve_reg_LLR(kdata_OUT{ccc}, E_MR{ccc}, ...
-                    Rx(:,:,:,ccc), y(:,:,:,ccc), CG_lambda, CG_maxit, CG_minres);
-
-            end
+            x(:,:,:,ccc) = solve_reg_LLR(kdata_OUT{ccc}, E_MR{ccc}, ...
+                Rx(:,:,:,ccc), y(:,:,:,ccc), CG_lambda, CG_maxit, CG_minres, x_it(:,:,:,ccc,ttt-1));
             toc();
 
         end
