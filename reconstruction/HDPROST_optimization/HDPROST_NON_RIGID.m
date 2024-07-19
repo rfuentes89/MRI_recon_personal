@@ -1,55 +1,31 @@
-%  This C function implements the motion-compensated reconstruction using 3D patch-based regularization (3D-PROST)
-%
-%  Information:
-%         gsl package is required for the SVD and HOSVD decompositions and is freely available here:
-%         https://www.gnu.org/software/gsl/m
-%
-%  For installation on linux system please read the INSTALL file
-%
-%  Usage Example:
-%         [x, Rx_it, y_it, x_it] = HDPROST_NON_RIGID(Params_acqui, Params_MR, Params_PROST)
-%
+function [x_out, Rx_history, y_history, x_history] = HDPROST_NON_RIGID(kdata, E_operator, admm_params, prost_params)
+% HDPROST_NON_RIGID Run ADMM optimization with HD-PROST
 %  Inputs:
-%        Params_acqui : consists of the (undersampled) k-spaces (with multiple respiratory bins)
-%        Params_PROST : consists of all the parameters related to the PROST optimization (2)
-%                           - patch_zs:size of 3D patches (in pixels)
-%                           - max_patch:maximum number of similar 3D patches to search
-%                           - win:size of search window
-%                           - offset:offset between patches (to accelerate the reconstruction)
-%                                    no visual difference was seen between offset = 1 and offset = 4 (but x4 faster)
-%                           - debug:display information on the optimization 2 (patch-based) when debug==1
-%                           - recon_mode: for 3D reconstruction use 4
-%        Params_MR : consists of all the parameters related to the MR reconstruction (1)
-%                           - ADMM_maxit:total number of ADMM iterations
-%                           - CG_minres: conjugate gradient tolerance (usually set to 1e-10)
-%                           - CG_maxit_ini: maximum number of iterations at the first MR optimization
-%                           - CG_maxit: maximum number of iterations for the MR optimization (1)
-%                           - CG_lambda: regularization parameters (weighting data fidelity and denoised prior: mu in the paper)
-%                           - E_CSbins: motion compensated operator
+%        kdata: cell of arbitrary size (n_images, e.g. number of contrasts,
+%               or number of bins), each with an array of size
+%               (n_kx, n_ky, n_kz, n_coils, n_bins)
+%        E_operator: cell of size (n_images,), each with motion compensated
+%               operator
+%        prost_params: parameters used in the second step (PROST
+%               optimization). See PROST params in the PROST function
+%        admm_params: consists of all the parameters related to the MR reconstruction (1)
+%                  - max_iter: total number of ADMM iterations
+%                  - cg_residual_tol: conjugate gradient tolerance (usually set to 1e-10)
+%                  - cg_max_iter_first: maximum number of iterations at the first MR optimization
+%                  - cg_max_iter: maximum number of iterations for the MR optimization (1)
+%                  - cg_lambda: regularization parameters (weighting data fidelity and denoised prior: mu in the paper)
 %
 %
 %  Outputs:
-%        output : - x: the reconstructed motion-compensated image
-%                 - Rx_it: the images obtained after optimization 2 (patch-based)
-%                 - y_it: the lagragian images
-%                 - x_it: the images obtained after optimization 1 (MR reconstruction)
+%        output : - x_out: the reconstructed motion-compensated image
+%                 - Rx_history: the images obtained after optimization 2 (patch-based)
+%                 - y_history: the lagragian images
+%                 - x_history: the images obtained after optimization 1 (MR reconstruction)
 %
 %
 %  Recommended parameters for a typical CMRA reconstruction (1.2mm3, acc x5):
 %     optimization 2: sig = 0.04 / patch_sz = 5 / max_patch = 20 / win = 10 / offset = 4
 %     optimization 1: ADMM_maxit = 6 / CG_minres = 1e-10 / CG_maxit_ini = 5 / CG_maxit = 5 / CG_lambda = 0.6
-%
-% Some comments on the parameters:
-% The large number of parameters can be scary at first sight but allows
-% more flexibility in the reconstruction. In general, only 3 parameters
-% need attention:
-% 1) patch size: this parameter needs to be tuned according to your resolution (range: [5-10])
-% 2) sig: controls the amount of denoising to perform (important parameter)
-% 3) CG_lambda: controls the weight to give to the denoised prior to the MR reconstruction (represented by mu in the paper)
-% Parameter win: this parameter sets a windows limit for the search of the
-% patches. The code has been developped such that the reconstruction time
-% is quite insensitive to the size of search. Therefore we recommend win in
-% the range [20-60].
 %
 %  Contacts:
 %  Aurelien Bustin (aurelien.bustin@kcl.ac.uk)
@@ -61,116 +37,108 @@
 %  100% Respiratory Scan Efficiency and 3D-PROST Reconstruction.
 %  Magnetic Resonance in Medicine, 2019;81(1):102-115 doi: 10.1002/mrm.27354
 
+% Default parameters for MR recon
+admm_params = fill_struct_values(admm_params, struct( ...
+    max_iter = 3,...
+    cg_max_iter_first = 5, ...
+    cg_max_iter = 5, ...
+    cg_residual_tol = 1e-10, ...
+    cg_lambda = 0.01, ...
+    verbose = 0));
 
-function [x, Rx_it, y_it, x_it] = HDPROST_NON_RIGID(Params_acqui, Params_MR, Params_PROST)
+% Default parameters for PROST recon
+prost_params = fill_struct_values(prost_params, struct( ...
+    sig = 0.055, ...
+    patch_sz = 5, ...
+    max_patch = 20, ...
+    win = 20, ...
+    offset = 4, ...
+    debug = 0, ...
+    recon_mode = 6, ...
+    sharpness = 0, ...
+    type = 0, ...
+    ref_idx = 1));
 
-% Parameters Acquisition
+n_images = numel(kdata);
+[n_kx, n_ky, n_kz, n_coils, n_bins] = size(kdata{1});
 
-kdata_OUT = Params_acqui.kdata_OUT;
+result_size = [n_kx, n_ky, n_kz, n_images];
+x = zeros(result_size); % resulting images
+y = zeros(result_size); % lagrangian images
 
-% Parameters for MR recon
+x_history  = zeros([result_size admm_params.max_iter]); % images after step 1
+Rx_history = zeros([result_size admm_params.max_iter]); % images after step 2
+y_history = zeros([result_size admm_params.max_iter]);
 
-ADMM_maxit    = Params_MR.ADMM_maxit;
-CG_minres     = Params_MR.CG_minres;
-CG_maxit_ini  = Params_MR.CG_maxit_ini;
-CG_maxit      = Params_MR.CG_maxit;
-CG_lambda     = Params_MR.CG_lambda;
-
-% Parameters for PROST recon
-
-sig         = Params_PROST.sig;
-patch_sz    = Params_PROST.patch_sz;
-max_patch   = Params_PROST.max_patch;
-win         = Params_PROST.win;
-offset      = Params_PROST.offset;
-debug       = Params_PROST.debug;
-recon_mode  = Params_PROST.recon_mode;
-type        = Params_PROST.type;
-sharpness   = Params_PROST.sharpness;
-
-% Build E operators
-
-E_MR       = Params_MR.E_CSbins;
-nContrast  = size(kdata_OUT,2);
-
-clear Params_MR Params_PROST Params_acqui
-
-% other tested parameters:
-% E_3D_PROST = Bustin_E_3D_PROST(sig, patch_sz, max_patch, win, offset, debug, recon_mode);
-% E_3D_PROST = Bustin_E_3D_PROST(0.06, 5, 20, 10, 4, 1, 4);
-% E_3D_PROST = Bustin_E_3D_PROST(0.1, 5, 20, 10, 4, 1, 4);
-% E_3D_PROST = Bustin_E_3D_PROST(sig, 5, 20, 10, 4, 1, 4);
-
-for ttt = 1:ADMM_maxit
-
-    fprintf('<strong> Iteration: %d/%d </strong>\n', ttt, ADMM_maxit);
-
-    %  OPTIMIZATION 1: Data consistency (x): MR reconstruction
-
-    fprintf('<strong> Running MR reconstruction step </strong>\n');
-
-    for ccc = 1:nContrast
-
-        if ttt == 1 && ccc == 1
-
-            tic();
-            x_tmp        = solve_CG(kdata_OUT{ccc}, E_MR{ccc}, CG_maxit_ini, CG_minres);
-            x            = zeros([size(x_tmp) nContrast]);
-            x(:,:,:,ccc) = x_tmp; clear x_tmp
-
-            sz    = size(x);
-            y     = zeros(sz);
-            if numel(sz) == 3
-                sz(4) = 1;
-            end
-            x_it  = zeros([sz(1) sz(2) sz(3) sz(4) ADMM_maxit]);
-            Rx_it = zeros([sz(1) sz(2) sz(3) sz(4) ADMM_maxit]);
-            y_it  = zeros([sz(1) sz(2) sz(3) sz(4) ADMM_maxit]);
-            toc();
-
-        elseif ttt == 1 && ccc ~= 1
-
-            tic();
-            x(:,:,:,ccc) = solve_CG(kdata_OUT{ccc}, E_MR{ccc}, CG_maxit_ini, CG_minres);
-            toc();
-
-        else
-
-            tic();
-            x(:,:,:,ccc) = solve_reg_LLR(kdata_OUT{ccc}, E_MR{ccc}, ...
-                Rx(:,:,:,ccc), y(:,:,:,ccc), CG_lambda, CG_maxit, CG_minres, x_it(:,:,:,ccc,ttt-1));
-            toc();
-
-        end
-
-        x_it(:,:,:,ccc,ttt) = x(:,:,:,ccc);
+for i_iter = 1:admm_params.max_iter
+    if admm_params.verbose >= 1
+        fprintf("\tADMM ite=%d/%d\n", i_iter, admm_params.max_iter);
     end
-        if ttt == ADMM_maxit
-            break;
-        end
 
-%     end
+    % OPTIMIZATION 1: Data consistency (x): MR reconstruction
+    for i_image = 1:n_images
+        if i_iter == 1
+            x(:,:,:,i_image) = solve_CG( ...
+                kdata{i_image}, ...
+                E_operator{i_image}, ...
+                admm_params.cg_max_iter_first, ...
+                admm_params.cg_residual_tol);
+        else
+            x(:,:,:,i_image) = solve_reg_LLR( ...
+                kdata{i_image}, ...
+                E_operator{i_image}, ...
+                Rx(:,:,:,i_image), ...
+                y(:,:,:,i_image), ...
+                admm_params.cg_lambda, ...
+                admm_params.cg_max_iter, ...
+                admm_params.cg_residual_tol, ...
+                x(:,:,:,i_image));
+        end
+    end
+
+    % if i_iter == admm_params.max_iter
+    %     % TODO(pdpino): check this. Last step doesn't do denoising?
+    %     break;
+    % end
 
     %  OPTIMIZATION 2: Tensor Decomposition (Rx - denoising)
-    fprintf('OPTIMIZATION 2: Tensor Decomposition (Rx - denoising)')
+    added_images = double(x + y);
 
-    Tensor = double(x + y);
+    ref_img = abs(added_images(:,:,:,prost_params.ref_idx));
+    E_3D_PROST = Bustin_E_3D_HDPROST_v3( ...
+        prost_params.sig, ...
+        prost_params.patch_sz, ...
+        prost_params.max_patch, ...
+        prost_params.win, ...
+        prost_params.offset, ...
+        prost_params.debug, ...
+        prost_params.recon_mode, ...
+        prost_params.type, ...
+        prost_params.sharpness, ...
+        ref_img);
+    Rx = E_3D_PROST * added_images;
 
-    ref_img = abs(Tensor(:,:,:,end)); % reference = 4th contrast <--
-    E_3D_PROST = Bustin_E_3D_HDPROST_v3(sig, patch_sz, max_patch, win, offset, debug, recon_mode, type, sharpness, ref_img);
-
-    Rx = E_3D_PROST * Tensor;
-    if any(any(any(any(isnan(Rx)))))
-        fprintf("some NaN founds after denoisins in it %i. break\n",ccc)
-        return;
+    % Check for NaNs
+    count_nan = sum(isnan(Rx(:)));
+    if count_nan > 0
+        warning("NaN found after denoising: ite=%i nans=%d\n", i_iter, count_nan);
     end
-    Rx_it(:,:,:,:,ttt) = Rx;
 
-	%  STEP 3: Lagrangian Update (y)
-
+	% STEP 3: Lagrangian Update (y)
     y = y + x - Rx;
-    y_it(:,:,:,:,ttt) = y;
 
+    % Save history
+    if nargout > 1
+        x_history(:,:,:,:,i_iter) = x;
+        Rx_history(:,:,:,:,i_iter) = Rx;
+        y_history(:,:,:,:,i_iter) = y;
+    end
+end
+
+% Transform result to cell (same format as kspaces)
+x_out = cell(size(kdata));
+for i_image = 1:n_images
+    x_out{i_image} = x(:,:,:,i_image);
 end
 
 

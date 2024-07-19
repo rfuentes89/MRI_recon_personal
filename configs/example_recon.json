@@ -148,11 +148,12 @@
         "sharpness": 0,
         "type": 0,
     },
-    "cg_params": {
-        "ADMM_maxit": 3,
-        "CG_minres": 1e-10,
-        "CG_maxit_ini": 5,
-        "CG_maxit": 5,
-        "CG_lambda": 0.01,
+    "admm_params": {
+        "max_iter": 3, // Max ADMM iterations
+        "cg_max_iter_first": 5, // Max CG iterations in the first ADMM iteration
+        "cg_max_iter": 5, // Max CG iterations in the other ADMM iterations
+        "cg_residual_tol": 1e-10, // Stops if residuals improve less than this
+        "cg_lambda": 0.01, // Prior's weight
+        "verbose": 0,
     }
 }
