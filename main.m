@@ -99,7 +99,6 @@ if CONFIG.coil_params.reject_via_ui && isempty(CONFIG.coil_params.use_only)
     data = reject_coils(data, vertcat(maybe_indices, no_indices)); % TODO include variable if use maybe or not?
 end
 
-
 %% STEP 3.1: Compress coils
 n_coils = size(data.k_spaces{1}, 4);
 if CONFIG.coil_params.n_compressed_coils > 0 && CONFIG.coil_params.n_compressed_coils < n_coils
@@ -122,7 +121,6 @@ end
 if CONFIG.debug_ksize > 0
     [data, csm] = reduce_data_debug(data, csm, CONFIG.debug_ksize);
 end
-
 
 %% STEP 6: Motion Correction
 if CONFIG.motion_correction_params.type ~= "none"
@@ -158,18 +156,27 @@ for i_ref_bin = 1:n_ref_bins
     suffix = ternary(n_ref_bins > 1, sprintf("_refpos%02d", ref_bin), "");
 
     if CONFIG.motion_correction_params.type == "non_rigid"
-        fprintf("\tCalculating displacement fields\n");
-        motion_corrected_data = calculate_disp_fields( ...
-            motion_corrected_data, ...
-            CONFIG.motion_correction_params.selected_contrast_for_disp_fields, ...
-            ref_bin);
-
-        % Save to .mat file
-        if CONFIG.save_disp_fields
-            filename = fullfile(CONFIG.run_folder, "displacement_fields" + suffix + ".mat");
-            save(filename, "-struct", "motion_corrected_data", "displacement_fields");
-            disp("\tSaved DFs to " + filename);
+        if strlength(CONFIG.motion_correction_params.load_disp_fields) > 0
+            displacement_fields_file = fullfile(CONFIG.acq_folder,'recons' ,CONFIG.motion_correction_params.load_disp_fields, 'displacement_fields' + suffix + '.mat');
+            assert(isfile(displacement_fields_file), "displacement_fields not found: %s", displacement_fields_file);
+            fprintf("\tLoading displacement fields\n");
+            load(displacement_fields_file, 'displacement_fields');
+            motion_corrected_data.displacement_fields = displacement_fields;
+        else
+            fprintf("\tCalculating displacement fields\n");
+            motion_corrected_data = calculate_disp_fields( ...
+                motion_corrected_data, ...
+                CONFIG.motion_correction_params.selected_contrast_for_disp_fields, ...
+                ref_bin);
+            % Save to .mat file
+            if CONFIG.save_disp_fields
+                filename = fullfile(CONFIG.run_folder, "displacement_fields" + suffix + ".mat");
+                save(filename, "-struct", "motion_corrected_data", "displacement_fields");
+                disp("\tSaved DFs to " + filename);
+            end
         end
+        motion_corrected_data = pre_compute_interpolation_matrix(motion_corrected_data, ...
+                CONFIG.motion_correction_params.selected_contrast_for_disp_fields);
     end
 
     fprintf("\tReconstructing images\n");

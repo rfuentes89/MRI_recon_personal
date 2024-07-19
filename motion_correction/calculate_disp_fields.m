@@ -19,29 +19,18 @@ function data = calculate_disp_fields(data, df_contrast, ref_bin)
     assert(ref_bin <= n_bins, "refbin=%d cannot be higher than n_bins=%d", ref_bin, n_bins);
 
     [n_echoes, n_sets, n_repetitions] = size(data.k_spaces);
-
-    % Calculate displacement fields (and interpolation matrices)
+    % Calculate displacement fields
     data.displacement_fields = cell(n_echoes, n_sets, n_repetitions);
-    data.interpolation_matrix = cell(n_echoes, n_sets, n_repetitions);
     for repetition = 1:n_repetitions
         for set = 1:n_sets
             for echo = 1:n_echoes
                 if ~is_chosen_contrast(echo, set, repetition), continue; end
-
                 % Calculate displacement fields
                 dfs = register_bins(data.bin_images{echo,set,repetition}, ref_bin);
                 dfs = post_process_dfs( ...
                     dfs, ...
                     size(data.k_spaces_corrected{echo, set, repetition}, 1:3));
                 data.displacement_fields{echo,set,repetition} = dfs;
-
-                % Pre-compute interpolation matrices
-                img_size = zeros(size(dfs,1), size(dfs,2), size(dfs,3));
-                matrices = cell(1,n_bins);
-                for i_bin = 1:n_bins
-                    matrices{i_bin} = resampleMatrix(img_size, dfs(:,:,:,:,i_bin));
-                end
-                data.interpolation_matrix{echo,set,repetition} = matrices;
             end
         end
     end
@@ -52,11 +41,6 @@ function data = calculate_disp_fields(data, df_contrast, ref_bin)
             for set = 1:n_sets
                 for echo = 1:n_echoes
                     data.displacement_fields{echo,set,repetition} = data.displacement_fields{...
-                        df_contrast.echo,...
-                        df_contrast.set,...
-                        df_contrast.repetition};
-
-                    data.interpolation_matrix{echo,set,repetition} = data.interpolation_matrix{...
                         df_contrast.echo,...
                         df_contrast.set,...
                         df_contrast.repetition};

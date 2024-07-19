@@ -6,7 +6,7 @@ function data = motion_correction_non_rigid(data, motion_curves, csm, params)
     [n_echoes, n_sets, n_repetitions] = size(data.k_spaces);
 
     n_contrasts = size(data.sampling_masks);
-    data.displacement_fields = cell(n_contrasts);
+    data.bin_images = cell(n_contrasts);
     data.k_spaces_corrected = cell(n_contrasts);
     data.binned_sampling_masks = cell(n_contrasts);
 
@@ -37,7 +37,11 @@ function data = motion_correction_non_rigid(data, motion_curves, csm, params)
                         continue;
                     end
                 end
-
+                
+                if strlength(params.load_disp_fields) > 0
+                    continue;
+                end
+                
                 [weighted_k_spaces, weighted_sampling_masks, bin_soft_weights] = soft_binning( ...
                                 data.k_spaces_corrected{echo,set,repetition}, ...
                                 data.segment_masks{echo,set,repetition}, ...
