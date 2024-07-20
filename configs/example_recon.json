@@ -84,14 +84,14 @@
         "ref_bin": 4, // 1: inspiration, end: expiration
             // provide a list to reconstruct using a different bin as reference, e.g. [1, 2, 3, 4]
             // set to 0 to reconstruct to all bins
-        "bin_recon_type": "it_sense", // it_sense, orcca
+        "bin_recon_type": "it_sense", // one of: it_sense, orcca, admm
         "soft_fn": "bin_range_scaled", // choose exponential decay function, one of bins_avg, bin_range, bin_range_scaled
         "soft_decay": 1, // exponential decay for the soft binning
         "intrabin_TL_corr": true, // whether or not to apply intrabin translational correction
         "bin_resolution_factor": 1, // Set it to less than 1 to reduce bin images resolution (e.g. 0.5)
         "bin_denoise": false, // whether or not to apply HD PROST denoising to bin images
         "load_disp_fields" : "", // name of the run from which the displacement fields are loaded, set as "" to calculate the disp fields
-        "bin_prost_params": {
+        "bin_prost_params": { // only used if bin_denoise == true, or if bin_recon_type == admm
             // Same parameters as prost_params below
             "sig": 0.055,
             "patch_sz": 5,
@@ -102,6 +102,15 @@
             "recon_mode": 6,
             "sharpness": 0,
             "type": 0,
+        },
+        "admm_params": { // only used if bin_recon_type == admm
+            // same parameters as admm_params below
+            "max_iter": 3,
+            "cg_max_iter_first": 5,
+            "cg_max_iter": 5,
+            "cg_residual_tol": 1e-10,
+            "cg_lambda": 0.01,
+            "verbose": 0,
         },
         "orcca_params": { // only used if bin_recon_type == orcca
             // if weight_scale > 0, other weights are scaled with the data,
