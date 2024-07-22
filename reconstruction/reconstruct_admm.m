@@ -1,14 +1,13 @@
 function [x_out, Rx_history, y_history, x_history] = reconstruct_admm(kdata, E_operator, admm_params, prost_params)
 % RECONSTRUCT_ADMM Run ADMM optimization with HD-PROST
 %  Inputs:
-%        kdata: cell of arbitrary size (n_images, e.g. number of contrasts,
+%        kdata: cell of arbitrary size n_images (e.g. number of contrasts,
 %               or number of bins), each with an array of size
-%               (n_kx, n_ky, n_kz, n_coils, n_bins)
-%        E_operator: cell of size (n_images,), each with motion compensated
+%               (n_kx, n_ky, n_kz, *), compatible with its E_operator
+%        E_operator: cell of size n_images, each with motion compensated
 %               operator
-%        prost_params: parameters used in the second step (PROST
-%               optimization). See PROST params in the PROST function
-%        admm_params: consists of all the parameters related to the MR reconstruction (1)
+%        prost_params: parameters used in the second step (PROST optimization)
+%        admm_params: parameters related to the first step (MR reconstruction)
 %                  - max_iter: total number of ADMM iterations
 %                  - cg_residual_tol: conjugate gradient tolerance (usually set to 1e-10)
 %                  - cg_max_iter_first: maximum number of iterations at the first MR optimization
@@ -60,8 +59,8 @@ prost_params = fill_struct_values(prost_params, struct( ...
     type = 0, ...
     ref_idx = 1));
 
-n_images = numel(kdata);
-[n_kx, n_ky, n_kz, n_coils, n_bins] = size(kdata{1});
+n_images = numel(kdata); % e.g. n_contrasts or n_bins
+[n_kx, n_ky, n_kz] = size(kdata{1}, 1:3);
 
 result_size = [n_kx, n_ky, n_kz, n_images];
 x = zeros(result_size); % resulting images
@@ -124,7 +123,7 @@ for i_iter = 1:admm_params.max_iter
         warning("NaN found after denoising: ite=%i nans=%d\n", i_iter, count_nan);
     end
 
-	% STEP 3: Lagrangian Update (y)
+    % STEP 3: Lagrangian Update (y)
     y = y + x - Rx;
 
     % Save history
