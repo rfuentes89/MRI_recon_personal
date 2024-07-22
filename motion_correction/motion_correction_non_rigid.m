@@ -37,11 +37,12 @@ function data = motion_correction_non_rigid(data, motion_curves, csm, params)
                         continue;
                     end
                 end
-                
+
+                % Bin images are not needed when loading previous disp fields
                 if strlength(params.load_disp_fields) > 0
                     continue;
                 end
-                
+
                 [weighted_k_spaces, weighted_sampling_masks, bin_soft_weights] = soft_binning( ...
                                 data.k_spaces_corrected{echo,set,repetition}, ...
                                 data.segment_masks{echo,set,repetition}, ...

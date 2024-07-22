@@ -90,7 +90,7 @@
         "intrabin_TL_corr": true, // whether or not to apply intrabin translational correction
         "bin_resolution_factor": 1, // Set it to less than 1 to reduce bin images resolution (e.g. 0.5)
         "bin_denoise": false, // whether or not to apply HD PROST denoising to bin images
-        "load_disp_fields" : "" // name of the run from which the displacement fields are loaded, set as "" to calculate the displacement fields. 
+        "load_disp_fields" : "", // name of the run from which the displacement fields are loaded, set as "" to calculate the disp fields
         "bin_prost_params": {
             // Same parameters as prost_params below
             "sig": 0.055,
