@@ -1,4 +1,4 @@
-function  res = Cruz_E_3D_CART_BATCH(interpolation_matrices,At,csm,ncoils,siz,Ksiz)
+function  res = Cruz_E_3D_CART_BATCH(interpolation_matrices,At,csm,siz,Ksiz)
 % Operator used for non-rigid MoCo
 % reconstructs considering binned data and displacement fields (MF)
 
@@ -6,7 +6,6 @@ res.adjoint = 0; % flag
 res.interpolation_matrices = interpolation_matrices;
 res.At = At; % sampled points [Nx,Ny,Nz,Nm] logical matrix
 res.coils = csm; % coils [Nx,Ny,Nz,Nc]
-res.ncoils = ncoils; % size(coils) ADDED FROM CAMILA's CODE
 res.siz = siz; % size in image space
 res.Ksiz = Ksiz; % size in k-space
 res = class(res,'Cruz_E_3D_CART_BATCH');
