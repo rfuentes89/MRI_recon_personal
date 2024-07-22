@@ -8,9 +8,9 @@ function bin_images = reconstruct_bin_images( ...
 
     switch lower(params_moco.bin_recon_type)
         case "it_sense"
-            bin_images = reconstruct_bin_images_it_sense(k_spaces, sampling_masks, csm);
+            bin_images_raw = reconstruct_bin_images_it_sense(k_spaces, sampling_masks, csm);
         case "orcca"
-            bin_images = reconstruct_bin_images_orcca( ...
+            bin_images_raw = reconstruct_bin_images_orcca( ...
                 k_spaces, ...
                 sampling_masks, ...
                 csm, ...
@@ -18,7 +18,7 @@ function bin_images = reconstruct_bin_images( ...
                 motion_curve, ...
                 params_moco);
         case "admm"
-            bin_images = reconstruct_bin_images_admm( ...
+            bin_images_raw = reconstruct_bin_images_admm( ...
                 k_spaces, ...
                 sampling_masks, ...
                 csm, ...
@@ -27,48 +27,37 @@ function bin_images = reconstruct_bin_images( ...
         otherwise
             error("unknown bin reconstruction method: %s", params_moco.bin_recon_type);
     end
-end
-
-function bin_images = reconstruct_bin_images_admm( ...
-    k_spaces, sampling_masks, csm, params_admm, params_PROST)
-    n_bins = numel(k_spaces);
-
-    E_operator = cell(n_bins, 1);
-    for i_bin = 1:n_bins
-        E_operator{i_bin} = Cruz_E_3D_CARTESIAN( ...
-            sampling_masks{i_bin}, ...
-            csm.coil_sensitivity_maps, ...
-            size(k_spaces{i_bin}, 1:3), ...
-            size(k_spaces{i_bin}, 1:3) ...
-        );
-    end
-
-    images_raw = HDPROST_NON_RIGID(k_spaces, E_operator, params_admm, params_PROST);
 
     % Flip to the correct orientation
+    n_bins = numel(k_spaces);
     bin_images = cell(n_bins, 1);
     for i_bin = 1:n_bins
-        bin_images{i_bin} = flip(flip(flip(images_raw{i_bin}, 1), 2), 3);
+        bin_images{i_bin} = flip(flip(flip(bin_images_raw{i_bin}, 1), 2), 3);
     end
+end
+
+function bin_images = reconstruct_bin_images_admm(k_spaces, sampling_masks, csm, params_admm, params_PROST)
+    % Prepare E_operators
+    E_operators = build_operator_rigid(k_spaces, sampling_masks, csm);
+
+    % Reconstruct
+    bin_images = HDPROST_NON_RIGID(k_spaces, E_operators, params_admm, params_PROST);
 end
 
 function bin_images = reconstruct_bin_images_it_sense(k_spaces, sampling_masks, csm)
-    n_bins = numel(k_spaces);
-
+    % Apply filter to kspace
     filter_dims = size(k_spaces{1}, 1:3);
     filter_std = 40;
-
     filter = fspecial3('gaussian', filter_dims, filter_std);
+    filtered_k_space = cellfun(@(kspace) kspace .* filter, k_spaces, "UniformOutput", false);
 
-    bin_images = cell(size(k_spaces));
-    for bin = 1:n_bins
+    % Prepare E_operators
+    E_operators = build_operator_rigid(k_spaces, sampling_masks, csm);
 
-        filtered_k_space = k_spaces{bin} .* filter;
-
-        bin_image = it_SENSE(filtered_k_space, sampling_masks{bin}, csm);
-        bin_images{bin} = rescale(abs(bin_image), 0, 1);
-
-    end
+    % Reconstruct
+    n_iter = 3;
+    verbose = false;
+    bin_images = reconstruction_it_SENSE(filtered_k_space, E_operators, n_iter, verbose);
 end
 
 function bin_images = reconstruct_bin_images_orcca( ...
@@ -131,9 +120,6 @@ function bin_images = reconstruct_bin_images_orcca( ...
 
     disp('************ XD-ORCCA reconstruction **************')
     images = CSL1NlCg_ORCCA(params_orcca);
-
-    % Flip dimensions (image is returned upside down)
-    images = images(end:-1:1,end:-1:1,end:-1:1,:);
 
     % Return as cell
     bin_images = cell(n_bins, 1);

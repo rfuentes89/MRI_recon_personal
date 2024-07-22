@@ -1,18 +1,40 @@
 function images = reconstruct_images( ...
-    data, coil_sensitivity_maps, reconstruction_type, motion_correction_type, admm_params, prost_params)
+    data, csm, reconstruction_type, motion_correction_type, admm_params, prost_params)
 
+    % Prepare E-operators
+    switch lower(motion_correction_type)
+        case "non_rigid"
+            E_operators = build_operator_non_rigid( ...
+                data.k_spaces_corrected, ...
+                data.binned_sampling_masks, ...
+                data.interpolation_matrix, ...
+                csm);
+            target = "k_spaces_corrected"; % TODO(pdpino): could this be named k_spaces?
+        case {"translational", "none"}
+            E_operators = build_operator_rigid( ...
+                data.k_spaces, ...
+                data.sampling_masks, ...
+                csm);
+            target = "k_spaces";
+        otherwise
+            error("unknown motion correction type: %s", motion_correction_type);
+    end
+
+    % Run reconstruction
     switch lower(reconstruction_type)
         case "it_sense"
-            if motion_correction_type == "non_rigid"
-                images = reconstruction_non_rigid_it_SENSE(data, coil_sensitivity_maps);
-            else
-                images = reconstruction_it_SENSE(data, coil_sensitivity_maps);
-            end
+            n_iter = 4;
+            verbose = false;
+            images_raw = reconstruction_it_SENSE(data.(target), E_operators, n_iter, verbose);
         case "admm"
-            assert(motion_correction_type == "non_rigid", ...
-                "ADMM only supported for non-rigid motion correction");
-            images = reconstruction_admm(data, coil_sensitivity_maps, admm_params, prost_params);
+            images_raw = HDPROST_NON_RIGID(data.(target), E_operators, admm_params, prost_params);
         otherwise
             error("unknown reconstruction method: %s", reconstruction_type);
+    end
+
+    % Flip to account for wrong-orientation
+    images = cell(size(images_raw));
+    for i_image = 1:numel(images_raw)
+        images{i_image} = flip(flip(flip(images_raw{i_image},1),2),3);
     end
 end

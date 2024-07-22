@@ -1,19 +1,21 @@
-function images = reconstruction_it_SENSE(data, csm)
+function images = reconstruction_it_SENSE(k_spaces, E_operators, n_iter, verbose)
+% RECONSTRUCTION_IT_SENSE Reconstruct a group of images using IT-SENSE
+%
+% Args:
+%       - k_spaces: cell with n_contrasts to reconstruct
+%       - E_operators: cell with n_contrasts, each with the operator passed
+%         to CG-SENSE
+%       - n_iter: number of CG-SENSE iterations
+%       - verbose: CG-SENSE verbosity
+    images = cell(size(k_spaces));
+    n_images = numel(k_spaces);
 
-    images = cell(size(data.k_spaces));
-
-    [n_echoes, n_sets, n_repetitions] = size(data.k_spaces);
-
-    for repetition = 1:n_repetitions
-        for set = 1:n_sets
-            for echo = 1:n_echoes
-                images{echo,set,repetition} = it_SENSE( ...
-                    data.k_spaces{echo,set,repetition}, ...
-                    data.sampling_masks{echo,set,repetition}, ...
-                    csm ...
-                );
-            end
-        end
+    for i_image = 1:n_images
+        images{i_image} = Cart_itSENSE( ...
+            k_spaces{i_image}, ...
+            E_operators{i_image}, ...
+            n_iter, ...
+            verbose);
     end
 end
 
