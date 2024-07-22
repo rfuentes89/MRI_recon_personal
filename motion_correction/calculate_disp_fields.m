@@ -1,53 +1,31 @@
-function data = calculate_disp_fields(data, df_contrast, ref_bin)
+function displacement_fields = calculate_disp_fields(data, ref_bin)
 %CALCULATE_DISP_FIELDS Calculate non-rigid displacement fields from
 %bin_images
     assert(isfield(data, "bin_images"), ...
         "bin_images not present in data, " + ...
-        "check selected_contrast_for_disp_fields is correct " + ...
-        "and motion_correction_params.type is non_rigid");
+        "check motion_correction_params.type is non_rigid");
 
-    % Choose selected to compute disp fields
-    if df_contrast.echo ~= -1 % Only one contrast is chosen for all DFs
-        is_chosen_contrast = @(echo, set, rep) echo == df_contrast.echo && set == df_contrast.set && rep == df_contrast.repetition;
-        n_bins = numel(data.bin_images{df_contrast.echo,df_contrast.set,df_contrast.repetition});
-    else
-        is_chosen_contrast = @(echo, set, rep) true;
-        n_bins = numel(data.bin_images{1});
-    end
-
-    assert(n_bins > 0, "found zero bin images in selected contrast");
-    assert(ref_bin <= n_bins, "refbin=%d cannot be higher than n_bins=%d", ref_bin, n_bins);
-
-    [n_echoes, n_sets, n_repetitions] = size(data.k_spaces);
-    % Calculate displacement fields
-    data.displacement_fields = cell(n_echoes, n_sets, n_repetitions);
+    [n_echoes, n_sets, n_repetitions] = size(data.bin_images);
+    displacement_fields = cell(n_echoes, n_sets, n_repetitions);
     for repetition = 1:n_repetitions
         for set = 1:n_sets
             for echo = 1:n_echoes
-                if ~is_chosen_contrast(echo, set, repetition), continue; end
+                % Skip computation if bin images are not present
+                n_bins = numel(data.bin_images{echo,set,repetition});
+                if n_bins == 0, continue; end
+                assert(ref_bin <= n_bins, "refbin=%d cannot be higher than n_bins=%d", ref_bin, n_bins);
+
                 % Calculate displacement fields
                 dfs = register_bins(data.bin_images{echo,set,repetition}, ref_bin);
                 dfs = post_process_dfs( ...
                     dfs, ...
                     size(data.k_spaces_corrected{echo, set, repetition}, 1:3));
-                data.displacement_fields{echo,set,repetition} = dfs;
+                displacement_fields{echo,set,repetition} = dfs;
             end
         end
     end
 
-    % Point displacement fields to chosen DF
-    if df_contrast.echo ~= -1
-        for repetition = 1:n_repetitions
-            for set = 1:n_sets
-                for echo = 1:n_echoes
-                    data.displacement_fields{echo,set,repetition} = data.displacement_fields{...
-                        df_contrast.echo,...
-                        df_contrast.set,...
-                        df_contrast.repetition};
-                end
-            end
-        end
-    end
+    assert(exist("dfs", "var"), "no bin images found, check selected_contrast_for_disp_fields is correct");
 end
 
 function dfs = post_process_dfs(dfs, original_size)

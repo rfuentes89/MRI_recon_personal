@@ -156,27 +156,11 @@ for i_ref_bin = 1:n_ref_bins
     suffix = ternary(n_ref_bins > 1, sprintf("_refpos%02d", ref_bin), "");
 
     if CONFIG.motion_correction_params.type == "non_rigid"
-        if strlength(CONFIG.motion_correction_params.load_disp_fields) > 0
-            displacement_fields_file = fullfile(CONFIG.acq_folder,'recons' ,CONFIG.motion_correction_params.load_disp_fields, 'displacement_fields' + suffix + '.mat');
-            assert(isfile(displacement_fields_file), "displacement_fields not found: %s", displacement_fields_file);
-            fprintf("\tLoading displacement fields\n");
-            load(displacement_fields_file, 'displacement_fields');
-            motion_corrected_data.displacement_fields = displacement_fields;
-        else
-            fprintf("\tCalculating displacement fields\n");
-            motion_corrected_data = calculate_disp_fields( ...
-                motion_corrected_data, ...
-                CONFIG.motion_correction_params.selected_contrast_for_disp_fields, ...
-                ref_bin);
-            % Save to .mat file
-            if CONFIG.save_disp_fields
-                filename = fullfile(CONFIG.run_folder, "displacement_fields" + suffix + ".mat");
-                save(filename, "-struct", "motion_corrected_data", "displacement_fields");
-                disp("\tSaved DFs to " + filename);
-            end
-        end
-        motion_corrected_data = pre_compute_interpolation_matrix(motion_corrected_data, ...
-                CONFIG.motion_correction_params.selected_contrast_for_disp_fields);
+        motion_corrected_data = prepare_displacement_fields( ...
+            motion_corrected_data, ...
+            CONFIG, ...
+            ref_bin, ...
+            suffix);
     end
 
     fprintf("\tReconstructing images\n");
@@ -224,6 +208,53 @@ end
 %% Write config at end
 CONFIG.timestamp_end = string(datetime("now"), "yyyy-MM-dd_HH:mm:ss");
 save_config(CONFIG.run_folder, CONFIG);
+
+%% Functions
+function data = prepare_displacement_fields(data, config, ref_bin, fname_suffix)
+    df_fname = sprintf("displacement_fields%s.mat", fname_suffix);
+    if strlength(config.motion_correction_params.load_disp_fields) > 0
+        % Load DFs from previous run
+        displacement_fields_file = fullfile( ...
+            config.acq_folder, ...
+            "recons", ...
+            config.motion_correction_params.load_disp_fields, ...
+            df_fname);
+        assert(isfile(displacement_fields_file), "displacement_fields not found: %s", displacement_fields_file);
+
+        fprintf("\tLoading displacement fields\n");
+        load(displacement_fields_file, "displacement_fields");
+        data.displacement_fields = displacement_fields;
+    else
+        fprintf("\tCalculating displacement fields\n");
+        data.displacement_fields = calculate_disp_fields(data, ref_bin);
+
+        % Save to .mat file
+        if config.save_disp_fields
+            filename = fullfile(config.run_folder, df_fname);
+            save(filename, "-struct", "data", "displacement_fields");
+            fprintf("\tSaved DFs to %s\n", filename);
+        end
+    end
+
+    % Compute interpolation matrices
+    data.interpolation_matrix = pre_compute_interpolation_matrix(data.displacement_fields);
+
+    % Point matrices to chosen contrast
+    df_contrast = config.motion_correction_params.selected_contrast_for_disp_fields;
+    if df_contrast.echo ~= -1
+        [n_echoes, n_sets, n_repetitions] = size(data.interpolation_matrix);
+        for repetition = 1:n_repetitions
+            for set = 1:n_sets
+                for echo = 1:n_echoes
+                    data.interpolation_matrix{echo,set,repetition} = data.interpolation_matrix{...
+                        df_contrast.echo,...
+                        df_contrast.set,...
+                        df_contrast.repetition};
+                end
+            end
+        end
+    end
+end
 
 %% Small util functions
 function save_dicom(config, image, input_info_name, contrast_name)
