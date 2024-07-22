@@ -44,6 +44,7 @@ admm_params = fill_struct_values(admm_params, struct( ...
     cg_max_iter = 5, ...
     cg_residual_tol = 1e-10, ...
     cg_lambda = 0.01, ...
+    last_iter_skip_prost = false, ...
     verbose = 0));
 
 % Default parameters for PROST recon
@@ -96,10 +97,9 @@ for i_iter = 1:admm_params.max_iter
         end
     end
 
-    % if i_iter == admm_params.max_iter
-    %     % TODO(pdpino): check this. Last step doesn't do denoising?
-    %     break;
-    % end
+    if admm_params.last_iter_skip_prost && i_iter == admm_params.max_iter
+        break;
+    end
 
     %  OPTIMIZATION 2: Tensor Decomposition (Rx - denoising)
     added_images = double(x + y);
