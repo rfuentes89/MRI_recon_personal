@@ -25,9 +25,9 @@ function images = reconstruct_images( ...
         case "it_sense"
             n_iter = 4;
             verbose = false;
-            images_raw = reconstruction_it_SENSE(data.(target), E_operators, n_iter, verbose);
+            images_raw = reconstruct_it_SENSE(data.(target), E_operators, n_iter, verbose);
         case "admm"
-            images_raw = HDPROST_NON_RIGID(data.(target), E_operators, admm_params, prost_params);
+            images_raw = reconstruct_admm(data.(target), E_operators, admm_params, prost_params);
         otherwise
             error("unknown reconstruction method: %s", reconstruction_type);
     end

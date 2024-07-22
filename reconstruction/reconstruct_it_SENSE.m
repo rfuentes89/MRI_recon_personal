@@ -1,4 +1,4 @@
-function images = reconstruction_it_SENSE(k_spaces, E_operators, n_iter, verbose)
+function images = reconstruct_it_SENSE(k_spaces, E_operators, n_iter, verbose)
 % RECONSTRUCTION_IT_SENSE Reconstruct a group of images using IT-SENSE
 %
 % Args:

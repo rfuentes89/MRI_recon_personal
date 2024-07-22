@@ -1,5 +1,5 @@
-function [x_out, Rx_history, y_history, x_history] = HDPROST_NON_RIGID(kdata, E_operator, admm_params, prost_params)
-% HDPROST_NON_RIGID Run ADMM optimization with HD-PROST
+function [x_out, Rx_history, y_history, x_history] = reconstruct_admm(kdata, E_operator, admm_params, prost_params)
+% RECONSTRUCT_ADMM Run ADMM optimization with HD-PROST
 %  Inputs:
 %        kdata: cell of arbitrary size (n_images, e.g. number of contrasts,
 %               or number of bins), each with an array of size

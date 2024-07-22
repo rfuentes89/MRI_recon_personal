@@ -41,7 +41,7 @@ function bin_images = reconstruct_bin_images_admm(k_spaces, sampling_masks, csm,
     E_operators = build_operator_rigid(k_spaces, sampling_masks, csm);
 
     % Reconstruct
-    bin_images = HDPROST_NON_RIGID(k_spaces, E_operators, params_admm, params_PROST);
+    bin_images = reconstruct_admm(k_spaces, E_operators, params_admm, params_PROST);
 end
 
 function bin_images = reconstruct_bin_images_it_sense(k_spaces, sampling_masks, csm)
@@ -57,7 +57,7 @@ function bin_images = reconstruct_bin_images_it_sense(k_spaces, sampling_masks, 
     % Reconstruct
     n_iter = 3;
     verbose = false;
-    bin_images = reconstruction_it_SENSE(filtered_k_space, E_operators, n_iter, verbose);
+    bin_images = reconstruct_it_SENSE(filtered_k_space, E_operators, n_iter, verbose);
 end
 
 function bin_images = reconstruct_bin_images_orcca( ...
