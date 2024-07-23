@@ -56,6 +56,9 @@ twix = read_twix(path_to_twix);
 disp("step 1: unpacking raw data")
 data = read_raw_data(twix, CONFIG.selected_contrasts, CONFIG.coil_params.use_only);
 
+% Make sure the number of contrasts matches
+assert_contrasts_number(data, CONFIG);
+
 %% STEP 1.2: Remove Oversampling
 
 disp("step 1.2: removing oversampling")
@@ -278,4 +281,15 @@ function save_dicom(config, image, input_info_name, contrast_name)
     if ~exist(folder, "dir"), mkdir(folder), end
     filename = fullfile(folder, contrast_name + ".dcm");
     write_dicom_volume(abs(image), filename, info_base, config.dicom_params);
+end
+
+function assert_contrasts_number(data, config)
+% Make sure contrasts names given are the same number of kspaces loaded
+% from the twix file.
+    n_cnames = numel(config.seq_params.contrast_names);
+    n_kspaces = numel(data.k_spaces);
+    [n_echoes, n_sets, n_repetitions] = size(data.k_spaces);
+    assert(n_cnames == n_kspaces, ...
+        "Given %d contrast names for %d kspaces found (echoes=%d, sets=%d, reps=%d)", ...
+        n_cnames, n_kspaces, n_echoes, n_sets, n_repetitions);
 end
