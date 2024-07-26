@@ -100,6 +100,13 @@ for i_iter = 1:admm_params.max_iter
         break;
     end
 
+    % Check for nans
+    count_nan = sum(isnan(x(:)));
+    if count_nan > 0
+        warning("NaN found after ADMM-MR: ite=%i nans=%d\n", i_iter, count_nan);
+        x(isnan(x)) = 0;
+    end
+
     %  OPTIMIZATION 2: Tensor Decomposition (Rx - denoising)
     added_images = double(x + y);
 
@@ -120,7 +127,8 @@ for i_iter = 1:admm_params.max_iter
     % Check for NaNs
     count_nan = sum(isnan(Rx(:)));
     if count_nan > 0
-        warning("NaN found after denoising: ite=%i nans=%d\n", i_iter, count_nan);
+        warning("NaN found after ADMM-denoising: ite=%i nans=%d\n", i_iter, count_nan);
+        Rx(isnan(Rx)) = 0;
     end
 
     % STEP 3: Lagrangian Update (y)
