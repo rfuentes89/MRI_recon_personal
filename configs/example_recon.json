@@ -105,9 +105,9 @@
         },
         "admm_params": { // only used if bin_recon_type == admm
             // same parameters as admm_params below
-            "max_iter": 3,
-            "cg_max_iter_first": 5,
-            "cg_max_iter": 5,
+            "max_iter": 5,
+            "cg_max_iter_first": 3,
+            "cg_max_iter": 3,
             "cg_residual_tol": 1e-10,
             "cg_lambda": 0.01,
             "last_iter_skip_prost": false,
@@ -159,11 +159,11 @@
         "type": 0,
     },
     "admm_params": {
-        "max_iter": 3, // Max ADMM iterations
-        "cg_max_iter_first": 5, // Max CG iterations in the first ADMM iteration
-        "cg_max_iter": 5, // Max CG iterations in the other ADMM iterations
+        "max_iter": 5, // Max ADMM iterations
+        "cg_max_iter_first": 3, // Max CG iterations in the first ADMM iteration
+        "cg_max_iter": 3, // Max CG iterations in the other ADMM iterations
         "cg_residual_tol": 1e-10, // Stops if residuals improve less than this
-        "cg_lambda": 0.01, // Prior's weight
+        "cg_lambda": 0.1, // Prior's weight
         "last_iter_skip_prost": false, // Skip HD_PROST in the last iteration
         "verbose": 0,
     }
