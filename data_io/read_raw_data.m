@@ -101,7 +101,7 @@ function data = read_raw_data(twix, selected_contrasts, selected_coils)
                 switch scanner_software_version
                     case "syngo MR E11" % Aera
                         used_offsets = ternary(mod(echo, 2), base_offset, [0, 0, 0]);
-                    case "syngo MR XA50" % Free.Max
+                    case {"syngo MR XA50", "syngo MR XA60"} % Free.Max
                         used_offsets = base_offset;
                     otherwise
                         warning("unrecognised scanner: %s, defaulting to XA50 behaviour", scanner_software_version);
