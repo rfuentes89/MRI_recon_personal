@@ -61,12 +61,14 @@
     },
     "coil_params": {
         "use_only": [], // pass empty list to use all coils
-        "csm_algorithm": "ESPIRiT", // SOS, ESPIRiT, WASLH
+        "csm_algorithm": "espirit", // one of: espirit, walsh
         "n_compressed_coils": -1, // Set to -1 to not compress coils
         "reject_via_ui": false, // display UI to reject coils manually
         "csm_params": {
             // walsh only params:
             "smoothing" : 5,
+            // espirit only params:
+            "bart_params": "-r 20 -k 5 -c 0 -S",
         },
     },
     "selected_contrasts": {
