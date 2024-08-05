@@ -1,4 +1,4 @@
-function csm = get_csm(data, algorithm_name, selected)
+function csm = get_csm(data, algorithm_name, selected,params)
 %GET_CSM Wrapper to call csm calculation function
 
     k_space_for_csm = data.k_spaces{selected.echo,selected.set,selected.repetition};
@@ -7,6 +7,6 @@ function csm = get_csm(data, algorithm_name, selected)
     filter_std = 10;
     filtered_k_space = k_space_for_csm .* fspecial3('gaussian', filter_dims, filter_std);
 
-    csm = estimate_coil_sensitivity_maps(filtered_k_space, algorithm_name);
+    csm = estimate_coil_sensitivity_maps(filtered_k_space, algorithm_name,params);
 end
 

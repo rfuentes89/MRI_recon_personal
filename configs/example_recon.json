@@ -64,6 +64,10 @@
         "csm_algorithm": "ESPIRiT", // SOS, ESPIRiT, WASLH
         "n_compressed_coils": -1, // Set to -1 to not compress coils
         "reject_via_ui": false, // display UI to reject coils manually
+        "csm_params": {
+            // walsh only params:
+            "smoothing" : 5,
+        },
     },
     "selected_contrasts": {
         // pass empty list to use all
