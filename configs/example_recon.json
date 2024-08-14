@@ -53,6 +53,8 @@
     "save_images": false, // save denoised images as .mat
     "save_stdout": true, // save console output to stdout.txt (prints, warnings, errors)
 
+    "bins_only": false, // if true will only reconstruct bin images and stop
+
     // Output DICOM params
     "dicom_params": {
         // clamp image values by a percentage before saving to DICOM

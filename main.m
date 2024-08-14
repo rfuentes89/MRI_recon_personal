@@ -148,6 +148,8 @@ if CONFIG.save_dcm_intrabin && isfield(motion_corrected_data, "bin_images")
     end
 end
 
+if CONFIG.bins_only, return; end
+
 %% STEP 7: Reconstruction
 disp("step 7: reconstructing and denoising images")
 

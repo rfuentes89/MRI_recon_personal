@@ -4,10 +4,16 @@ function config = clean_config_recon(config)
     if ~isfield(config, 'save_images'), config.save_images = false; end
     if ~isfield(config, 'save_stdout'), config.save_stdout = false; end
     if ~isfield(config, 'debug_ksize'), config.debug_ksize = 0; end
+    if ~isfield(config, 'bins_only'), config.bins_only = false; end
     if ~isfield(config.motion_curve, 'zero_rl'), config.motion_curve.zero_rl = true; end
     if ~isfield(config.motion_curve, 'zero_fh'), config.motion_curve.zero_fh = false; end
     if ~isfield(config.motion_correction_params, 'load_disp_fields'), config.motion_correction_params.load_disp_fields = ""; end
     if ~isfield(config.coil_params, 'csm_params'), config.coil_params.csm_params = struct(bart_params="-r 20 -k 5 -c 0 -S"); end
+
+    % Add _BINSONLY for runs with bins_only set
+    if config.debug_ksize > 0
+        config.run_name = string(config.run_name) + "_BINSONLY";
+    end
 
     % Add _DEBUG for runs with debug_ksize set
     if config.debug_ksize > 0
