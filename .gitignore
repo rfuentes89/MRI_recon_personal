@@ -19,7 +19,7 @@ Bruno_data
 *.mat
 
 # Personal scripts
-debug*.m
+debug*
 nifty_call.m
 nonrigid_hdprost_batch.m
 recon_NRP_batch.m
