@@ -106,7 +106,7 @@ end
 n_coils = size(data.k_spaces{1}, 4);
 if CONFIG.coil_params.n_compressed_coils > 0 && CONFIG.coil_params.n_compressed_coils < n_coils
     disp("step 3.1: compressing coils")
-    data = compress_coils(data, CONFIG.coil_params.n_compressed_coils);
+    data.k_spaces = compress_coils_wrapper(data.k_spaces, CONFIG.coil_params.n_compressed_coils);
 end
 
 %% STEP 4: CSM Estimation
