@@ -11,7 +11,7 @@ function config = clean_config_recon(config)
     if ~isfield(config.coil_params, 'csm_params'), config.coil_params.csm_params = struct(bart_params="-r 20 -k 5 -c 0 -S"); end
 
     % Add _BINSONLY for runs with bins_only set
-    if config.debug_ksize > 0
+    if config.bins_only
         config.run_name = string(config.run_name) + "_BINSONLY";
     end
 
