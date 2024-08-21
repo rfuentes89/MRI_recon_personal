@@ -1,15 +1,6 @@
 function config = clean_config_recon(config)
 %CLEAN_RECON_PARAMS Pre-process recon config
-    % Backward compatibility
-    if ~isfield(config, 'save_images'), config.save_images = false; end
-    if ~isfield(config, 'save_stdout'), config.save_stdout = false; end
-    if ~isfield(config, 'debug_ksize'), config.debug_ksize = 0; end
-    if ~isfield(config, 'bins_only'), config.bins_only = false; end
-    if ~isfield(config.motion_curve, 'zero_rl'), config.motion_curve.zero_rl = true; end
-    if ~isfield(config.motion_curve, 'zero_fh'), config.motion_curve.zero_fh = false; end
-    if ~isfield(config.motion_correction_params, 'load_disp_fields'), config.motion_correction_params.load_disp_fields = ""; end
-    if ~isfield(config.motion_correction_params, 'registration_params'), config.motion_correction_params.registration_params = struct(); end
-    if ~isfield(config.coil_params, 'csm_params'), config.coil_params.csm_params = struct(bart_params="-r 20 -k 5 -c 0 -S"); end
+    config = add_backward_compat_params(config);
 
     % Add _BINSONLY for runs with bins_only set
     if config.bins_only
@@ -70,3 +61,21 @@ function config = clean_config_recon(config)
     end
 end
 
+
+function config = add_backward_compat_params(config)
+% Add backward compatibility parameters
+%
+% When new params are added to the base config (i.e. to
+% configs/example_recon.json), other users might have old JSON files which
+% are missing the new parameters. To avoid breaking those JSON files, a
+% default value is initialized here for the new parameters.
+    if ~isfield(config, 'save_images'), config.save_images = false; end
+    if ~isfield(config, 'save_stdout'), config.save_stdout = false; end
+    if ~isfield(config, 'debug_ksize'), config.debug_ksize = 0; end
+    if ~isfield(config, 'bins_only'), config.bins_only = false; end
+    if ~isfield(config.motion_curve, 'zero_rl'), config.motion_curve.zero_rl = true; end
+    if ~isfield(config.motion_curve, 'zero_fh'), config.motion_curve.zero_fh = false; end
+    if ~isfield(config.motion_correction_params, 'load_disp_fields'), config.motion_correction_params.load_disp_fields = ""; end
+    if ~isfield(config.motion_correction_params, 'registration_params'), config.motion_correction_params.registration_params = struct(); end
+    if ~isfield(config.coil_params, 'csm_params'), config.coil_params.csm_params = struct(bart_params="-r 20 -k 5 -c 0 -S"); end
+end
