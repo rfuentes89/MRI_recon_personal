@@ -1,4 +1,4 @@
-function displacement_fields = calculate_disp_fields(data, ref_bin)
+function displacement_fields = calculate_disp_fields(data, ref_bin, registration_params)
 %CALCULATE_DISP_FIELDS Calculate non-rigid displacement fields from
 %bin_images
     assert(isfield(data, "bin_images"), ...
@@ -16,7 +16,7 @@ function displacement_fields = calculate_disp_fields(data, ref_bin)
                 assert(ref_bin <= n_bins, "refbin=%d cannot be higher than n_bins=%d", ref_bin, n_bins);
 
                 % Calculate displacement fields
-                dfs = register_bins(data.bin_images{echo,set,repetition}, ref_bin);
+                dfs = register_bins(data.bin_images{echo,set,repetition}, ref_bin, registration_params);
                 dfs = post_process_dfs( ...
                     dfs, ...
                     size(data.k_spaces_corrected{echo, set, repetition}, 1:3));

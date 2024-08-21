@@ -231,7 +231,10 @@ function data = prepare_displacement_fields(data, config, ref_bin, fname_suffix)
         data.displacement_fields = displacement_fields;
     else
         fprintf("\tCalculating displacement fields\n");
-        data.displacement_fields = calculate_disp_fields(data, ref_bin);
+        data.displacement_fields = calculate_disp_fields( ...
+            data, ...
+            ref_bin, ...
+            config.motion_correction_params.registration_params);
 
         % Save to .mat file
         if config.save_disp_fields

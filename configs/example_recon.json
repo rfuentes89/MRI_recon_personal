@@ -146,6 +146,12 @@
                 "adapt_step": true, // if present, adapts step_size in each iteration
             },
         },
+        "registration_params": {
+            "zero_ref_bin": true, // whether or not to explictly set the reference bin's DF to zero
+            "nifty_params": "--nmi -be 0.0005 -sx 14", // params given to nifty_reg()
+            // Use -omp N to choose number of threads
+            // See NIFTY_REG/reg_f3d --help for more parameters
+        },
         "selected_contrast_for_disp_fields": {
             // Choose a fixed contrast to use for displacement fields
             "echo": -1, // Set to -1 to use each contrast for disp fields

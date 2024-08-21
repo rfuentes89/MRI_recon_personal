@@ -30,10 +30,11 @@ fprintf("Loaded %d bin images\n", n_bins);
 ref_bin = 4;
 
 % Call Nifty
-dfs = register_bins(bin_images, ref_bin);
+params.nifty_params = '--nmi -be 0.01 -vel -sx 1 -omp 5';
+dfs = register_bins(bin_images, ref_bin, params);
 % size: n_x, n_y, n_z, 3, n_bins
 
-fprintf("Finished register_bins()\n");
+fprintf("Finished register_bins() %s\n", params.nifty_params);
 
 %% Plot as colorfields
 i_slice = 17;
@@ -52,7 +53,7 @@ for i_bin = 1:n_bins
     pbaspect(ax, [size(bin_image, 2), size(bin_image, 1), 1]);
     title(sprintf("bin %d", i_bin));
 
-    ax = subplot(n_rows, n_cols, i_bin + n_bins);
+    ax = subplot(n_rows, n_cols, i_bin + n_bins*1);
     plot_disp_field_color(sqrt(df_rl.^2 + df_fh.^2), ax);
     title("Total magnitude");
 
@@ -65,7 +66,7 @@ for i_bin = 1:n_bins
     title("RL magnitude");
 end
 
-sgtitle(sprintf("slice=%d", i_slice));
+sgtitle(sprintf("slice=%d, refbin=%d, nifty=%s", i_slice, ref_bin, params.nifty_params), 'Interpreter', 'none');
 
 
 %% Plot image with DF arrows on top
