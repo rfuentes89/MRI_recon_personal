@@ -27,7 +27,7 @@
         "name": "inav-heart", // custom name to save motion_curves
         "recompute": false, // if present, will compute curve again and save it
         "zero_rl": true, // if true will ignore right-left motion
-        "zero_fh": true, // if true will ignore foot-head motion
+        "zero_fh": false, // if true will ignore foot-head motion
     },
 
     // Options for the sequence
