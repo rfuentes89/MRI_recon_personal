@@ -133,8 +133,10 @@ else
     motion_corrected_data = data;
 end
 
-%% Save bin images
-if CONFIG.save_dcm_intrabin && isfield(motion_corrected_data, "bin_images")
+%% Load or save bin images
+if strlength(CONFIG.motion_correction_params.load_bin_images) > 0
+    motion_corrected_data.bin_images = load_bin_images_wrapper(CONFIG);
+elseif CONFIG.save_dcm_intrabin && isfield(motion_corrected_data, "bin_images")
     for i_contrast = 1:numel(motion_corrected_data.bin_images)
         cname = string(CONFIG.seq_params.contrast_names{i_contrast});
         info_name = string(CONFIG.seq_params.scanner_dcms{i_contrast});
@@ -265,6 +267,31 @@ function data = prepare_displacement_fields(data, config, ref_bin, fname_suffix)
 end
 
 %% Small util functions
+function bin_images = load_bin_images_wrapper(config)
+    % Select only chosen motion field
+    chosen = config.motion_correction_params.selected_contrast_for_disp_fields;
+    if chosen.echo ~= -1
+        is_chosen = @(echo,set,rep) chosen.echo == echo && chosen.set == set && chosen.repetition == rep;
+    else
+        is_chosen = @(echo,set,rep) true;
+    end
+
+    [n_echoes, n_sets, n_repetitions] = size(config.seq_params.contrast_names);
+    bin_images = cell(n_echoes, n_sets, n_repetitions);
+    for echo = 1:n_echoes
+        for set = 1:n_sets
+            for repetition = 1:n_repetitions
+                if ~is_chosen(echo,set,repetition), continue; end
+
+                bin_images{echo,set,repetition} = load_bin_images( ...
+                    config.acq_folder, ...
+                    config.motion_correction_params.load_bin_images, ...
+                    config.seq_params.contrast_names{echo,set,repetition});
+            end
+        end
+    end
+end
+
 function save_dicom(config, image, input_info_name, contrast_name)
     contrast_name = string(contrast_name);
 

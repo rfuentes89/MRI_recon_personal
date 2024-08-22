@@ -10,18 +10,7 @@ CONFIG.run_name = "2024-05-22_itsense_n-intraTL_decayINF_DFbefore-flip";
 CONFIG.contrast_name = "HB1";
 
 %% Load bin images
-CONFIG.run_folder = fullfile(CONFIG.acq_folder, "recons", CONFIG.run_name);
-prefix = fullfile(CONFIG.run_folder, "dcm", CONFIG.contrast_name + "-bin");
-fpaths = dir([convertStringsToChars(prefix), '*', '.dcm']);
-
-assert(numel(fpaths) > 0, "Found zero bin images with prefix: %s", prefix);
-bin_images = cell(length(fpaths), 1);
-for i_fpath = 1:length(fpaths)
-    fpath = fpaths(i_fpath);
-    fpath = fullfile(fpath.folder, fpath.name);
-    bin_images{i_fpath} = squeeze(dicomread(fpath));
-end
-
+bin_images = load_bin_images(CONFIG.acq_folder, CONFIG.run_name, CONFIG.contrast_name);
 n_bins = numel(bin_images);
 fprintf("Loaded %d bin images\n", n_bins);
 

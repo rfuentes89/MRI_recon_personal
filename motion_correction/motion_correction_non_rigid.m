@@ -38,8 +38,8 @@ function data = motion_correction_non_rigid(data, motion_curves, csm, params)
                     end
                 end
 
-                % Bin images are not needed when loading previous disp fields
-                if strlength(params.load_disp_fields) > 0
+                % Do not reconstruct bin images when loading DFs or bin images
+                if strlength(params.load_disp_fields) > 0 || strlength(params.load_bin_images) > 0
                     continue;
                 end
 

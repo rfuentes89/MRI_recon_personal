@@ -76,6 +76,7 @@ function config = add_backward_compat_params(config)
     if ~isfield(config.motion_curve, 'zero_rl'), config.motion_curve.zero_rl = true; end
     if ~isfield(config.motion_curve, 'zero_fh'), config.motion_curve.zero_fh = false; end
     if ~isfield(config.motion_correction_params, 'load_disp_fields'), config.motion_correction_params.load_disp_fields = ""; end
+    if ~isfield(config.motion_correction_params, 'load_bin_images'), config.motion_correction_params.load_bin_images = ""; end
     if ~isfield(config.motion_correction_params, 'registration_params'), config.motion_correction_params.registration_params = struct(); end
     if ~isfield(config.coil_params, 'csm_params'), config.coil_params.csm_params = struct(bart_params="-r 20 -k 5 -c 0 -S"); end
 end
