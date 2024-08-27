@@ -1,122 +1,102 @@
-function [best_rho, residuals] = Cart_itSENSE(m, E, maxit, verbose)
+function [image, residual_history] = Cart_itSENSE(k_space, E_operator, params)
 %
-% Uses conjugate gradient iteration to solve:
-%   (E^H*E)rho = E^H*m
+% Uses conjugate gradient (CG) iteration to solve objective function:
+%   (E^H*E)*rho = (E^H)*kspace
 %
 %  INPUT ARGUMENTS:
-%   - m                 : measured data [k,coil]
-%   - S                 : complex sensitivities [x,y,z,coil]
-%   - weights           : density compensation
-%   - maxit:            : maximum number of iterations of CG
-%   - precision:        : precision of gridding
+%   - k_space              : Measured k_space [kx, ky, kz, coils].
+%   - E_operator           : E_operator of the constrast.
+%   - params.max_iter      : Maximum number of iterations of CG. Defaults
+%                            to 4.
+%   - params.residual_tol  : Minimum residual threshold expected. Defaults
+%                            to 1e-6.
+%   - params.verbose       : If 1, provides detailed output information.
+%                            Defaults to 1.
 %
 %  OUTPUT:
-%   - rho               : reconstruction result
+%   - image                  : Reconstructed image
+%
+%   See also BUILD_OPERATOR_RIGID
 
-% Variable parameters:
-limit = 1e-6;
 
-% Get dimensions
-% siz = tformdata.siz;
-% coils = size(m,2);
-% num_ft_elements = prod(siz);
-
-% fhandle_E = @get_E;
-% fhandle_EH = @get_EH;
-
-% coil_rss = tformdata.coil_rss;
-
-if nargin<4
-    verbose = 1;
+if ~exist('params', 'var')
+    params = struct();
 end
 
-% Form right hand side:
-if verbose
-    fprintf('Forming right hand side...');
-end
-rhs = E'*m;
-siz = size(rhs);
+if ~isfield(params, 'max_iter'),       params.max_iter = 4; end
+if ~isfield(params, 'residual_tol'),   params.residual_tol = 1e-6; end
+if ~isfield(params, 'verbose'),        params.verbose = 0; end
 
-% S = reshape(S,num_ft_elements,coils);
-% parfor nc = 1: coils,
-%     %rhs(:,nc) = fhandle_EH(m(:,nc),tformdata,S(:,nc),precision);
-%     rhs(:,nc) = fhandle_EH(m(:,nc),tformdata,S(:,nc),precision);
-% end
-% 
-% rhs = sum(rhs,2);
-% 
-% %divide by rss
-% rhs = rhs ./  coil_rss(:);
-% %rhs = rhs ./  coil_rss(:); % additional
-% rhs(coil_rss==0) = 0;
-% rhs(isnan(rhs)) = 0;
+% NOTE: CG VARIABLES
+%       rho          : reconstructed image
+%       residual     : Measures how far the current approximate solution rho
+%                      is from completely satisfying the system.
+%       p            : Search direction vector of residual greatest decrease.
+%       alpha        : Magnitude of vector p to minimize the objective function.
+%       beta         : Used to compute p to determine the next search direction.
+
+
+
+% Form right hand side (rhs):
+rhs = E_operator'*k_space;
+
+% Initial solution
+rho = zeros(size(rhs));
 
 % Calculate initial residuals
-if verbose
-    fprintf('Calculate initial residual...');
+% NOTE: the formula is:
+% residual = rhs - E^H*(E*rho)
+% but since rho is zero, is just residual = rhs.
+residual = rhs;
+
+% Initial values
+p = residual;
+rr = residual(:)'*residual(:); % residual norm squared
+
+initial_rr = rr;
+if nargout > 1
+    residual_history = zeros(params.max_iter,1);
 end
 
-rho = zeros(siz);
-
-% rho = rho ./ coil_rss;
-% rho(coil_rss==0) = 0;
-% rho(isnan(rho)) = 0;    
-
-rho = rho(:);
-res = rho;
-
-if verbose
-    fprintf('done\n');
+% Run iterations
+if params.verbose >= 1
+    fprintf('\tStarting it-sense...\n');
 end
-% Iterations
-%---------------
-rhs = reshape(rhs, siz); 
-res = reshape(res, siz); 
-rho = reshape(rho, siz); 
-r = rhs - res;
-rr_0 = r(:)'*r(:);
-rr = 0;
 
-residuals = zeros(maxit,1);
-% Run iteration
-if verbose
-    fprintf('Iterating...\n');
-end
-for it = 1:maxit
-    rr_1 = rr;
-    rr = r(:)'*r(:);
-    if (it == 1)
-        p = r;
-    else        
-        beta = rr/rr_1;
-        p =  r + beta*p;
-    end
-    
-    q = E'*(E*p);
+for i_iter = 1:params.max_iter
 
-    % CG magnitude and direction
-    q = reshape(q, siz);      
-    alpha = rr/(p(:)'*q(:)); 
+    q = E_operator'*(E_operator*p);
+    alpha = rr/(p(:)'*q(:));
+
+    % Update result
     rho = rho + alpha*p;
-    r = r - alpha*q;
- 
-    clear q;
-    if verbose
-        fprintf('Iteration %d, rho = %12.8e\n', it, rr/rr_0);drawnow;
-    end
-    
-    
-    residuals(it) = rr/rr_0;
+    residual = residual - alpha*q;
 
-    
-    if (rr/rr_0 < limit)
-       break;
+    if nargout > 1
+        residual_history(i_iter) = rr;
     end
-    
+
+    if params.verbose >= 1
+        fprintf('\tite=%d, residual=%12.8e, intensity=%12.8e\n', i_iter, rr, mean(rho(:)));
+    end
+
+    improvement = rr/initial_rr;
+    if (improvement < params.residual_tol)
+        if params.verbose >= 1
+            fprintf('\tStopping: residuals improved less than tolerance: %12.8e\n', improvement);
+        end
+        break;
+    end
+
+    rr_old = rr;
+    rr = residual(:)'*residual(:);
+    beta = rr / rr_old;
+    p = residual + beta*p;
 end
 
-best_rho = reshape(rho, siz);
+if params.verbose >= 1 && i_iter >= params.max_iter
+    fprintf("\tStopped: reached max iter = %d\n", i_iter);
+end
 
-if verbose
-    fprintf('Reconstruction done\n');
+image = rho;
 end
