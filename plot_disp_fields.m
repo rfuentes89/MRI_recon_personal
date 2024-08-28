@@ -18,11 +18,16 @@ fprintf("Loaded %d bin images\n", n_bins);
 % Params
 ref_bin = 4;
 
+% Nifty params
+params.nifty_params = '--nmi -be 0.01 -omp 8 -sx 1 --rbn 8';
+params.tmp_dir = fullfile(getenv("WORKSPACE"), ".nifty-tmp-plot");
+
 % Call Nifty
-params.nifty_params = '--nmi -be 0.01 -vel -sx 1 -omp 5';
+tic();
 dfs = register_bins(bin_images, ref_bin, params);
 % size: n_x, n_y, n_z, 3, n_bins
 
+toc();
 fprintf("Finished register_bins() %s\n", params.nifty_params);
 
 %% Plot as colorfields
