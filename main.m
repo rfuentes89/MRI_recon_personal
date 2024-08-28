@@ -57,7 +57,7 @@ disp("step 1: unpacking raw data")
 data = read_raw_data(twix{end}, CONFIG.selected_contrasts, CONFIG.coil_params.use_only);
 
 % Make sure the number of contrasts matches
-assert_contrasts_number(data, CONFIG);
+CONFIG = assert_contrasts_number(data, CONFIG);
 
 %% STEP 1.2: Remove Oversampling
 
@@ -288,7 +288,7 @@ function save_dicom(config, image, input_info_name, contrast_name)
     write_dicom_volume(abs(image), filename, info_base, config.dicom_params);
 end
 
-function assert_contrasts_number(data, config)
+function config = assert_contrasts_number(data, config)
 % Make sure contrasts names given are the same number of kspaces loaded
 % from the twix file.
     n_cnames = numel(config.seq_params.contrast_names);
@@ -297,4 +297,14 @@ function assert_contrasts_number(data, config)
     assert(n_cnames == n_kspaces, ...
         "Given %d contrast names for %d kspaces found (echoes=%d, sets=%d, reps=%d)", ...
         n_cnames, n_kspaces, n_echoes, n_sets, n_repetitions);
+
+    % Reshape list of contrasts
+    contrasts_shape = [n_echoes, n_sets, n_repetitions];
+    config.seq_params.contrast_names = reshape(config.seq_params.contrast_names, contrasts_shape);
+    config.seq_params.scanner_dcms = reshape(config.seq_params.scanner_dcms, contrasts_shape);
+
+    % Save numbers explicitly as well
+    config.seq_params.n_echoes = n_echoes;
+    config.seq_params.n_sets = n_sets;
+    config.seq_params.n_repetitions = n_repetitions;
 end
