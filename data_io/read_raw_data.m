@@ -2,7 +2,6 @@ function data = read_raw_data(twix, selected_contrasts, selected_coils)
 
     coil_IDs = get_coil_IDs(twix);
 
-    twix = twix{end};
     unsorted_data = twix.image.unsorted(); % all data in acquisition order
 
     n_readouts = twix.image.NAcq; % Number of readouts acquired

@@ -54,7 +54,7 @@ twix = read_twix(path_to_twix);
 %% STEP 1.1: Unpack raw data
 
 disp("step 1: unpacking raw data")
-data = read_raw_data(twix, CONFIG.selected_contrasts, CONFIG.coil_params.use_only);
+data = read_raw_data(twix{end}, CONFIG.selected_contrasts, CONFIG.coil_params.use_only);
 
 % Make sure the number of contrasts matches
 assert_contrasts_number(data, CONFIG);
