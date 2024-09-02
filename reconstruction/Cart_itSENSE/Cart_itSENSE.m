@@ -133,9 +133,9 @@ function params = check_warm_start_params(params)
         if valid_image_reg || valid_image_initial || valid_lambda
             warning("itSENSE: warm start parameters are incomplete, you must provide image_reg, image_initial and lambda > 0" + ...
             "Falling back to cold start instead");
-            params.image_reg = 0;
-            params.image_initial = 0;
-            params.lambda = 0;
         end
+        params.image_reg = 0;
+        params.image_initial = 0;
+        params.lambda = 0;
     end
 end
