@@ -82,17 +82,12 @@ for i_iter = 1:admm_params.max_iter
             params.residual_tol = admm_params.cg_residual_tol;
             x(:,:,:,i_image) = Cart_itSENSE(kdata{i_image},E_operator{i_image}, params);
         else
-            image_reg = Rx(:,:,:,i_image)-y(:,:,:,i_image);
+            params.image_reg = Rx(:,:,:,i_image)-y(:,:,:,i_image);
+            params.image_initial = x(:,:,:,i_image);
+            params.lambda = admm_params.cg_lambda;
             params.max_iter = admm_params.cg_max_iter;
             params.residual_tol = admm_params.cg_residual_tol;
-
-            x(:,:,:,i_image) = Cart_itSENSE_reg_warm_start( ...
-                kdata{i_image},...
-                E_operator{i_image}, ...
-                image_reg, ...
-                x(:,:,:,i_image), ...
-                admm_params.cg_lambda, ...
-                params);
+            x(:,:,:,i_image) = Cart_itSENSE(kdata{i_image},E_operator{i_image}, params);
         end
     end
 

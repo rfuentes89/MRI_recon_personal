@@ -1,53 +1,62 @@
-function [image, residual_history] = Cart_itSENSE(k_space, E_operator, params)
-%
-% Uses conjugate gradient (CG) iteration to solve objective function:
-%   (E^H*E)*rho = (E^H)*kspace
+function [image, residual_history] = Cart_itSENSE(k_space,E_operator,params)
+% Uses conjugate gradient iteration to solve:
+%   (E^H*E + lambda) rho = E^H*k_space + lambda*image_reg
 %
 %  INPUT ARGUMENTS:
 %   - k_space              : Measured k_space [kx, ky, kz, coils].
-%   - E_operator           : E_operator of the constrast.
+%   - E_operator           : Encoding operator.
+%   - params.image_reg     : Regularization image used to maintain data
+%                            consistency after HD PROST denoising process. Only useful if lambda > 0
+%   - params.image_initial : Initial solution for a warm start based on
+%                            the last iteration reconstructed image. Only useful if lambda > 0
+%   - params.lambda        : Regularization strength, use 0 to disable regularization. Defaults to 0.
+%
 %   - params.max_iter      : Maximum number of iterations of CG. Defaults
-%                            to 4.
+%                            to 3.
 %   - params.residual_tol  : Minimum residual threshold expected. Defaults
 %                            to 1e-6.
 %   - params.verbose       : If 1, provides detailed output information.
-%                            Defaults to 1.
+%                            Defaults to 0.
 %
 %  OUTPUT:
-%   - image                  : Reconstructed image
+%   - image               : Reconstructed image.
 %
-%   See also BUILD_OPERATOR_RIGID
+%   See also BUILD_OPERATOR_RIGID, BUILD_OPERATOR_NON_RIGID
 
-
+% Check parameters
 if ~exist('params', 'var')
     params = struct();
 end
 
-if ~isfield(params, 'max_iter'),       params.max_iter = 4; end
+if ~isfield(params, 'max_iter'),       params.max_iter = 3; end
 if ~isfield(params, 'residual_tol'),   params.residual_tol = 1e-6; end
 if ~isfield(params, 'verbose'),        params.verbose = 0; end
 
+params = check_warm_start_params(params);
+
 % NOTE: CG VARIABLES
-%       rho          : reconstructed image
+%       rho          : image reconstructed
 %       residual     : Measures how far the current approximate solution rho
 %                      is from completely satisfying the system.
 %       p            : Search direction vector of residual greatest decrease.
 %       alpha        : Magnitude of vector p to minimize the objective function.
 %       beta         : Used to compute p to determine the next search direction.
 
-
-
-% Form right hand side (rhs):
-rhs = E_operator'*k_space;
+% Form right hand side (rhs)
+rhs = E_operator'*k_space + params.lambda*params.image_reg;
 
 % Initial solution
-rho = zeros(size(rhs));
+if params.lambda > 0
+    rho = params.image_initial;
+else
+    rho = zeros(size(rhs));
+end
+
+% Form left hand side (lhs)
+lhs = E_operator'*(E_operator*rho) + params.lambda*rho;
 
 % Calculate initial residuals
-% NOTE: the formula is:
-% residual = rhs - E^H*(E*rho)
-% but since rho is zero, is just residual = rhs.
-residual = rhs;
+residual = rhs - lhs;
 
 % Initial values
 p = residual;
@@ -59,18 +68,22 @@ if nargout > 1
 end
 
 % Run iterations
-if params.verbose >= 1
-    fprintf('\tStarting it-sense...\n');
-end
-
 for i_iter = 1:params.max_iter
 
-    q = E_operator'*(E_operator*p);
+    q = E_operator'*(E_operator*p) + params.lambda*p;
     alpha = rr/(p(:)'*q(:));
 
     % Update result
     rho = rho + alpha*p;
     residual = residual - alpha*q;
+
+    improvement = rr/initial_rr;
+    if (improvement < params.residual_tol)
+        if params.verbose >= 1
+            fprintf('\tStopping: residuals improved less than tolerance: %12.8e\n', improvement);
+        end
+        break;
+    end
 
     if nargout > 1
         residual_history(i_iter) = rr;
@@ -99,4 +112,30 @@ if params.verbose >= 1 && i_iter >= params.max_iter
 end
 
 image = rho;
+end
+
+function params = check_warm_start_params(params)
+    % Check if 'image_reg', 'image_initial', and 'lambda' fields exist in params
+    valid_image_reg = isfield(params, 'image_reg');
+    valid_image_initial = isfield(params, 'image_initial');
+    valid_lambda = isfield(params, 'lambda') && params.lambda > 0;
+
+    % Determine if warm start mode should be used
+    if valid_image_reg && valid_image_initial && valid_lambda
+        if params.verbose >= 1
+            fprintf('\titSENSE: using warm start with lambda=%.3g\n', params.lambda);
+        end
+    else
+        if params.verbose >= 1
+            fprintf('\titSENSE: using cold start\n');
+        end
+        % Warn if warm start parameters are partially set but incomplete
+        if valid_image_reg || valid_image_initial || valid_lambda
+            warning("itSENSE: warm start parameters are incomplete, you must provide image_reg, image_initial and lambda > 0" + ...
+            "Falling back to cold start instead");
+            params.image_reg = 0;
+            params.image_initial = 0;
+            params.lambda = 0;
+        end
+    end
 end
