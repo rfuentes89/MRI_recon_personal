@@ -8,8 +8,6 @@ function image_out = apply_window_level(image, window, level)
 % Returned image is in range [0,1], same type as input array
     min_out = level - window / 2;
     max_out = level + window / 2;
-    image_out = image;
-    image_out(image_out < min_out) = min_out;
-    image_out(image_out > max_out) = max_out;
+    image_out = clip(image, min_out, max_out);
     image_out = ((image_out - min_out) / window);
 end
