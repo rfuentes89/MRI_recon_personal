@@ -1,5 +1,5 @@
 function images = reconstruct_images( ...
-    data, csm, reconstruction_type, motion_correction_type, admm_params, prost_params)
+    data, csm, reconstruction_type, motion_correction_type, admm_params, prost_params, it_sense_params)
 
     % Prepare E-operators
     switch lower(motion_correction_type)
@@ -23,9 +23,7 @@ function images = reconstruct_images( ...
     % Run reconstruction
     switch lower(reconstruction_type)
         case "it_sense"
-            n_iter = 4;
-            verbose = false;
-            images_raw = reconstruct_it_SENSE(data.(target), E_operators, n_iter, verbose);
+            images_raw = reconstruct_it_SENSE(data.(target), E_operators, it_sense_params);
         case "admm"
             images_raw = reconstruct_admm(data.(target), E_operators, admm_params, prost_params);
         otherwise

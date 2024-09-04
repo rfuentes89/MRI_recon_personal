@@ -73,10 +73,12 @@ function config = add_backward_compat_params(config)
     if ~isfield(config, 'save_stdout'), config.save_stdout = false; end
     if ~isfield(config, 'debug_ksize'), config.debug_ksize = 0; end
     if ~isfield(config, 'bins_only'), config.bins_only = false; end
+    if ~isfield(config, 'it_sense_params'), config.it_sense_params = struct(); end
     if ~isfield(config.motion_curve, 'zero_rl'), config.motion_curve.zero_rl = true; end
     if ~isfield(config.motion_curve, 'zero_fh'), config.motion_curve.zero_fh = false; end
     if ~isfield(config.motion_correction_params, 'load_disp_fields'), config.motion_correction_params.load_disp_fields = ""; end
     if ~isfield(config.motion_correction_params, 'load_bin_images'), config.motion_correction_params.load_bin_images = ""; end
     if ~isfield(config.motion_correction_params, 'registration_params'), config.motion_correction_params.registration_params = struct(); end
+    if ~isfield(config.motion_correction_params, 'it_sense_params'), config.motion_correction_params.it_sense_params = struct(); end
     if ~isfield(config.coil_params, 'csm_params'), config.coil_params.csm_params = struct(bart_params="-r 20 -k 5 -c 0 -S"); end
 end

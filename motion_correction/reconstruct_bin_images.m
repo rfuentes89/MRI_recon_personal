@@ -8,7 +8,7 @@ function bin_images = reconstruct_bin_images( ...
 
     switch lower(params_moco.bin_recon_type)
         case "it_sense"
-            bin_images_raw = reconstruct_bin_images_it_sense(k_spaces, sampling_masks, csm);
+            bin_images_raw = reconstruct_bin_images_it_sense(k_spaces, sampling_masks, csm, params_moco.it_sense_params);
         case "orcca"
             bin_images_raw = reconstruct_bin_images_orcca( ...
                 k_spaces, ...
@@ -44,7 +44,7 @@ function bin_images = reconstruct_bin_images_admm(k_spaces, sampling_masks, csm,
     bin_images = reconstruct_admm(k_spaces, E_operators, params_admm, params_PROST);
 end
 
-function bin_images = reconstruct_bin_images_it_sense(k_spaces, sampling_masks, csm)
+function bin_images = reconstruct_bin_images_it_sense(k_spaces, sampling_masks, csm, it_sense_params)
     % Apply filter to kspace
     filter_dims = size(k_spaces{1}, 1:3);
     filter_std = 40;
@@ -55,9 +55,7 @@ function bin_images = reconstruct_bin_images_it_sense(k_spaces, sampling_masks, 
     E_operators = build_operator_rigid(k_spaces, sampling_masks, csm);
 
     % Reconstruct
-    n_iter = 3;
-    verbose = false;
-    bin_images = reconstruct_it_SENSE(filtered_k_space, E_operators, n_iter, verbose);
+    bin_images = reconstruct_it_SENSE(filtered_k_space, E_operators, it_sense_params);
 end
 
 function bin_images = reconstruct_bin_images_orcca( ...

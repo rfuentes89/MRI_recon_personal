@@ -1,4 +1,4 @@
-function images = reconstruct_it_SENSE(k_spaces, E_operators, n_iter, verbose)
+function images = reconstruct_it_SENSE(k_spaces, E_operators, params)
 % RECONSTRUCTION_IT_SENSE Reconstruct a group of images using IT-SENSE
 %
 % Args:
@@ -11,9 +11,6 @@ function images = reconstruct_it_SENSE(k_spaces, E_operators, n_iter, verbose)
     n_images = numel(k_spaces);
 
     for i_image = 1:n_images
-
-        params.max_iter = n_iter;
-        params.verbose = verbose;
         images{i_image} = Cart_itSENSE( ...
             k_spaces{i_image}, ...
             E_operators{i_image}, ...
