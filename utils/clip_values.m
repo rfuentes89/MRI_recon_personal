@@ -1,5 +1,5 @@
-function arr = clip(arr, lower, upper)
-%CLIP Clips an array to range [lower, upper]
+function arr = clip_values(arr, lower, upper)
+%CLIP_VALUES Clips an array to range [lower, upper]
 %
 % Notice there is a native function for this, but only since version R2024a
 % https://www.mathworks.com/help/matlab/ref/clip.html
