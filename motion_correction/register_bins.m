@@ -4,6 +4,7 @@ function displacement_fields = register_bins(bin_images, ref_bin_idx, params)
     params = fill_struct_values(params, struct( ...
         zero_ref_bin=true, ...
         nifty_params='--nmi -be 0.0005 -sx 14', ...
+        clip_df=[-1, -1, -1], ...
         tmp_dir=fullfile(getenv("WORKSPACE"), ".nifty-tmp")));
 
     n_bins = numel(bin_images);
@@ -24,5 +25,12 @@ function displacement_fields = register_bins(bin_images, ref_bin_idx, params)
             displacement_field = squeeze(displacement_field);
         end
         displacement_fields(:,:,:,:,i_bin) = displacement_field;
+    end
+
+    % Clip values
+    for i_dim = 1:3
+        limit = params.clip_df(i_dim);
+        if limit < 0, continue; end
+        displacement_fields(:,:,:,i_dim,:) = clip_values(displacement_fields(:,:,:,i_dim,:), -limit, limit);
     end
 end
