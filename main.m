@@ -291,6 +291,7 @@ function bin_images = load_bin_images_wrapper(config)
             end
         end
     end
+    fprintf("\tLoaded bin images from %s\n", config.motion_correction_params.load_bin_images);
 end
 
 function save_dicom(config, image, input_info_name, contrast_name)
