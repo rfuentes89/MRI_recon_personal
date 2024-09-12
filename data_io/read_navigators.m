@@ -1,6 +1,5 @@
 function navigators = read_navigators(twix, selected)
 
-twix = twix{end};
 unsorted_data = twix.RTfeedback.unsorted();
 
 n_readouts   = twix.RTfeedback.NAcq; % Number of readouts acquired

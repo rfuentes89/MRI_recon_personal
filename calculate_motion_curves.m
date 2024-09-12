@@ -25,7 +25,7 @@ path_to_twix = find_twix_file(fullfile(CONFIG.acq_folder, "raw", CONFIG.twix_fna
 twix = read_twix(path_to_twix);
 
 %% Calculate motion curve
-motion_curves = estimate_motion_curves(twix, CONFIG.selected_contrasts, base_fname);
+motion_curves = estimate_motion_curves(twix{end}, CONFIG.selected_contrasts, base_fname);
 
 save(motion_curves_file, 'motion_curves');
 fprintf("Saved motion curves to file %s\n", motion_curves_file);
