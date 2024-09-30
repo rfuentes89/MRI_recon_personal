@@ -21,34 +21,17 @@ function plot_dfs_colorfield(bin_images, dfs, i_slice, nifty_params)
         title(sprintf("bin %d", i_bin));
     
         ax = subplot(n_rows, n_cols, i_bin + n_bins*1);
-        plot_disp_field_color(sqrt(df_rl.^2 + df_fh.^2), ax);
-        title("FH+RL magn");
+        plot_image_as_colorfield(sqrt(df_rl.^2 + df_fh.^2), ax);
+        title("|FH+RL|");
     
         ax = subplot(n_rows, n_cols, i_bin + n_bins*2);
-        plot_disp_field_color(df_fh, ax);
-        title("FH magn");
+        plot_image_as_colorfield(df_fh, ax);
+        title("FH");
     
         ax = subplot(n_rows, n_cols, i_bin + n_bins*3);
-        plot_disp_field_color(df_rl, ax);
-        title("RL magn");
+        plot_image_as_colorfield(df_rl, ax);
+        title("RL");
     end
     
     sgtitle(sprintf("slice=%d, nifty=%s", i_slice, nifty_params), 'Interpreter', 'none');
 end
-
-function plot_disp_field_color(df, ax)
-    % Plot field as image
-    imagesc(ax, df, 'AlphaData', 0.8);
-    colormap(ax, 'jet');
-
-    % Set colobar limits
-    min_value = min(df(:));
-    max_value = max(max(df(:)), min_value + eps);
-    clim(ax, [min_value, max_value]);
-
-    % Fix aspect ratio
-    pbaspect(ax, [size(df, 2), size(df, 1), 1]);
-    colorbar();
-    axis off;
-end
-

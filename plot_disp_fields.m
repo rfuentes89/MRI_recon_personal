@@ -58,7 +58,7 @@ end
 
 %% Util functions
 function plot_image(img)
-    imshow(uint8(rescale(img, 0, 255)));
+    imshow(rescale(img, 0, 1));
 end
 
 function plot_disp_field_2d(df, i_slice, downsample_factor)
