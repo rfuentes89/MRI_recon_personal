@@ -76,10 +76,10 @@ function bin_images = reconstruct_bin_images_orcca( ...
     % Compute mean per bin
     target_pos_mean = cell(n_bins, 1);
     for i_bin = 1:n_bins
-        curr_shots = motion_curve.Tx >= bin_limits{i_bin}.lower & motion_curve.Tx < bin_limits{i_bin}.upper;
+        curr_shots = motion_curve.fh >= bin_limits{i_bin}.lower & motion_curve.fh < bin_limits{i_bin}.upper;
 
-	    target_pos_mean{i_bin}.X = mean(motion_curve.Tx(curr_shots));
-	    target_pos_mean{i_bin}.Y = mean(motion_curve.Ty(curr_shots));
+	    target_pos_mean{i_bin}.X = mean(motion_curve.fh(curr_shots));
+	    target_pos_mean{i_bin}.Y = mean(motion_curve.rl(curr_shots));
     end
 
 

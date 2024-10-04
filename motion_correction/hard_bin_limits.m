@@ -1,4 +1,7 @@
-function limits = hard_bin_limits(displacements, n_bins)
+function limits = hard_bin_limits(fh_motion, n_bins)
+    % Remove outliers
+    included = abs(fh_motion - mean(fh_motion)) <= 2 * std(fh_motion);
+    displacements = fh_motion(included);
 
     small_bin_size = floor(numel(displacements) / n_bins);
     large_bin_size = small_bin_size + 1;

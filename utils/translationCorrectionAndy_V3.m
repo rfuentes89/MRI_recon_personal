@@ -19,8 +19,8 @@ function kdata_corr = translationCorrectionAndy_V3(kdata, At, motion_info, param
 
             curr_idx = 1+(params.chunksize*(ccc-1)):until_idx;
             curr_At =  At(:,:,:,curr_idx);
-            curr_info.Tx = motion_info.Tx(curr_idx);
-            curr_info.Ty = motion_info.Ty(curr_idx);
+            curr_info.fh = motion_info.fh(curr_idx);
+            curr_info.rl = motion_info.rl(curr_idx);
             curr_kdata = apply_translationCorrectionAndy_V3(kdata, curr_At, curr_info);
             kdata_corr(:,:,:,:,ccc) = sample_dataV2(curr_kdata, curr_At);
         end
@@ -42,8 +42,8 @@ function kdata_corr = apply_translationCorrectionAndy_V3(kdata, At, motion_info)
     end
 
     % Extract motion info
-    Ty = motion_info.Ty;
-    Tx = motion_info.Tx;
+    Ty = motion_info.rl;
+    Tx = motion_info.fh;
 
     n_shots = size(AtFE, 4);
     assert(n_shots == numel(Tx), "n_shots mismatches with x motion: " + string(size(Tx)));
