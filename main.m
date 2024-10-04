@@ -246,16 +246,16 @@ function data = prepare_displacement_fields(data, config, ref_bin, fname_suffix)
     end
 
     % Compute interpolation matrices
-    data.interpolation_matrix = pre_compute_interpolation_matrix(data.displacement_fields);
+    data.interpolation_matrices = pre_compute_interpolation_matrix(data.displacement_fields);
 
     % Point matrices to chosen contrast
     df_contrast = config.motion_correction_params.selected_contrast_for_disp_fields;
     if df_contrast.echo ~= -1
-        [n_echoes, n_sets, n_repetitions] = size(data.interpolation_matrix);
+        [n_echoes, n_sets, n_repetitions] = size(data.interpolation_matrices);
         for repetition = 1:n_repetitions
             for set = 1:n_sets
                 for echo = 1:n_echoes
-                    data.interpolation_matrix{echo,set,repetition} = data.interpolation_matrix{...
+                    data.interpolation_matrices{echo,set,repetition} = data.interpolation_matrices{...
                         df_contrast.echo,...
                         df_contrast.set,...
                         df_contrast.repetition};
