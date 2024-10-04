@@ -73,16 +73,6 @@ function bin_images = reconstruct_bin_images_orcca( ...
         At_bins(:,:,:,i_bin) = sampling_masks{i_bin};
     end
 
-    % Compute mean per bin
-    target_pos_mean = cell(n_bins, 1);
-    for i_bin = 1:n_bins
-        curr_shots = motion_curve.fh >= bin_limits{i_bin}.lower & motion_curve.fh < bin_limits{i_bin}.upper;
-
-	    target_pos_mean{i_bin}.X = mean(motion_curve.fh(curr_shots));
-	    target_pos_mean{i_bin}.Y = mean(motion_curve.rl(curr_shots));
-    end
-
-
     params_orcca = params_moco.orcca_params;
 
     % Prepare operator
@@ -111,7 +101,7 @@ function bin_images = reconstruct_bin_images_orcca( ...
     params_orcca.TV = TVOP();
     params_orcca.TV_Temp = TV_Temp();
     %params_orcca.MTV = MTV(interpolationMatrices); % nonrigid correction
-    params_orcca.MTV = TC_XMR_MTVi(target_pos_mean, params_moco.ref_bin(1));   % translational correction
+    params_orcca.MTV = TC_XMR_MTVi(motion_curve, bin_limits, params_moco.ref_bin(1));   % translational correction
 
     params_orcca.y = kdata;
 
