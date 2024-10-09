@@ -32,6 +32,11 @@
     // Add a suffix to the output GIF folder
     "name_suffix": "",
 
+    // (only useful for gif_ modes)
+    // If true, will animate in a circular fashion, e.g. for 4 images:
+    // 1, 2, 3, 4, 3, 2
+    "cyclic": false,
+
     // Params to normalize brightness across images
     "norm_brightness_params": {
         "apply": true,

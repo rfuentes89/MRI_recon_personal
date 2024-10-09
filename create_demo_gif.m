@@ -11,7 +11,7 @@
 addpath(genpath("./"))
 
 %% Load config
-%config_fname = "configs/example_gif.json";
+config_fname = "configs/base_gif.json";
 CONFIG = load_config(config_fname);
 
 %% Prepare DCM filenames
@@ -51,6 +51,15 @@ images = cell(n_paths,1);
 for i_dcm = 1:n_paths
     dcm_filepath = dcm_fpaths{i_dcm};
     images{i_dcm} = double(squeeze(dicomread(dcm_filepath)));
+end
+
+%% Animate in a cycle
+if CONFIG.cyclic
+    n_new = n_paths - 2;
+    n_from = n_paths;
+    for i_dcm = 1:n_new
+        images{n_from + i_dcm} = double(images{n_paths - i_dcm});
+    end
 end
 
 %% Normalize to same brightness
@@ -173,6 +182,10 @@ function folder_output = build_output_folder(config)
 
     if ~contains(config.mode, "xyz")
         output_name = output_name + "_" + axis;
+    end
+
+    if config.cyclic && startsWith(config.mode, "gif")
+        output_name = output_name + "_cyc";
     end
 
     if config.mip_params.apply
