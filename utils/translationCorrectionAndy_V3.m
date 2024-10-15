@@ -1,42 +1,13 @@
-function kdata_corr = translationCorrectionAndy_V3(kdata, At, motion_info, params)
-    if ~exist("params", "var"), params = struct(); end
-    if ~isfield(params, "chunksize"), params.chunksize = 100; end
-    if ~isfield(params, "force_chunks"), params.force_chunks = false; end
-    if ~isfield(params, "force_nochunks"), params.force_nochunks = false; end
-
-    % Split the data if it is too large
-    if ~params.force_nochunks && (params.force_chunks || size(At,4) > params.chunksize)
-        nchunks = floor(size(At,4)/params.chunksize);
-        kdata_corr = zeros(size(kdata,1),size(kdata,2),size(kdata,3),size(kdata,4),nchunks+1);
-
-        % Phase shift each chunk
-        for ccc = 1:nchunks+1
-            if ccc < nchunks + 1
-                until_idx = params.chunksize*ccc;
-            else
-                until_idx = size(At,4);
-            end
-
-            curr_idx = 1+(params.chunksize*(ccc-1)):until_idx;
-            curr_At =  At(:,:,:,curr_idx);
-            curr_info.fh = motion_info.fh(curr_idx);
-            curr_info.rl = motion_info.rl(curr_idx);
-            curr_kdata = apply_translationCorrectionAndy_V3(kdata, curr_At, curr_info);
-            kdata_corr(:,:,:,:,ccc) = sample_dataV2(curr_kdata, curr_At);
-        end
-
-        kdata_corr = sum(kdata_corr,5);
-    else
-        kdata_corr =  apply_translationCorrectionAndy_V3(kdata, At, motion_info);
-    end
-end
-
-
-function kdata_corr = apply_translationCorrectionAndy_V3(kdata, At, motion_info)
-
-    % Reshape shot information
-    AtFE = At;
-
+function kdata_corr = translationCorrectionAndy_V3(kdata, AtFE, motion_info)
+% translationCorrectionAndy_V3. Applies XY translation correction to kdata,
+% to center at position = 0.
+%
+% Args:
+%     - kdata: cell with n_coils, array(nx,ny,nz)
+%     - At: logical sampling matrix with size (nx,ny,nz,n_shots)
+%     - motion_info: a struct with:
+%         - fh: array of size n_shots with foot-head motion
+%         - rl: array of size n_shots with right-left motion
     if any(sum(AtFE ,4) > 1)
         error('Shots are not mutually exclusive')
     end
