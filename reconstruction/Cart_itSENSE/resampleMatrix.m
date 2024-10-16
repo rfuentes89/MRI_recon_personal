@@ -3,7 +3,7 @@ function [interpolationMatrix] = resampleMatrix(old,deformationField)
 % function of the derformationField and the interpolation scheme (bilinear
 % in this case).
 
-% TODO(pdpino): pass dimensions instead of empty array (first arg)
+% TODO(pdpino): optimize: pass dimensions instead of empty array (first arg)
 
 % Number of dimensions of the image
 ndims = numel(size(old));
@@ -83,6 +83,8 @@ if ndims == 2
     % Using tighter precisions in 3D.
 elseif ndims == 3
     [ymax,xmax,zmax] = size(old);
+    % TODO(pdpino): optimize: avoid unnecessary slicing, operate in
+    % matrices directly
     deformationField = double(deformationField);
     % floor and ceil value for each pixel are extracted
     floorGridX=double(floor(deformationField(:,:,:,1)));
@@ -142,6 +144,7 @@ elseif ndims == 3
     ceilGridY(ceilGridY>size(old,2))=xmax;
     ceilGridZ(ceilGridZ>size(old,3))=zmax;
 
+    % TODO(pdpino): optimize: avoid slicing, use cell+cat
     P = double(zeros(ymax,xmax,zmax,8));
     W = double(zeros(ymax,xmax,zmax,8));
     % We here compute the index in 1D of each pixel

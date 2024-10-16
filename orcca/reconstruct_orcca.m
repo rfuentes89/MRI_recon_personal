@@ -4,7 +4,7 @@ function bin_images = reconstruct_orcca(k_spaces, sampling_masks, csm, bin_limit
     [kx_size, ky_size, kz_size, n_coils] = size(k_spaces{1});
     k_size = [kx_size, ky_size, kz_size];
 
-    % TODO(pdpino): standardize n_bins dimensions
+    % TODO(pdpino): optimize: try to use cell{n_bins} instead of array
     kdata = zeros([k_size, n_coils, n_bins]);
     At_bins = zeros([k_size, n_bins]);
     for i_bin = 1:n_bins
