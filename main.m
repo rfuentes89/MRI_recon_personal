@@ -232,10 +232,12 @@ function data = prepare_displacement_fields(data, config, ref_bin, fname_suffix)
         data.displacement_fields = displacement_fields;
     else
         fprintf("\tCalculating displacement fields\n");
+        timer_df = tic();
         data.displacement_fields = calculate_disp_fields( ...
             data, ...
             ref_bin, ...
             config.motion_correction_params.registration_params);
+        fprintf("\t\t\tcalculate_disp_fields() "); toc(timer_df);
 
         % Save to .mat file
         if config.save_disp_fields
@@ -246,7 +248,9 @@ function data = prepare_displacement_fields(data, config, ref_bin, fname_suffix)
     end
 
     % Compute interpolation matrices
+    timer_interp_matrices = tic();
     data.interpolation_matrices = pre_compute_interpolation_matrix(data.displacement_fields);
+    fprintf("\t\t\tprepare_interp_matrices() "); toc(timer_interp_matrices);
 
     % Point matrices to chosen contrast
     df_contrast = config.motion_correction_params.selected_contrast_for_disp_fields;

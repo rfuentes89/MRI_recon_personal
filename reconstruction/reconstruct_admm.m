@@ -75,6 +75,7 @@ for i_iter = 1:admm_params.max_iter
     end
 
     % OPTIMIZATION 1: Data consistency (x): MR reconstruction
+    timer_admm_consistency = tic();
     for i_image = 1:n_images
         if i_iter == 1
             params.max_iter = admm_params.cg_max_iter_first;
@@ -89,12 +90,14 @@ for i_iter = 1:admm_params.max_iter
             x{i_image} = Cart_itSENSE(kdata{i_image},E_operator{i_image}, params);
         end
     end
+    fprintf("\t\t\tADMM data consistency() "); toc(timer_admm_consistency);
 
     if admm_params.last_iter_skip_prost && i_iter == admm_params.max_iter
         break;
     end
 
     %  OPTIMIZATION 2: Tensor Decomposition (Rx - denoising)
+    timer_admm_prost = tic();
     x = concat_cell_to_array(x);
 
     if i_iter == 1
@@ -128,6 +131,8 @@ for i_iter = 1:admm_params.max_iter
     x = split_array_to_cell(x, is_one_element_cell);
     y = split_array_to_cell(y, is_one_element_cell);
     Rx = split_array_to_cell(Rx, is_one_element_cell);
+
+    fprintf("\t\t\tprost() "); toc(timer_admm_prost);
 
     % Save history
     if nargout > 1
