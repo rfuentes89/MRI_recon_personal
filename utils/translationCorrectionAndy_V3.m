@@ -20,12 +20,14 @@ function kdata_corr = translationCorrectionAndy_V3(kdata, AtFE, motion_info)
     assert(n_shots == numel(Tx), "n_shots mismatches with x motion: " + string(size(Tx)));
     assert(n_shots == numel(Ty), "n_shots mismatches with y motion: " + string(size(Ty)));
 
-    AffMats = zeros(3,3,n_shots);
+    AffMats = cell(n_shots,1);
     % Create affine matrices
     for i_shot = 1:size(AtFE,4)
-        [~,Affine_FH] = affine_from_values_B(eye(3),-Tx(i_shot),-Ty(i_shot),0,1,1,0,0);
-        AffMats(:,:,i_shot) = Affine_FH;
+        AffMats{i_shot} = affine_from_values_B(-Tx(i_shot),-Ty(i_shot),0,1,1,0,0);
+        % size: 3, 3
     end
+    AffMats = concat_cell_to_array(AffMats);
+    % size: 3, 3, n_shots
 
     % Create grid and shifts
     [d1, d2, d3, d4] = size(kdata);

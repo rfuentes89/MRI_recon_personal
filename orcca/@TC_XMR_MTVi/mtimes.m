@@ -12,7 +12,9 @@ if ~a.adjoint
         TX = a.target_pos{ref_bin}.X - a.target_pos{bbb}.X;
         TY = a.target_pos{ref_bin}.Y - a.target_pos{bbb}.Y;
         res(:,:,:,bbb) = imtranslate(b(:,:,:,bbb),[TY, TX]);
-        %res(:,:,:,bbb) = affine_from_values_B(b(1:250,:,43,bbb),TX,TY,0,1,1,0,0);
+        % affine = = affine_from_values_B(TX,TY,0,1,1,0,0);
+        % res(:,:,:,bbb) = resampleImage(b(1:250,:,43,bbb), ...
+        %     getDeformationFieldFromAffine(b(1:250,:,43,bbb), affine));
     end
     % TV
     res = res(:,:,:,[2:end,end]) - res(:,:,:,:);
@@ -26,5 +28,5 @@ else
         TY = a.target_pos{ref_bin}.Y - a.target_pos{bbb}.Y;
         res(:,:,:,bbb) = imtranslate(res(:,:,:,bbb),[-TY, -TX]);
     end
- 
+
 end
