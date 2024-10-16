@@ -1,4 +1,4 @@
-function [x_out, Rx_history, y_history, x_history] = reconstruct_admm(kdata, E_operator, admm_params, prost_params)
+function [x, Rx_history, y_history, x_history] = reconstruct_admm(kdata, E_operator, admm_params, prost_params)
 % RECONSTRUCT_ADMM Run ADMM optimization with HD-PROST
 %  Inputs:
 %        kdata: cell of arbitrary size n_images (e.g. number of contrasts,
@@ -16,7 +16,7 @@ function [x_out, Rx_history, y_history, x_history] = reconstruct_admm(kdata, E_o
 %
 %
 %  Outputs:
-%        output : - x_out: the reconstructed motion-compensated image
+%        output : - x: the reconstructed motion-compensated image
 %                 - Rx_history: the images obtained after optimization 2 (patch-based)
 %                 - y_history: the lagragian images
 %                 - x_history: the images obtained after optimization 1 (MR reconstruction)
@@ -60,15 +60,14 @@ prost_params = fill_struct_values(prost_params, struct( ...
     ref_idx = 1));
 
 n_images = numel(kdata); % e.g. n_contrasts or n_bins
-[n_kx, n_ky, n_kz] = size(kdata{1}, 1:3);
+x = cell(n_images, 1); % resulting images
+y = cell(n_images, 1); % lagrangian images
 
-result_size = [n_kx, n_ky, n_kz, n_images];
-x = zeros(result_size); % resulting images
-y = zeros(result_size); % lagrangian images
-
-x_history  = zeros([result_size admm_params.max_iter]); % images after step 1
-Rx_history = zeros([result_size admm_params.max_iter]); % images after step 2
-y_history = zeros([result_size admm_params.max_iter]);
+if nargout > 1
+    x_history = cell(admm_params.max_iter, 1); % images after step 1
+    Rx_history = cell(admm_params.max_iter, 1); % images after step 2
+    y_history = cell(admm_params.max_iter, 1);
+end
 
 for i_iter = 1:admm_params.max_iter
     if admm_params.verbose >= 1
@@ -80,19 +79,28 @@ for i_iter = 1:admm_params.max_iter
         if i_iter == 1
             params.max_iter = admm_params.cg_max_iter_first;
             params.residual_tol = admm_params.cg_residual_tol;
-            x(:,:,:,i_image) = Cart_itSENSE(kdata{i_image},E_operator{i_image}, params);
+            x{i_image} = Cart_itSENSE(kdata{i_image},E_operator{i_image}, params);
         else
-            params.image_reg = Rx(:,:,:,i_image)-y(:,:,:,i_image);
-            params.image_initial = x(:,:,:,i_image);
+            params.image_reg = Rx{i_image} - y{i_image};
+            params.image_initial = x{i_image};
             params.lambda = admm_params.cg_lambda;
             params.max_iter = admm_params.cg_max_iter;
             params.residual_tol = admm_params.cg_residual_tol;
-            x(:,:,:,i_image) = Cart_itSENSE(kdata{i_image},E_operator{i_image}, params);
+            x{i_image} = Cart_itSENSE(kdata{i_image},E_operator{i_image}, params);
         end
     end
 
     if admm_params.last_iter_skip_prost && i_iter == admm_params.max_iter
         break;
+    end
+
+    %  OPTIMIZATION 2: Tensor Decomposition (Rx - denoising)
+    x = concat_cell_to_array(x);
+
+    if i_iter == 1
+        y = zeros(size(x));
+    else
+        y = concat_cell_to_array(y);
     end
 
     % Check for nans
@@ -102,7 +110,7 @@ for i_iter = 1:admm_params.max_iter
         x(isnan(x)) = 0;
     end
 
-    %  OPTIMIZATION 2: Tensor Decomposition (Rx - denoising)
+    % Apply denoising
     added_images = double(x + y);
     Rx = denoising_HD_PROST(added_images, prost_params);
 
@@ -116,19 +124,17 @@ for i_iter = 1:admm_params.max_iter
     % STEP 3: Lagrangian Update (y)
     y = y + x - Rx;
 
+    is_one_element_cell = n_images == 1;
+    x = split_array_to_cell(x, is_one_element_cell);
+    y = split_array_to_cell(y, is_one_element_cell);
+    Rx = split_array_to_cell(Rx, is_one_element_cell);
+
     % Save history
     if nargout > 1
-        x_history(:,:,:,:,i_iter) = x;
-        Rx_history(:,:,:,:,i_iter) = Rx;
-        y_history(:,:,:,:,i_iter) = y;
+        x_history{i_iter} = x;
+        Rx_history{i_iter} = Rx;
+        y_history{i_iter} = y;
     end
 end
-
-% Transform result to cell (same format as kspaces)
-x_out = cell(size(kdata));
-for i_image = 1:n_images
-    x_out{i_image} = x(:,:,:,i_image);
-end
-
 
 end
