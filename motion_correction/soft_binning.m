@@ -45,7 +45,7 @@ function [weighted_k_spaces, weighted_sampling_masks, bin_weights] = soft_binnin
         weighted_segment_masks(:,:,:,outside_bin) = weighted_segment_masks(:,:,:,outside_bin) .* weights(outside_bin);
 
         weighted_sampling_masks{bin} = sum(weighted_segment_masks, 4);
-        weighted_k_spaces{bin} = k_space(:,:,:,:,bin) .* weighted_sampling_masks{bin};
+        weighted_k_spaces{bin} = k_space{bin} .* weighted_sampling_masks{bin};
 
     end
 

@@ -13,17 +13,17 @@ function [kdata_OUT,At_bins] = Focus_binsV2(raw_data,At,motion_info,bins, apply_
 %         - upper: upper limit for data to be included in this bin
 
 nav = motion_info.fh;
-
-kdata_OUT = zeros(size(raw_data,1),size(raw_data,2),size(raw_data,3),size(raw_data,4),size(bins,1));
-At_bins   = zeros(size(At,1),size(At,2),size(At,3),size(bins,1));
+n_bins = numel(bins);
+kdata_OUT = cell(n_bins, 1);
+At_bins = cell(n_bins, 1);
 
 % Focus ALL data onto each bin
-for bbb = 1:size(bins,1)  
+for bbb = 1:n_bins
     curr_shots  = nav>=bins{bbb}.lower & nav<bins{bbb}.upper;
-    
+
     % Save bin positions
     bin_At = At(:,:,:,curr_shots);
-    At_bins(:,:,:,bbb) = sum(bin_At,4);
+    At_bins{bbb} = sum(bin_At,4);
 
     if apply_TL
         %bin_mean_Tx = (bins{bbb}.lower + bins{bbb}.upper) / 2;
@@ -41,7 +41,7 @@ for bbb = 1:size(bins,1)
     else
         kdata_corr = raw_data;
     end
-    
+
     % Push data on bin level
-    kdata_OUT(:,:,:,:,bbb) = kdata_corr; % sample_dataV2(kdata_corr, bin_At);
+    kdata_OUT{bbb} = kdata_corr;
 end

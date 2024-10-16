@@ -1,49 +1,43 @@
-function [res] = mtimes(a,b)
+function [res] = mtimes(operator,input)
 
-if a.adjoint % EH operation
-% b = full_k_data : (Ny,Nx,Nz,Nc) -> (Ny,Nx,Nz) when applying EH
+n_coils = size(operator.coils, 4);
 
-    res_coils = zeros(a.siz(1),a.siz(2),a.siz(3),size(a.coils, 4)); % init
-    At = a.At;
-    coils = a.coils;
+if operator.adjoint % EH operation
+% input: k_space: array (nx,ny,nz,n_coils)
+% returns: image: array(nx, ny, nz)
+    k_space = input;
 
-    for coil = 1:size(a.coils, 4) % number of coils
-        % Sampling
-        b_sample = b(:,:,:,coil).*At;
+    % Sampling
+    b_sample = k_space.*operator.At;
 
-        % 3D FFT
-        b_sample = sqrt(size(b_sample,1)).* fftshift( ifft(ifftshift(b_sample ,1),[],1), 1);
-        b_sample = sqrt(size(b_sample,2)).* fftshift( ifft(ifftshift(b_sample ,2),[],2), 2);
-        b_sample = sqrt(size(b_sample,3)).* fftshift( ifft(ifftshift(b_sample ,3),[],3), 3);
+    % 3D FFT
+    b_sample = sqrt(size(b_sample,1)).* fftshift( ifft(ifftshift(b_sample ,1),[],1), 1);
+    b_sample = sqrt(size(b_sample,2)).* fftshift( ifft(ifftshift(b_sample ,2),[],2), 2);
+    b_sample = sqrt(size(b_sample,3)).* fftshift( ifft(ifftshift(b_sample ,3),[],3), 3);
 
-        % Coil weights
-        res_coils(:,:,:,coil) = b_sample.*conj(coils(:,:,:,coil)); 
-    end
+    % Coil weights
+    res_coils = b_sample .* conj(operator.coils);
 
-    res = sum(res_coils,4);
+    % Sum over coils
+    res = sum(res_coils, 4);
+
+    % Remove nans
     res(isnan(res)) = 0;
 
 else % E operation
-% b = full_image_data : (Ny,Nx,Nz) -> (Ny,Nx,Nz,Nc) when applying E
+% input: image: (nx,ny,nz)
+% returns: k_space: array(nx,ny,nz,n_coils)
+    image = input;
+    image(isnan(image)) = 0;
 
-    res = zeros(a.Ksiz(1),a.Ksiz(2),a.Ksiz(3),size(a.coils, 4));
-    At = a.At;
-    coils = a.coils;
+    % Coil weights
+    b_sample = image .* operator.coils;
 
-    b(isnan(b)) = 0;
+    % 3D FFT
+    b_sample = 1/sqrt(size(b_sample,1))*fftshift(fft(ifftshift( b_sample, 1 ),[],1),1);
+    b_sample = 1/sqrt(size(b_sample,2))*fftshift(fft(ifftshift( b_sample, 2 ),[],2),2);
+    b_sample = 1/sqrt(size(b_sample,3))*fftshift(fft(ifftshift( b_sample, 3 ),[],3),3);
 
-    for coil = 1:size(a.coils, 4) % number of coils
-        % Coil weights
-        b_sample = b.*coils(:,:,:,coil);
-
-        % 3D FFT
-        b_sample = 1/sqrt(size(b_sample,1))*fftshift(fft(ifftshift( b_sample, 1 ),[],1),1);
-        b_sample = 1/sqrt(size(b_sample,2))*fftshift(fft(ifftshift( b_sample, 2 ),[],2),2);
-        b_sample = 1/sqrt(size(b_sample,3))*fftshift(fft(ifftshift( b_sample, 3 ),[],3),3);
-
-        % Sampling
-        res(:,:,:,coil) = b_sample.*At;
-    end
-
-
+    % Sampling
+    res = b_sample.*operator.At;
 end

@@ -38,7 +38,7 @@ end
 
 function bin_images = reconstruct_bin_images_admm(k_spaces, sampling_masks, csm, params_admm, params_PROST)
     % Prepare E_operators
-    E_operators = build_operator_rigid(k_spaces, sampling_masks, csm);
+    E_operators = build_operator_rigid(sampling_masks, csm);
 
     % Reconstruct
     bin_images = reconstruct_admm(k_spaces, E_operators, params_admm, params_PROST);
@@ -52,7 +52,7 @@ function bin_images = reconstruct_bin_images_it_sense(k_spaces, sampling_masks, 
     filtered_k_space = cellfun(@(kspace) kspace .* filter, k_spaces, "UniformOutput", false);
 
     % Prepare E_operators
-    E_operators = build_operator_rigid(k_spaces, sampling_masks, csm);
+    E_operators = build_operator_rigid(sampling_masks, csm);
 
     % Reconstruct
     bin_images = reconstruct_it_SENSE(filtered_k_space, E_operators, it_sense_params);

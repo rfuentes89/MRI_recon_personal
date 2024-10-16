@@ -17,9 +17,9 @@ function displacement_fields = calculate_disp_fields(data, ref_bin, registration
 
                 % Calculate displacement fields
                 dfs = register_bins(data.bin_images{echo,set,repetition}, ref_bin, registration_params);
-                dfs = post_process_dfs( ...
-                    dfs, ...
-                    size(data.k_spaces_corrected{echo, set, repetition}, 1:3));
+                dfs = post_process_dfs(dfs, data.padded_dimensions);
+
+                assert(all(size(dfs) == [data.padded_dimensions 3 n_bins]));
                 displacement_fields{echo,set,repetition} = dfs;
             end
         end
