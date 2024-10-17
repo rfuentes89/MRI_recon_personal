@@ -11,9 +11,11 @@ function images = reconstruct_it_SENSE(k_spaces, E_operators, params)
     n_images = numel(k_spaces);
 
     for i_image = 1:n_images
+        timer_itsense = tic();
         images{i_image} = Cart_itSENSE( ...
             k_spaces{i_image}, ...
             E_operators{i_image}, ...
             params);
+        fprintf("\t\t\t itsense iter() "); toc(timer_itsense);
     end
 end
