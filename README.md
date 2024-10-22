@@ -59,7 +59,7 @@ Follow instructions in [their README](https://github.com/RCiHealthGroup/mapVBVD)
 
 ### Manual installation: PROST
 
-Follow instructions in [their README](https://github.com/RCiHealthGroup/HD_PROST_MATLAB)
+Follow instructions in [their README](https://github.com/RCiHealthGroup/HD-PROST)
 
 ### Manual installation: MRI-coils
 
