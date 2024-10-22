@@ -10,7 +10,6 @@
 
 addpath(genpath("./"));
 
-assert(~isempty(getenv('NIFTY_PATH')));
 warning('off','backtrace');
 
 % Choose your config file here

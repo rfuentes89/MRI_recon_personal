@@ -5,8 +5,8 @@ function [registered_image, displacement_field,inv_displacement_field] = niftyre
 % Input:
 % reference, moving: images to be registered
 % options: string containing any options for reg_3fd (default empty)
-% tmp_path: path where temporary nifti files will be written (default
-% current directory)
+% tmp_path: path where temporary nifti files will be written (defaults to
+% $HOME/.nifty-tmp/)
 % clean_temp: flag, 1 to delete temp files afterwards, 0 to keep them
 
 
