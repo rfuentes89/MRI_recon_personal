@@ -10,7 +10,7 @@
     * _"Signal Processing Toolbox"_ (optional)
 2. Load these modules before running MATLAB in iHEALTH servers (e.g. ih-condor, nyquist, fourier):
     ```bash
-    module load bart imagine nifty mapVBVD prost/1.1.0 mri-coils
+    module load bart imagine niftyreg mapVBVD prost/1.1.0 mri-coils
     ```
 
 <details>
@@ -49,9 +49,9 @@ git clone https://github.com/lab-midas/imagine.git
 export MATLABPATH=/path/to/install/imagine:$MATLABPATH
 ```
 
-### Manual installation: [NIFTY](https://github.com/RCiHealthGroup/NIFTY_REG)
+### Manual installation: [NiftyReg](https://github.com/KCL-BMEIS/niftyreg)
 
-Follow instructions in [their README](https://github.com/RCiHealthGroup/NIFTY_REG/tree/main#readme).
+Follow instructions in [their wiki](https://github.com/KCL-BMEIS/niftyreg/wiki).
 
 ### Manual installation: [mapVBVD](https://github.com/RCiHealthGroup/mapVBVD)
 
