@@ -15,23 +15,21 @@ n_bins = numel(bin_images);
 fprintf("Loaded %d bin images\n", n_bins);
 
 %% Calculate DFs
-% Params
-ref_bin = 4;
-
 % Nifty params
-params.nifty_params = '--nmi -be 0.01 -omp 8 -sx 1 --rbn 8';
-params.tmp_dir = fullfile(getenv("WORKSPACE"), ".nifty-tmp-plot");
+params.nifty_params = '--nmi -be 0.01 -omp 16 -sx 14 --rbn 64 --fbn 64';
+params.method = "chain";
 
 % Call Nifty
 tic();
-dfs = register_bins(bin_images, ref_bin, params);
-% size: n_x, n_y, n_z, 3, n_bins
-
+dfs = register_bins(bin_images, 0, params);
 toc();
 fprintf("Finished register_bins() %s\n", params.nifty_params);
 
-%% Plot as colorfields
-plot_dfs_colorfield(bin_images, dfs, 68, params.nifty_params)
+%% Plot one reference
+plot_dfs_oneref(bin_images, dfs, 88, 4, params.nifty_params)
+
+%% Plot matrix
+plot_dfs_allref(dfs, 88, 1);
 
 %% Plot image with DF arrows on top
 % Params
