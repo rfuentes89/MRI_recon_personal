@@ -5,6 +5,8 @@ function dfs = niftyreg_chain(bin_images, params)
 %     bin_images: cell with n_bins, with arrays of size (nx, ny, nz)
 %     params.nifty_params: options passed to reg_f3d script
 %     params.tmp_dir: directory to store temporal files
+%     params.ascending: whether to compute DFs ascending (1-2, 2-3, etc) or
+%         descending (4-3, 3-2, etc)
 %
 % Explanation: computes displacement fields (DFs) between all pair
 % combination of bin images, using the "chain" method explained here:
@@ -32,8 +34,13 @@ function dfs = niftyreg_chain(bin_images, params)
 
     % Register 1-2, 2-3, and so on
     for i_bin = 1:n_bins-1
-        i_ref = i_bin + 1;
-        i_float = i_bin;
+        if params.ascending
+            i_float = i_bin;
+            i_ref = i_bin + 1;
+        else
+            i_float = i_bin + 1;
+            i_ref = i_bin;
+        end
         cmd = sprintf("reg_f3d -ref %s -flo %s -res %s -cpp %s %s", ...
             build_fpath("bin_%d.nii", i_ref), ...
             build_fpath("bin_%d.nii", i_float), ...
@@ -52,13 +59,18 @@ function dfs = niftyreg_chain(bin_images, params)
     % Compose for cases 1-3, 1-4, etc
     for i_bin_distance = 2:n_bins-1
         for i_bin = 1:n_bins - i_bin_distance
-            i_float = i_bin;
-            i_ref = i_float + i_bin_distance;
+            if params.ascending
+                i_float = i_bin;
+                i_ref = i_bin + i_bin_distance;
+            else
+                i_float = i_bin + i_bin_distance;
+                i_ref = i_bin;
+            end
 
-            % Set intermediate step, will add these two DFs:
+            % Intermediate step will be used to add these two DFs:
             %   i_float -> i_step
             %   i_step -> i_ref
-            i_step = i_ref - 1;
+            i_step = i_bin + 1;
 
             % Compute deformation field
             cmd = sprintf("reg_transform -ref %s -ref2 %s -comp %s %s %s", ...
@@ -81,12 +93,19 @@ function dfs = niftyreg_chain(bin_images, params)
     % Invert DFs
     for i_bin = 1:n_bins
         for j_bin = i_bin+1:n_bins
+            if params.ascending
+                i_float = i_bin;
+                i_ref = j_bin;
+            else
+                i_float = j_bin;
+                i_ref = i_bin;
+            end
+
             % Compute inverse displacement field
-            cmd = sprintf("reg_transform -ref %s -invNrr %s %s %s", ...
-                build_fpath("bin_%d.nii", i_bin), ...
-                build_fpath("df_%d_%d.nii", i_bin, j_bin), ...
-                build_fpath("bin_%d.nii", j_bin), ...
-                build_fpath("df_%d_%d.nii", j_bin, i_bin));
+            cmd = sprintf("reg_transform -invNrr %s %s %s", ...
+                build_fpath("df_%d_%d.nii", i_float, i_ref), ...
+                build_fpath("bin_%d.nii", i_ref), ...
+                build_fpath("df_%d_%d.nii", i_ref, i_float));
             [~, ~] = system(cmd);
         end
     end
