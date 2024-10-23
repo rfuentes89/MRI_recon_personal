@@ -156,7 +156,6 @@
             },
         },
         "registration_params": {
-            "zero_ref_bin": true, // whether or not to explictly set the reference bin's DF to zero
             "clip_df": [-1, -1, -1],
                 // if >= 0 will clip DF magnitude in [FH, RL, AP] direction
             "nifty_params": "--nmi -be 0.0005 -sx 14", // params given to nifty's reg_f3d

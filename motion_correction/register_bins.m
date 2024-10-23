@@ -3,7 +3,6 @@ function displacement_fields = register_bins(bin_images, ref_bin, params)
 % another
     if ~exist("params", "var"), params = struct(); end
     params = fill_struct_values(params, struct( ...
-        zero_ref_bin=true, ...
         nifty_params='--nmi -be 0.0005 -sx 14', ...
         clip_df=[-1, -1, -1], ...
         method="pairwise", ...
@@ -17,7 +16,7 @@ function displacement_fields = register_bins(bin_images, ref_bin, params)
 
     switch params.method
         case "pairwise"
-            displacement_fields = register_pairwise(bin_images, ref_bin, params);
+            displacement_fields = niftyreg_pairwise(bin_images, ref_bin, params);
         case "chain"
             displacement_fields = niftyreg_chain(bin_images, params);
         otherwise
@@ -31,36 +30,6 @@ function displacement_fields = register_bins(bin_images, ref_bin, params)
     if params.rm_tmp_dir
         delete(fullfile(params.tmp_dir, "*.nii"));
         [~] = rmdir(params.tmp_dir);
-    end
-end
-
-function displacement_fields = register_pairwise(bin_images, ref_bin, params)
-    n_bins = numel(bin_images);
-    displacement_fields = cell(n_bins, n_bins);
-    image_size = size(bin_images{1});
-
-    for i_ref = 1:numel(ref_bin)
-        ref_bin_idx = ref_bin(i_ref);
-
-        reference_image = rescale(abs(bin_images{ref_bin_idx}), 0, 1);
-
-        for i_floating_idx = 1:n_bins
-            if params.zero_ref_bin && i_floating_idx == ref_bin_idx
-                df = zeros([image_size, 3]);
-            else
-                floating_image = rescale(abs(bin_images{i_floating_idx}),0,1);
-
-                [~, df] = niftyreg_wrapper( ...
-                    reference_image, ...
-                    floating_image, ...
-                    params.nifty_params, ...
-                    params.tmp_dir);
-
-                df = squeeze(df);
-                % size: (image_size, 3)
-            end
-            displacement_fields{i_floating_idx, ref_bin_idx} = df;
-        end
     end
 end
 
