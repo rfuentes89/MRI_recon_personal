@@ -65,5 +65,5 @@ function dfs = post_process_dfs(dfs, original_size)
 
 
     % Operation needed for interp-matrices to work
-    dfs = Add_mesh_to_DF(dfs);
+    dfs = displacement_to_deformation(dfs);
 end
