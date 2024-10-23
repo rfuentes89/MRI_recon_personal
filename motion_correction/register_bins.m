@@ -6,11 +6,36 @@ function displacement_fields = register_bins(bin_images, ref_bin, params)
         zero_ref_bin=true, ...
         nifty_params='--nmi -be 0.0005 -sx 14', ...
         clip_df=[-1, -1, -1], ...
-        tmp_dir=fullfile(getenv("WORKSPACE"), ".nifty/tmp")));
+        method="pairwise", ...
+        tmp_dir=fullfile(getenv("WORKSPACE"), ".nifty/tmp"), ...
+        rm_tmp_dir=true));
 
+    % Different tmp_dir for each run
+    params.tmp_dir = fullfile(params.tmp_dir, string(datetime('now', 'Format', 'yyyy-MM-dd_HH-mm-ss')));
+
+    if ref_bin == 0, ref_bin = 1:numel(bin_images); end
+
+    switch params.method
+        case "pairwise"
+            displacement_fields = register_pairwise(bin_images, ref_bin, params);
+        case "chain"
+            displacement_fields = niftyreg_chain(bin_images, params);
+        otherwise
+            error("Method %s not recognized", params.method);
+    end
+
+    % Clip values
+    displacement_fields = cellfun(@(df) clip_df(df, params.clip_df), displacement_fields, 'UniformOutput', false);
+
+    % Clean directory
+    if params.rm_tmp_dir
+        delete(fullfile(params.tmp_dir, "*.nii"));
+        [~] = rmdir(params.tmp_dir);
+    end
+end
+
+function displacement_fields = register_pairwise(bin_images, ref_bin, params)
     n_bins = numel(bin_images);
-    if ref_bin == 0, ref_bin = 1:n_bins; end
-
     displacement_fields = cell(n_bins, n_bins);
     image_size = size(bin_images{1});
 
@@ -37,9 +62,6 @@ function displacement_fields = register_bins(bin_images, ref_bin, params)
             displacement_fields{i_floating_idx, ref_bin_idx} = df;
         end
     end
-
-    % Clip values
-    displacement_fields = cellfun(@(df) clip_df(df, params.clip_df), displacement_fields, 'UniformOutput', false);
 end
 
 function df = clip_df(df, clip_limits)
