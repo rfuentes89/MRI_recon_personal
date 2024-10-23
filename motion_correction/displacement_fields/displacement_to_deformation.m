@@ -5,7 +5,7 @@ function deformation_field = displacement_to_deformation(displacement_field)
 % - deformation fields = original position + delta
 %
 % This function was previously named Add_mesh_to_DF
-    [fh_size,rl_size,ap_size,dims] = size(displacement_field, 1:4);
+    [fh_size,rl_size,ap_size,dims] = size(displacement_field);
     assert(dims == 3);
     
     % Note: the order here must be [RL, FH, AP], because matlab's meshgrid

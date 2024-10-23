@@ -149,6 +149,22 @@ end
 
 if CONFIG.bins_only, return; end
 
+%% Step 6.1: Calculate displacement fields
+if CONFIG.motion_correction_params.type == "non_rigid"
+    data.displacement_fields = load_or_calculate_dfs(data, CONFIG);
+    % cell{n_contrasts} with cell{n_floating, n_ref} with array[kx, ky, kz, 3]
+
+    moco_params = CONFIG.motion_correction_params;
+    n_new_bins = moco_params.n_interp_bins;
+    if n_new_bins ~= moco_params.n_bins
+        fprintf("\tInterpolating to %d bins\n", n_new_bins);
+        data = interpolate_data(data, motion_curves, n_new_bins, moco_params.intrabin_TL_corr);
+
+        % TODO(pdpino): do this more elegantly?
+        CONFIG.motion_correction_params.ref_bin = 1:n_new_bins;
+    end
+end
+
 %% STEP 7: Reconstruction
 disp("step 7: reconstructing and denoising images")
 
@@ -160,11 +176,10 @@ for i_ref_bin = 1:n_ref_bins
     suffix = ternary(n_ref_bins > 1, sprintf("_refpos%02d", ref_bin), "");
 
     if CONFIG.motion_correction_params.type == "non_rigid"
-        data = prepare_displacement_fields( ...
-            data, ...
-            CONFIG, ...
+        data.interpolation_matrices = prepare_interp_matrices( ...
+            data.displacement_fields, ...
             ref_bin, ...
-            suffix);
+            CONFIG.motion_correction_params.selected_contrast_for_disp_fields);
     end
 
     fprintf("\tReconstructing images\n");
@@ -217,50 +232,49 @@ CONFIG.timestamp_end = string(datetime("now"), "yyyy-MM-dd_HH:mm:ss");
 save_config(CONFIG.run_folder, CONFIG);
 
 %% Functions
-function data = prepare_displacement_fields(data, config, ref_bin, fname_suffix)
-    df_fname = sprintf("displacement_fields%s.mat", fname_suffix);
+function displacement_fields = load_or_calculate_dfs(data, config)
     if strlength(config.motion_correction_params.load_disp_fields) > 0
         % Load DFs from previous run
-        displacement_fields_file = fullfile( ...
+        filename = fullfile( ...
             config.acq_folder, ...
             "recons", ...
             config.motion_correction_params.load_disp_fields, ...
-            df_fname);
-        assert(isfile(displacement_fields_file), "displacement_fields not found: %s", displacement_fields_file);
+            "displacement_fields.mat");
 
         fprintf("\tLoading displacement fields\n");
-        load(displacement_fields_file, "displacement_fields");
-        data.displacement_fields = displacement_fields;
+        load(filename, "displacement_fields");
     else
         fprintf("\tCalculating displacement fields\n");
         timer_df = tic();
-        data.displacement_fields = calculate_disp_fields( ...
-            data, ...
-            ref_bin, ...
+        displacement_fields = calculate_disp_fields( ...
+            data.bin_images, ...
+            data.padded_dimensions, ...
+            config.motion_correction_params.ref_bin, ...
             config.motion_correction_params.registration_params);
         fprintf("\t\t\tcalculate_disp_fields() "); toc(timer_df);
 
         % Save to .mat file
         if config.save_disp_fields
-            filename = fullfile(config.run_folder, df_fname);
-            save(filename, "-struct", "data", "displacement_fields");
+            filename = fullfile(config.run_folder, "displacement_fields.mat");
+            save(filename, "displacement_fields");
             fprintf("\tSaved DFs to %s\n", filename);
         end
     end
+end
 
+function interpolation_matrices = prepare_interp_matrices(displacement_fields, ref_bin, df_contrast)
     % Compute interpolation matrices
     timer_interp_matrices = tic();
-    data.interpolation_matrices = pre_compute_interpolation_matrix(data.displacement_fields);
+    interpolation_matrices = pre_compute_interpolation_matrix(displacement_fields, ref_bin);
     fprintf("\t\t\tprepare_interp_matrices() "); toc(timer_interp_matrices);
 
     % Point matrices to chosen contrast
-    df_contrast = config.motion_correction_params.selected_contrast_for_disp_fields;
     if df_contrast.echo ~= -1
-        [n_echoes, n_sets, n_repetitions] = size(data.interpolation_matrices);
+        [n_echoes, n_sets, n_repetitions] = size(interpolation_matrices);
         for repetition = 1:n_repetitions
             for set = 1:n_sets
                 for echo = 1:n_echoes
-                    data.interpolation_matrices{echo,set,repetition} = data.interpolation_matrices{...
+                    interpolation_matrices{echo,set,repetition} = interpolation_matrices{...
                         df_contrast.echo,...
                         df_contrast.set,...
                         df_contrast.repetition};

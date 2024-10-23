@@ -1,5 +1,6 @@
-function displacement_fields = register_bins(bin_images, ref_bin_idx, params)
-% REGISTER_BINS Register all bin images to one bin (e.g. expiration)
+function displacement_fields = register_bins(bin_images, ref_bin, params)
+% REGISTER_BINS Calculate displacement fields by register bin images to one
+% another
     if ~exist("params", "var"), params = struct(); end
     params = fill_struct_values(params, struct( ...
         zero_ref_bin=true, ...
@@ -8,29 +9,43 @@ function displacement_fields = register_bins(bin_images, ref_bin_idx, params)
         tmp_dir=fullfile(getenv("WORKSPACE"), ".nifty/tmp")));
 
     n_bins = numel(bin_images);
-    assert(ref_bin_idx <= n_bins);
-    reference_image = rescale(abs(bin_images{ref_bin_idx}), 0, 1);
+    if ref_bin == 0, ref_bin = 1:n_bins; end
 
-    displacement_fields = nan([size(bin_images{1}, 1:3), 3, n_bins]);
-    for i_bin = 1:n_bins
-        if params.zero_ref_bin && i_bin == ref_bin_idx
-            displacement_field = zeros(size(displacement_fields, 1:4));
-        else
-            [~, displacement_field] = niftyreg_wrapper( ...
-                reference_image, ...
-                rescale(abs(bin_images{i_bin}),0,1), ...
-                params.nifty_params, ...
-                params.tmp_dir);
+    displacement_fields = cell(n_bins, n_bins);
+    image_size = size(bin_images{1});
 
-            displacement_field = squeeze(displacement_field);
+    for i_ref = 1:numel(ref_bin)
+        ref_bin_idx = ref_bin(i_ref);
+
+        reference_image = rescale(abs(bin_images{ref_bin_idx}), 0, 1);
+
+        for i_floating_idx = 1:n_bins
+            if params.zero_ref_bin && i_floating_idx == ref_bin_idx
+                df = zeros([image_size, 3]);
+            else
+                floating_image = rescale(abs(bin_images{i_floating_idx}),0,1);
+
+                [~, df] = niftyreg_wrapper( ...
+                    reference_image, ...
+                    floating_image, ...
+                    params.nifty_params, ...
+                    params.tmp_dir);
+
+                df = squeeze(df);
+                % size: (image_size, 3)
+            end
+            displacement_fields{i_floating_idx, ref_bin_idx} = df;
         end
-        displacement_fields(:,:,:,:,i_bin) = displacement_field;
     end
 
     % Clip values
+    displacement_fields = cellfun(@(df) clip_df(df, params.clip_df), displacement_fields, 'UniformOutput', false);
+end
+
+function df = clip_df(df, clip_limits)
     for i_dim = 1:3
-        limit = params.clip_df(i_dim);
+        limit = clip_limits(i_dim);
         if limit < 0, continue; end
-        displacement_fields(:,:,:,i_dim,:) = clip_values(displacement_fields(:,:,:,i_dim,:), -limit, limit);
+        df(:,:,:,i_dim) = clip_values(df(:,:,:,i_dim), -limit, limit);
     end
 end
