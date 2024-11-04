@@ -6,8 +6,6 @@
 1. Install MATLAB (at least version R2023b) and include the following toolboxes:
     * _"Image Processing Toolbox"_ (required)
     * _"Parallel Processing Toolbox"_ (optional)
-    * _"Optimization Toolbox"_ (optional)
-    * _"Signal Processing Toolbox"_ (optional)
 2. Load these modules before running MATLAB in iHEALTH servers (e.g. ih-condor, nyquist, fourier):
     ```bash
     module load bart imagine niftyreg mapVBVD prost/1.1.0 mri-coils
