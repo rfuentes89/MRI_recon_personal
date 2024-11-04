@@ -14,7 +14,7 @@ twix = read_twix(path_to_twix);
 disp("Twix loaded");
 
 %% Load navigators
-raw_navigators = read_navigators(twix, CONFIG.selected_contrasts);
+raw_navigators = read_navigators(twix{end}, CONFIG.selected_contrasts);
 disp("Navigators loaded");
 
 %% Pass to array
