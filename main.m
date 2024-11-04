@@ -183,7 +183,9 @@ for i_ref_bin = 1:n_ref_bins
     % PROST Denoising
     if CONFIG.denoising_type ~= "none"
         fprintf("\tPROST denoising\n");
+        tic();
         images = denoising_HD_PROST(images, CONFIG.prost_params);
+        fprintf("\t\t\t denoising_hd_prost() "); toc();
     end
 
     if CONFIG.save_images

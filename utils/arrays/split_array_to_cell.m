@@ -16,8 +16,8 @@ function cell_of_arrays = split_array_to_cell(array, dummy_dim_at_the_end)
 %              dummy_dim_at_the_end = true
 %       output: cell of size 1, with an array of size (n_x, n_y, n_z)
 %
-% Note: using this is much more efficient than slicing,
-% since slicing makes copies of the data:
+% Note: using this function is much more efficient than slicing,
+% since slicing makes copies of the data, e.g.:
 %
 %       for i_array = 1:size(array, 4)
 %           output_cell{i_array} = array(:,:,:,i_array)
