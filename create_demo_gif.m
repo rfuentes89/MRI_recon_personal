@@ -17,15 +17,11 @@ CONFIG = load_config(config_fname);
 %% Prepare DCM filenames
 base_recons_folder = fullfile(CONFIG.acq_folder, "recons");
 
-requires_more_than_one = false;
 switch CONFIG.mode
     case "png_final_recon"
         get_filepaths = @get_final_dcm_filepaths;
     case "gif_bin_images"
         get_filepaths = @get_bin_dcm_filepaths;
-    case "gif_final_recons"
-        requires_more_than_one = true;
-        get_filepaths = @get_final_dcm_filepaths;
     case "gif_refpos"
         get_filepaths = @get_refpos_dcm_filepaths;
     case "gif_xyz"
@@ -35,11 +31,6 @@ switch CONFIG.mode
 end
 
 % Get filepaths
-if requires_more_than_one
-    assert(length(CONFIG.run_name) > 1, "mode %s requires more than 1 recon_name", CONFIG.mode);
-else
-    assert(length(CONFIG.run_name) == 1, "mode %s requires exactly 1 recon_name", CONFIG.mode);
-end
 dcm_fpaths = get_filepaths(base_recons_folder, CONFIG.run_name, CONFIG.contrast_name);
 
 % Build output folder
@@ -53,39 +44,23 @@ for i_dcm = 1:n_paths
     images{i_dcm} = double(squeeze(dicomread(dcm_filepath)));
 end
 
+%% Apply images corrections
+images = apply_image_corrections(images, CONFIG.image_params);
+
+
+%% Apply MIP
+if CONFIG.mip_params.apply && ~contains(CONFIG.mode, "xyz")
+    for i_image = 1:numel(images)
+        images{i_image} = calc_mip_image(images{i_image}, CONFIG.mip_params);
+    end
+end
+
 %% Animate in a cycle
 if CONFIG.cyclic
     n_new = n_paths - 2;
     n_from = n_paths;
     for i_dcm = 1:n_new
         images{n_from + i_dcm} = double(images{n_paths - i_dcm});
-    end
-end
-
-%% Normalize to same brightness
-if CONFIG.norm_brightness_params.apply
-    images = norm_image_brightness(images, CONFIG.norm_brightness_params.target);
-end
-
-%% Apply LUT
-if CONFIG.lut_params.apply
-    for i_image = 1:numel(images)
-        images{i_image} = apply_window_level(images{i_image}, CONFIG.lut_params.window, CONFIG.lut_params.level);
-    end
-end
-
-%% Clip percentiles
-if CONFIG.percentile_params.apply
-    params = CONFIG.percentile_params;
-    for i_image = 1:numel(images)
-        images{i_image} = clip_percentiles(images{i_image}, params.min_perc, params.max_perc);
-    end
-end
-
-%% Apply MIP
-if CONFIG.mip_params.apply && ~contains(CONFIG.mode, "xyz")
-    for i_image = 1:numel(images)
-        images{i_image} = calc_mip_image(images{i_image}, CONFIG.mip_params);
     end
 end
 
@@ -199,7 +174,7 @@ function folder_output = build_output_folder(config)
     folder_output = fullfile( ...
         config.acq_folder, ...
         "recons", ...
-        config.run_name(end), ... % save in the last recon if >1
+        config.run_name, ...
         folder_name, ...
         output_name);
 

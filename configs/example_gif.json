@@ -6,22 +6,14 @@
     "verbose": false,
 
     // Which DCMs to use, see options below
-    "mode": "gif_final_recons",
+    "mode": "gif_refpos",
     // "png_final_recon": use one final recon to create PNGs
     // "gif_bin_images": use bin images from one recon to create GIFs
-    // "gif_final_recons": use final reconstructions from multiple recons to create GIFs
+    // "gif_refpos": use final recons with multiple reference positions to create GIFs
     // "gif_xyz": use one final recon to create x, y and z GIFs
 
-    // If mode other than "gif_final_recons" set 1 recon
-    //"run_name": "RUN_1",
-
-    // If mode == "gif_final_recons" set multiple recons
-    "run_name": [
-        "RUN_1",
-        "RUN_2",
-        "RUN_3",
-        "RUN_4", // GIFs will be saved in the last recon
-    ],
+    // Choose which recon to use
+    "run_name": "RUN_1",
 
     // Choose contrast to select DCM files
     "contrast_name": "HB1",
@@ -37,11 +29,27 @@
     // 1, 2, 3, 4, 3, 2
     "cyclic": false,
 
-    // Params to normalize brightness across images
-    "norm_brightness_params": {
-        "apply": true,
-        "target": "mean", // one of min, max, mean, median or number
-        // if number: which image to use as target brightness
+    // Image pre-processing params
+    "image_params": {
+        // Params to normalize brightness across images
+        "norm_brightness_params": {
+            "apply": true,
+            "target": "mean", // one of min, max, mean, median or number
+            // if number: which image to use as target brightness
+        },
+
+        // Choose Lookup Table params
+        "lut_params": {
+            "apply": false, // whether or not to apply window and level
+            "window": 1399,
+            "level": 391,
+        },
+
+        "percentile_params": {
+            "apply": true, // whether or not to clip percentiles
+            "min_perc": 1,
+            "max_perc": 99,
+        },
     },
 
     // Choose MIP params
@@ -49,19 +57,6 @@
         "apply": true, // whether or not to apply MIP to each image
         "thickness": 10, // number of slices to grab to either side
         "axis": "z", // which axis to apply MIP, one of "x", "y", "z"
-    },
-
-    // Choose Lookup Table params
-    "lut_params": {
-        "apply": false, // whether or not to apply window and level
-        "window": 1399,
-        "level": 391,
-    },
-
-    "percentile_params": {
-        "apply": true, // whether or not to clip percentiles
-        "min_perc": 1,
-        "max_perc": 99,
     },
 
     // Choose PNG generation params (for "png_" modes only)
