@@ -1,4 +1,4 @@
-function dfs = interpolate_dfs(dfs, new_n_bins)
+function dfs = interpolate_dfs(dfs, new_n_bins, params)
 %INTERPOLATE_DFS Interpolate 3D displacement fields to more bins
 % Args:
 %     dfs: cell of size (n_floating_bins, n_ref_bins), where
@@ -15,6 +15,10 @@ function dfs = interpolate_dfs(dfs, new_n_bins)
     assert(n_floating == n_ref);
     df_size = size(dfs{1});
 
+    % Default params
+    if ~exist("params", "var"), params = struct(); end
+    params = fill_struct_values(params, struct(method='linear'));
+
     % Flatten DFs
     lastdim = numel(df_size) + 1;
     dfs_flatten = cat(lastdim, dfs{:}); % size: nx, ny, nz, 3, n_target*n_ref
@@ -26,7 +30,7 @@ function dfs = interpolate_dfs(dfs, new_n_bins)
     % Build interpolator
     interp_grid_x = 1:n_floating;
     interp_grid_y = 1:n_ref;
-    interp_fn = griddedInterpolant({interp_grid_x, interp_grid_y}, dfs_permuted);
+    interp_fn = griddedInterpolant({interp_grid_x, interp_grid_y}, dfs_permuted, params.method);
 
     % Interpolate
     new_range = calculate_interpolation_range(n_ref, new_n_bins);
