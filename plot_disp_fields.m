@@ -8,6 +8,7 @@ addpath(genpath("./"))
 CONFIG.acq_folder = fullfile(getenv("WORKSPACE"), "acquisitions/2024-01-01_JR_BOOST");
 CONFIG.run_name = "2024-05-22_itsense_n-intraTL_decayINF_DFbefore-flip";
 CONFIG.contrast_name = "HB1";
+CONFIG.i_slice = 77;
 
 %% Load bin images
 bin_images = load_bin_images(CONFIG.acq_folder, CONFIG.run_name, CONFIG.contrast_name);
@@ -22,25 +23,27 @@ params.ascending = true;
 
 % Call Nifty
 tic();
-dfs = register_bins(bin_images, 0, params);
+dfs_og = register_bins(bin_images, 0, params);
 toc();
 fprintf("Finished register_bins() %s\n", params.nifty_params);
 
 %% Plot one reference
-plot_dfs_oneref(bin_images, dfs, 88, 4, params.nifty_params)
+plot_dfs_oneref(bin_images, dfs_og, CONFIG.i_slice, 4, params.nifty_params)
 
 %% Plot matrix
-plot_dfs_allref(dfs, 88, 1);
+plot_dfs_allref(dfs_og, CONFIG.i_slice, 1);
 
-%% Interploate
-dfs_interp = interpolate_dfs(dfs, 8);
+%% Interpolate
+dfs_interp = interpolate_dfs(dfs_og, 8, struct(method='linear'));
 
 %% Plot matrix (interpolated)
-plot_dfs_allref(dfs_interp, 88, 1);
+plot_dfs_allref(dfs_interp, CONFIG.i_slice, 1);
 
-%% Plot arrow DF matrix
-i_slice = 68;
+%% Plot DF matrix
+i_slice = CONFIG.i_slice;
 plot_params.downsample_factor = 0.14;
+use_arrows = false;
+dfs = dfs_og;
 
 [n_float, n_ref] = size(dfs);
 
@@ -51,9 +54,13 @@ t = tiledlayout(n_rows, n_cols, 'Padding', 'compact', 'TileSpacing', 'compact');
 
 for i_float = 1:n_float
     for i_ref = 1:n_ref
-        nexttile;
-        df = flip(dfs{i_float, i_ref}, 1);
-        plot_df_arrows(df, i_slice, plot_params);
+        df = dfs{i_float, i_ref};
+        ax = nexttile;
+        if use_arrows
+            plot_df_arrows(flip(df, 1), i_slice, plot_params);
+        else
+            plot_image_as_colorfield(df(:,:,i_slice,1), ax, struct(cbar=true));
+        end
     end
 end
 

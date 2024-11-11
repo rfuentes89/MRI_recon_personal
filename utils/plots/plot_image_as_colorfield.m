@@ -1,10 +1,15 @@
-function plot_image_as_colorfield(image, ax)
+function plot_image_as_colorfield(image, ax, params)
 %PLOT_IMAGE_AS_COLORFIELD Plot an image as a colorfield, with the colorbar
 %next to it.
+    % Default params
+    if ~exist("params", "var"), params = struct(); end
+    params = fill_struct_values(params, struct(cbar=true));
+
     assert(ismatrix(image));
 
     imagesc(ax, image, 'AlphaData', 0.8);
     colormap(ax, 'jet');
+    axis off;
 
     % Set colobar limits
     min_value = min(image(:));
@@ -13,6 +18,8 @@ function plot_image_as_colorfield(image, ax)
 
     % Fix aspect ratio
     pbaspect(ax, [size(image, 2), size(image, 1), 1]);
-    colorbar();
-    axis off;
+
+    if params.cbar
+        colorbar();
+    end
 end
