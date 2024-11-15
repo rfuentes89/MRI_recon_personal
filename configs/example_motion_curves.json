@@ -1,0 +1,27 @@
+{
+    // Acquisition folder
+    // Use $WORKSPACE to replace by your workspace folder
+    // Use ~ to replace by your home
+    "acq_folder": "$WORKSPACE/acquisitions/2024-01-01_HV1_BOOST",
+
+    // Raw data from scanner
+    // Will be searched in folder: acq_folder/raw/
+    "twix_fname": "example_twix.dat",
+
+    // Motion curve options
+    "name": "inav-heart", // custom name to save motion curve as
+    "override": false, // if present, will override motion curve with same name
+    "roi_padding": {
+        // the selected ROI will be padded with these number of extra pixels in each dimension
+        "fh": 10,
+        "rl": 2,
+    },
+
+    // Choose contrasts
+    "selected_contrasts": {
+        // pass empty list to use all
+        "echoes": [],
+        "sets": [],
+        "repetitions": [],
+    },
+}

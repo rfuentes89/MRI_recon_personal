@@ -75,7 +75,7 @@ offset = padded_k_space_dimensions / 2 - k_space_centre + 1;
 
 padded_k_spaces = cell(n_selected_echoes, n_selected_sets, n_navigators, n_selected_repetitions);
 
-navigators = cell(n_selected_echoes, n_selected_sets, n_navigators, n_selected_repetitions);
+navigators = cell(n_selected_echoes, n_selected_sets, n_selected_repetitions, n_navigators);
 for repetition = 1:n_selected_repetitions
     for navigator = 1:n_navigators
         for set = 1:n_selected_sets        
@@ -89,7 +89,7 @@ for repetition = 1:n_selected_repetitions
                        = k_spaces{selected.echoes(echo),selected.sets(set),navigator,selected.repetitions(repetition)};
                 end
                 coil_images = flip(flip(ktoi(padded_k_spaces{echo,set,navigator,repetition}, [1 2]), 1), 2);
-                navigators{echo,set,navigator,repetition} = double(sqrt(sum(abs(coil_images) .^ 2, 3)));
+                navigators{echo,set,repetition,navigator} = double(sqrt(sum(abs(coil_images) .^ 2, 3)));
             end
         end
     end

@@ -24,8 +24,7 @@
 
     // Motion curve options
     "motion_curve": {
-        "name": "inav-heart", // custom name to save motion_curves
-        "recompute": false, // if present, will compute curve again and save it
+        "name": "inav-heart", // motion curves to load
         "zero_rl": true, // if true will ignore right-left motion
         "zero_fh": false, // if true will ignore foot-head motion
     },
