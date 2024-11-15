@@ -5,10 +5,12 @@
 addpath(genpath("./"))
 
 % Params: choose recon
-CONFIG.acq_folder = fullfile(getenv("WORKSPACE"), "acquisitions/2024-01-01_JR_BOOST");
-CONFIG.run_name = "2024-05-22_itsense_n-intraTL_decayINF_DFbefore-flip";
+CONFIG.acq_folder = fullfile(getenv("WORKSPACE"), "acquisitions/2024-07-19_FE_CMRA-params");
+CONFIG.run_name = "2024-10-21_NR_resp";
 CONFIG.contrast_name = "HB1";
-CONFIG.i_slice = 77;
+CONFIG.i_slice = 68;
+
+CONFIG.run_folder = fullfile(CONFIG.acq_folder, "recons", CONFIG.run_name);
 
 %% Load bin images
 bin_images = load_bin_images(CONFIG.acq_folder, CONFIG.run_name, CONFIG.contrast_name);
@@ -27,11 +29,16 @@ dfs_og = register_bins(bin_images, 0, params);
 toc();
 fprintf("Finished register_bins() %s\n", params.nifty_params);
 
-%% Plot one reference
-plot_dfs_oneref(bin_images, dfs_og, CONFIG.i_slice, 4, params.nifty_params)
-
 %% Plot matrix
-plot_dfs_allref(dfs_og, CONFIG.i_slice, 1);
+i_slice = CONFIG.i_slice;
+
+fig = figure('visible', 'on');
+plot_dfs_allref(dfs_og, i_slice, 1, params.nifty_params);
+
+%% Save to figure
+save_figure( ...
+    @() plot_dfs_allref(dfs_og, i_slice, 1, params.nifty_params), ...
+    CONFIG.run_folder, sprintf("slice%03d", i_slice));
 
 %% Interpolate
 dfs_interp = interpolate_dfs(dfs_og, 8, struct(method='linear'));
@@ -91,4 +98,18 @@ end
 %% Util functions
 function plot_image(img)
     imshow(rescale(img, 0, 1));
+end
+
+function save_figure(plot_figure, run_folder, fname)
+    fig = figure('visible', 'off');
+    fig.Position = [0, 0, 1920, 1080];
+
+    plot_figure();
+
+    folder = fullfile(run_folder, "dfs");
+    if ~exist(folder, "dir"), mkdir(folder); end
+
+    fpath = fullfile(folder, sprintf("%s.png", fname));
+    saveas(gcf, fpath);
+    fprintf("Saved to %s\n", fpath);
 end
