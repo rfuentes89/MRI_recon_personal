@@ -1,0 +1,38 @@
+{
+    // Acquisition folder
+    "acq_folder": "$WORKSPACE/acquisitions/2024-01-01_HV_SEQ",
+
+    // Choose which recon to use
+    "run_name": "RUN_1",
+
+    // Choose contrast to select DCM files
+    "contrast_name": "HB1",
+
+    // Choose PNG generation params
+    "axis": "z", // which axis to slice to generate PNGs, one of "x", "y", "z"
+    "slices": "[30:45 67:80]", // which slices to generate
+        // if a string is provided, will evaluate as a MATLAB expression
+        // if a number or numbers are provided, will select those slices
+        // if 0 is provided, will generate all slices
+
+    // Image pre-processing params
+    "image_params": {
+        // Params to normalize brightness across images
+        "norm_brightness_params": {
+            "apply": true,
+            "target": "mean", // one of min, max, mean, median or number
+            // if number: which image to use as target brightness
+        },
+        // Choose Lookup Table params
+        "lut_params": {
+            "apply": false, // whether or not to apply window and level
+            "window": 1399,
+            "level": 391,
+        },
+        "percentile_params": {
+            "apply": true, // whether or not to clip percentiles
+            "min_perc": 1,
+            "max_perc": 99,
+        },
+    },
+}

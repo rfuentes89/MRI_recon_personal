@@ -1,11 +1,10 @@
-%%% Create GIF or PNGs for demos
+%%% Create GIF for demos
 % Steps:
 % 1. Create a config file, see configs/example_gif.json for an example
 % 2. Select the config_fname in the first lines
 % 3. Run this script
 %
 % GIFs will be saved as: acq_folder/recons/recon_name/gif/mode/*.gif
-% PNGs will be saved as: acq_folder/recons/recon_name/png/mode/*.png
 
 %% Import files
 addpath(genpath("./"))
@@ -18,8 +17,7 @@ CONFIG = load_config(config_fname);
 base_recons_folder = fullfile(CONFIG.acq_folder, "recons");
 
 switch CONFIG.mode
-    case "png_final_recon"
-        get_filepaths = @get_final_dcm_filepaths;
+    % TODO(pdpino): use load_bin_images() and load_final_recons() instead
     case "gif_bin_images"
         get_filepaths = @get_bin_dcm_filepaths;
     case "gif_refpos"
@@ -47,7 +45,6 @@ end
 %% Apply images corrections
 images = apply_image_corrections(images, CONFIG.image_params);
 
-
 %% Apply MIP
 if CONFIG.mip_params.apply && ~contains(CONFIG.mode, "xyz")
     for i_image = 1:numel(images)
@@ -72,7 +69,7 @@ if CONFIG.verbose
     disp(size(images))
 end
 
-%% Generate and save PNGs/GIFs
+%% Generate and save GIFs
 if CONFIG.mode == "gif_xyz"
     % Generate three 3D GIFs: through x, y and z
 
@@ -96,16 +93,6 @@ if CONFIG.mode == "gif_xyz"
     end
     fprintf("%d .gifs saved in %s\n", numel(axes), folder_output);
 
-elseif startsWith(CONFIG.mode, "png")
-    % Generate one PNG per slice
-    write_png = @(slice, fname) imwrite(uint8(rescale(slice, 0, 255)), fname);
-
-    write_output_per_slice( ...
-        images, ...
-        write_png, ...
-        CONFIG.png_params.axis, ...
-        folder_output, ...
-        ".png");
 elseif startsWith(CONFIG.mode, "gif")
     % Generate one GIF per slice, across multiple DICOMs loaded
     CONFIG.gif_params.norm = true; % required for proper output
@@ -143,13 +130,7 @@ function write_output_per_slice(volume, write_output, axis, folder_output, exten
 end
 
 function folder_output = build_output_folder(config)
-    folder_name = extractBefore(config.mode, 4); % i.e. "gif" or "png"
-    switch folder_name
-        case "gif"
-            axis = config.gif_params.axis;
-        case "png"
-            axis = config.png_params.axis;
-    end
+    axis = config.gif_params.axis;
 
     output_name = sprintf("%s_%s", ...
         extractAfter(config.mode, 4), ...
@@ -175,7 +156,7 @@ function folder_output = build_output_folder(config)
         config.acq_folder, ...
         "recons", ...
         config.run_name, ...
-        folder_name, ...
+        "gif", ...
         output_name);
 
     if ~exist(folder_output, "dir"), mkdir(folder_output); end

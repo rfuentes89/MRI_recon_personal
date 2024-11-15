@@ -5,11 +5,10 @@
     // If true, prints more information to stdout
     "verbose": false,
 
-    // Which DCMs to use, see options below
+    // Which DCMs to use to create GIFs, see options below
     "mode": "gif_refpos",
-    // "png_final_recon": use one final recon to create PNGs
-    // "gif_bin_images": use bin images from one recon to create GIFs
-    // "gif_refpos": use final recons with multiple reference positions to create GIFs
+    // "gif_bin_images": use bin images
+    // "gif_refpos": use final recons with multiple reference positions
     // "gif_xyz": use one final recon to create x, y and z GIFs
 
     // Choose which recon to use
@@ -17,7 +16,6 @@
 
     // Choose contrast to select DCM files
     "contrast_name": "HB1",
-    // If mode == "png_final_recon", will look for file HB1.dcm
     // If mode == "gif_bin_images", will look for files: HB1-bin01.dcm, HB1-bin02.dcm, etc
     // If mode == "gif_final_recons", will look for HB1.dcm files in each recon folder
 
@@ -57,11 +55,6 @@
         "apply": true, // whether or not to apply MIP to each image
         "thickness": 10, // number of slices to grab to either side
         "axis": "z", // which axis to apply MIP, one of "x", "y", "z"
-    },
-
-    // Choose PNG generation params (for "png_" modes only)
-    "png_params": {
-        "axis": "z", // which axis to slice to generate PNGs, one of "x", "y", "z"
     },
 
     // Choose GIF generation params (for "gif_" modes only)
