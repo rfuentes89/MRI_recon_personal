@@ -173,7 +173,7 @@ for i_ref_bin = 1:n_ref_bins
     ref_bin = CONFIG.motion_correction_params.ref_bin(i_ref_bin);
     fprintf("Reconstructing with ref_bin=%d (recon %d/%d)\n", ref_bin, i_ref_bin, n_ref_bins);
 
-    suffix = ternary(n_ref_bins > 1, sprintf("_refpos%02d", ref_bin), "");
+    suffix = sprintf("_refpos%02d", ref_bin);
 
     if CONFIG.motion_correction_params.type == "non_rigid"
         data.interpolation_matrices = prepare_interp_matrices( ...
