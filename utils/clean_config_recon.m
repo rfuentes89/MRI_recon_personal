@@ -59,6 +59,11 @@ function config = clean_config_recon(config)
             "Reconstructing to >1 ref-bin with ORCCA MTV -- MTV transform will use the first ref-bin %d", ...
             mc_params.ref_bin(1));
     end
+
+    % Complete coils .raw filepath with acq_folder/raw
+    if strlength(config.coil_params.csm_params.filename) > 0
+        config.coil_params.csm_params.filename = fullfile(config.acq_folder, "raw", config.coil_params.csm_params.filename);
+    end
 end
 
 
@@ -80,5 +85,6 @@ function config = add_backward_compat_params(config)
     if ~isfield(config.motion_correction_params, 'load_bin_images'), config.motion_correction_params.load_bin_images = ""; end
     if ~isfield(config.motion_correction_params, 'registration_params'), config.motion_correction_params.registration_params = struct(); end
     if ~isfield(config.motion_correction_params, 'it_sense_params'), config.motion_correction_params.it_sense_params = struct(); end
-    if ~isfield(config.coil_params, 'csm_params'), config.coil_params.csm_params = struct(bart_params="-r 20 -k 5 -c 0 -S"); end
+    if ~isfield(config.coil_params, 'csm_params'), config.coil_params.csm_params = struct(bart_params="-r 20 -k 5 -c 0 -S", filename=""); end
+    if ~isfield(config.coil_params.csm_params, 'filename'), config.coil_params.csm_params.filename = ""; end
 end

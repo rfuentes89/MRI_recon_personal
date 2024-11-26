@@ -70,6 +70,9 @@
             "smoothing" : 5,
             // espirit only params:
             "bart_params": "-r 20 -k 5 -c 0 -S",
+            // scanner only params:
+            "filename": "", // filename for .raw file with CSM given by the scanner
+                // file should be located in acq_folder/raw/
         },
     },
     "selected_contrasts": {
