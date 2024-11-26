@@ -39,6 +39,9 @@ function data = read_raw_data(twix, selected_contrasts, selected_coils)
     echo_at_readout = double(twix.image.Eco);
     repetition_at_readout = double(twix.image.Rep);
 
+    if ~exist("selected_contrasts", "var")
+        selected_contrasts = struct(sets=[], echoes=[], repetitions=[]);
+    end
     if isempty(selected_contrasts.sets)
         selected_contrasts.sets = 1:n_sets;
     end
@@ -48,7 +51,7 @@ function data = read_raw_data(twix, selected_contrasts, selected_coils)
     if isempty(selected_contrasts.repetitions)
         selected_contrasts.repetitions = 1:n_repetitions;
     end
-    if isempty(selected_coils)
+    if ~exist("selected_coils", "var") || isempty(selected_coils)
         selected_coils = 1:n_coils;
     end
     
