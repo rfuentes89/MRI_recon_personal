@@ -230,6 +230,7 @@ end
 %% Write config at end
 CONFIG.timestamp_end = string(datetime("now"), "yyyy-MM-dd_HH:mm:ss");
 save_config(CONFIG.run_folder, CONFIG);
+diary off;
 
 %% Functions
 function displacement_fields = load_or_calculate_dfs(data, config)
