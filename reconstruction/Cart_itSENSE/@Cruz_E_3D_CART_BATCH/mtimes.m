@@ -11,8 +11,9 @@ if operator.adjoint % EH operation
 
     for bin = 1:n_bins
         % Sampling
-        Bin_At = double(operator.At{bin});
-        b_sample = k_spaces{bin}.*Bin_At;
+        % TODO(pdpino): can we skip this step at all? only apply this mask
+        % once at the beginning
+        b_sample = k_spaces{bin}.*operator.At{bin};
         % size: nx, ny, nz, n_coils
 
         % FFT
@@ -66,7 +67,6 @@ else % E operation
         b_sample = 1/sqrt(size(b_sample,3))*fftshift(fft(ifftshift( b_sample, 3 ),[],3),3);
 
         % Sampling
-        Bin_At = double(operator.At{bin});
-        res{bin} = b_sample.*Bin_At;
+        res{bin} = b_sample.*operator.At{bin};
     end
 end

@@ -11,7 +11,8 @@ function  res = Cruz_E_3D_CART_BATCH(interpolation_matrices,binned_sampling_mask
 res.adjoint = 0; % flag
 
 res.interpolation_matrices = interpolation_matrices;
-res.At = binned_sampling_masks;
+% Make sure masks are type double
+res.At = cellfun(@(mask) double(mask), binned_sampling_masks, "UniformOutput", false);
 res.coils = csm;
 
 res = class(res,'Cruz_E_3D_CART_BATCH');
