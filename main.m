@@ -115,7 +115,7 @@ csm = get_csm(data, CONFIG.coil_params.csm_algorithm, CONFIG.selected_contrasts_
 
 if CONFIG.save_csm
     filename = fullfile(CONFIG.run_folder, "csm.mat");
-    save(filename, "csm");
+    save(filename, "csm", "-v7.3");
     disp("Saved csm to " + filename);
 end
 
@@ -205,7 +205,7 @@ for i_ref_bin = 1:n_ref_bins
 
     if CONFIG.save_images
         filename = fullfile(CONFIG.run_folder, sprintf("images%s.mat", suffix));
-        save(filename, "images");
+        save(filename, "images", "-v7.3");
         disp("Saved denoised images to " + filename);
     end
 
@@ -257,7 +257,7 @@ function displacement_fields = load_or_calculate_dfs(data, config)
         % Save to .mat file
         if config.save_disp_fields
             filename = fullfile(config.run_folder, "displacement_fields.mat");
-            save(filename, "displacement_fields");
+            save(filename, "displacement_fields", "-v7.3");
             fprintf("\tSaved DFs to %s\n", filename);
         end
     end

@@ -10,6 +10,7 @@ function config = clean_config_recon(config)
     % Add _DEBUG for runs with debug_ksize set
     if config.debug_ksize > 0
         config.run_name = string(config.run_name) + "_DEBUG";
+        config.override_if_exists = true;
     end
 
     % Add datestamp to run_name
