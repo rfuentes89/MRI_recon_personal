@@ -35,4 +35,11 @@
             "max_perc": 99,
         },
     },
+
+    // Choose MIP params
+    "mip_params": {
+        "apply": true, // whether or not to apply MIP to each image
+        "thickness": 10, // number of slices to grab to either side
+        "axis": "z", // which axis to apply MIP, one of "x", "y", "z"
+    },
 }

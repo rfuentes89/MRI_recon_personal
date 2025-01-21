@@ -11,6 +11,10 @@ images = load_final_recons(CONFIG.acq_folder, CONFIG.run_name, CONFIG.contrast_n
 
 %% Apply images corrections
 images = apply_image_corrections(images, CONFIG.image_params);
+if CONFIG.mip_params.apply
+    images = cellfun(@(image) calc_mip_image(image, CONFIG.mip_params), images, "UniformOutput", false);
+end
+
 images = cat(4, images{:});
 % size: nx, ny, nz, n_refpos
 
@@ -48,6 +52,10 @@ save_config(folder_output, CONFIG, false);
 %% Utils
 function folder_output = build_output_folder(config)
     output_name = sprintf("%s_%s", config.contrast_name, config.axis);
+
+    if config.mip_params.apply
+        output_name = output_name + "_MIP";
+    end
 
     folder_output = fullfile( ...
         config.acq_folder, ...
