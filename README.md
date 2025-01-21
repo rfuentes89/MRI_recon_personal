@@ -8,7 +8,7 @@
     * _"Parallel Processing Toolbox"_ (optional)
 2. Load these modules before running MATLAB in iHEALTH servers (e.g. ih-condor, nyquist, fourier):
     ```bash
-    module load bart imagine niftyreg mapVBVD prost/1.1.0 mri-coils
+    module load bart imagine niftyreg mapVBVD prost mri-coils
     ```
 
 <details>
