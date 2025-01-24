@@ -3,7 +3,7 @@
 
 %% Imports
 addpath(genpath("./"))
-config_fname = "configs/example_recon.json";
+config_fname = "configs/base_motion_curves.json";
 
 CONFIG = load_config(config_fname);
 
@@ -34,12 +34,12 @@ end
 folder_output = fullfile(CONFIG.acq_folder, "navigators");
 if ~exist(folder_output, "dir"), mkdir(folder_output); end
 for i_contrast = 1:length(navs)
-    cname = string(CONFIG.seq_params.contrast_names{i_contrast});
-    fpath = fullfile(folder_output, cname + ".gif");
+    cname = string(CONFIG.contrast_names{i_contrast});
+    fpath = fullfile(folder_output, CONFIG.name + "_" + cname + ".gif");
     save_gif(navs{i_contrast}, fpath);
 end
 
 %% Plot sum of navigators
 sum_of_navigators = sum_navigators(raw_navigators);
 imshow(sum_of_navigators, []);
-saveas(gcf, fullfile(folder_output, "sum.png"));
+saveas(gcf, fullfile(folder_output, CONFIG.name + "_sum.png"));
