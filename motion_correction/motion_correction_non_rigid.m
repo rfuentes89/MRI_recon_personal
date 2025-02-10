@@ -4,6 +4,7 @@ function data = motion_correction_non_rigid(data, motion_curves, csm, params)
     % force this behaviour for the inline reconstruction
 
     [n_echoes, n_sets, n_repetitions] = size(data.k_spaces);
+    [n_inav_echoes, ~] = size(motion_curves);
 
     n_contrasts = size(data.sampling_masks);
     data.bin_images = cell(n_contrasts);
@@ -16,7 +17,14 @@ function data = motion_correction_non_rigid(data, motion_curves, csm, params)
     for repetition = 1:n_repetitions
         for set = 1:n_sets
             for echo = 1:n_echoes
-                motion = motion_curves{echo,set,repetition};
+
+                % Use last inav echo if there are more acquisition echoes
+                % than inav echoes
+                if echo <= n_inav_echoes
+                    motion = motion_curves{echo,set,repetition};
+                else
+                    motion = motion_curves{n_inav_echoes,set,repetition};
+                end
                 bin_limits = hard_bin_limits(motion.fh, params.n_bins);
 
                 [data.k_spaces_corrected{echo,set,repetition}, data.binned_sampling_masks{echo,set,repetition}] = Focus_binsV2( ...
