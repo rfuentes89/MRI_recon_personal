@@ -38,10 +38,14 @@
         // for repetitions
         //     for sets
         //         for echoes
-        "bb": { // set to null if not needed
+        "bb": { // if present will calculate black-blood image from HB1-HB2
 		    "scanner_dcm": "BB", // Name of the input DCM file for black blood
 		    "contrast_name": "BB", // Name for the BB output DCM
 	    },
+        "dixon": { // if present will calculate F/W images from in-phase and opp-phase images
+            "scanner_dcm_water": "W", // name of the input DCM file for water, if any
+            "scanner_dcm_fat": "F", // name of the input DCM file for fat, if any
+        },
     },
 
     // Whether or not to save to file

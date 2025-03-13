@@ -221,9 +221,17 @@ for i_ref_bin = 1:n_ref_bins
     % Write black blood DICOM
     if (numel(images) == 2) && isstruct(CONFIG.seq_params.bb)
         bb = CONFIG.seq_params.bb;
-        deno_blackblood = abs(images{2}) - abs(images{1});
+        bb_image = calculate_black_blood(images{1}, images{2});
         bb_name = string(bb.contrast_name) + suffix;
-        save_dicom(CONFIG, deno_blackblood, bb.scanner_dcm, bb_name);
+        save_dicom(CONFIG, bb_image, bb.scanner_dcm, bb_name);
+    end
+
+    if (numel(images) == 2) && isstruct(CONFIG.seq_params.dixon)
+        [water_image, fat_image] = calculate_dixon(images{1}, images{2});
+
+        dixon = CONFIG.seq_params.dixon;
+        save_dicom(CONFIG, water_image, dixon.scanner_dcm_water, "W" + suffix);
+        save_dicom(CONFIG, fat_image, dixon.scanner_dcm_fat, "F" + suffix);
     end
 end
 

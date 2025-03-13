@@ -88,4 +88,5 @@ function config = add_backward_compat_params(config)
     if ~isfield(config.motion_correction_params, 'it_sense_params'), config.motion_correction_params.it_sense_params = struct(); end
     if ~isfield(config.coil_params, 'csm_params'), config.coil_params.csm_params = struct(bart_params="-r 20 -k 5 -c 0 -S", filename=""); end
     if ~isfield(config.coil_params.csm_params, 'filename'), config.coil_params.csm_params.filename = ""; end
+    if ~isfield(config.seq_params, 'dixon'), config.seq_params.dixon = false; end
 end
