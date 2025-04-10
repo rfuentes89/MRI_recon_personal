@@ -1,4 +1,4 @@
-function [x, Rx_history, y_history, x_history] = reconstruct_admm(kdata, E_operator, admm_params, prost_params)
+function [x, x_history, Rx_history, y_history] = reconstruct_admm(kdata, E_operator, admm_params, prost_params)
 % RECONSTRUCT_ADMM Run ADMM optimization with HD-PROST
 %  Inputs:
 %        kdata: cell of arbitrary size n_images (e.g. number of contrasts,
@@ -17,9 +17,9 @@ function [x, Rx_history, y_history, x_history] = reconstruct_admm(kdata, E_opera
 %
 %  Outputs:
 %        output : - x: the reconstructed motion-compensated image
+%                 - x_history: the images obtained after optimization 1 (MR reconstruction)
 %                 - Rx_history: the images obtained after optimization 2 (patch-based)
 %                 - y_history: the lagragian images
-%                 - x_history: the images obtained after optimization 1 (MR reconstruction)
 %
 %
 %  Recommended parameters for a typical CMRA reconstruction (1.2mm3, acc x5):
@@ -63,11 +63,9 @@ n_images = numel(kdata); % e.g. n_contrasts or n_bins
 x = cell(n_images, 1); % resulting images
 y = cell(n_images, 1); % lagrangian images
 
-if nargout > 1
-    x_history = cell(admm_params.max_iter, 1); % images after step 1
-    Rx_history = cell(admm_params.max_iter, 1); % images after step 2
-    y_history = cell(admm_params.max_iter, 1);
-end
+if nargout > 1, x_history = cell(n_images, admm_params.max_iter); end % images after step 1
+if nargout > 2, Rx_history = cell(n_images, admm_params.max_iter); end % images after step 2
+if nargout > 3, y_history = cell(n_images, admm_params.max_iter); end
 
 for i_iter = 1:admm_params.max_iter
     if admm_params.verbose >= 1
@@ -91,6 +89,9 @@ for i_iter = 1:admm_params.max_iter
         end
     end
     fprintf("\t\t\tADMM data consistency() "); toc(timer_admm_consistency);
+
+    % Save history
+    if nargout > 1, x_history(:,i_iter) = x; end
 
     if admm_params.last_iter_skip_prost && i_iter == admm_params.max_iter
         break;
@@ -135,11 +136,8 @@ for i_iter = 1:admm_params.max_iter
     fprintf("\t\t\tprost() "); toc(timer_admm_prost);
 
     % Save history
-    if nargout > 1
-        x_history{i_iter} = x;
-        Rx_history{i_iter} = Rx;
-        y_history{i_iter} = y;
-    end
+    if nargout > 2, Rx_history(:,i_iter) = Rx; end
+    if nargout > 3, y_history(:,i_iter) = y; end
 end
 
 end

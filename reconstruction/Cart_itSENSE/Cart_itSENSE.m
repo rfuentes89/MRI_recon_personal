@@ -1,4 +1,4 @@
-function [image, residual_history] = Cart_itSENSE(k_space,E_operator,params)
+function [image, residual_history, image_history] = Cart_itSENSE(k_space,E_operator,params)
 % Uses conjugate gradient iteration to solve:
 %   (E^H*E + lambda) rho = E^H*k_space + lambda*image_reg
 %
@@ -63,9 +63,8 @@ p = residual;
 rr = residual(:)'*residual(:); % residual norm squared
 
 initial_rr = rr;
-if nargout > 1
-    residual_history = zeros(params.max_iter,1);
-end
+if nargout > 1, residual_history = cell(params.max_iter,1); end
+if nargout > 2, image_history = cell(params.max_iter,1); end
 
 % Run iterations
 for i_iter = 1:params.max_iter
@@ -85,9 +84,8 @@ for i_iter = 1:params.max_iter
         break;
     end
 
-    if nargout > 1
-        residual_history(i_iter) = rr;
-    end
+    if nargout > 1, residual_history{i_iter} = rr; end
+    if nargout > 2, image_history{i_iter} = rho; end
 
     if params.verbose >= 1
         fprintf('\tite=%d, residual=%12.8e, intensity=%12.8e\n', i_iter, rr, mean(rho(:)));
