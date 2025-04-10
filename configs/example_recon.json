@@ -127,7 +127,6 @@
             "cg_max_iter": 3,
             "cg_residual_tol": 1e-10,
             "cg_lambda": 0.6,
-            "last_iter_skip_prost": false,
             "verbose": 0,
         },
         "it_sense_params": { // only used if bin_recon_type == it_sense
@@ -196,7 +195,6 @@
         "cg_max_iter": 3, // Max CG iterations in the other ADMM iterations
         "cg_residual_tol": 1e-10, // Stops if residuals improve less than this
         "cg_lambda": 0.6, // Prior's weight
-        "last_iter_skip_prost": false, // Skip HD_PROST in the last iteration
         "verbose": 0,
     },
     "it_sense_params": {

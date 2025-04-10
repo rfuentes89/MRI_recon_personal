@@ -43,7 +43,6 @@ admm_params = fill_struct_values(admm_params, struct( ...
     cg_max_iter = 3, ...
     cg_residual_tol = 1e-10, ...
     cg_lambda = 0.1, ...
-    last_iter_skip_prost = false, ...
     verbose = 0));
 
 % Default parameters for PROST recon
@@ -93,7 +92,7 @@ for i_iter = 1:admm_params.max_iter
     % Save history
     if nargout > 1, x_history(:,i_iter) = x; end
 
-    if admm_params.last_iter_skip_prost && i_iter == admm_params.max_iter
+    if i_iter == admm_params.max_iter
         break;
     end
 
