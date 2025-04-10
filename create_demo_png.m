@@ -22,7 +22,7 @@ images = cat(4, images{:});
 [slice_at_axis, axis_dim] = get_slicer(CONFIG.axis);
 
 %% Choose slices
-if isstring(CONFIG.slices)
+if isstring(CONFIG.slices) && strlength(CONFIG.slices)
     target_slices = eval(CONFIG.slices);
 elseif isnumeric(CONFIG.slices) && all(CONFIG.slices > 0)
     target_slices = CONFIG.slices;
