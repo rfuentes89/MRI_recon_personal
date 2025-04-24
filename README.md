@@ -77,7 +77,6 @@ export MATLABPATH=/path/to/install/imagine:$MATLABPATH
 ## Usage
 
 ### Step 0: Check the folder structure
-* The structure follows the same structure used for [MRI acquisitions stored in the NAS](https://i-health.cl/ih-condor/PE5YVBozG89q5qtsEo/build/faq/mri-acq/)
 * There should be 1 folder per acquisition (see details in example below)
   * Inputs:
     * (required) Raw data as twix (`.dat`) inside the `raw/` folder
