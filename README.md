@@ -18,7 +18,17 @@
 
 If you need to install them manually (e.g. in your computer), you can follow the instructions below (for a Linux system).
 
+### Manual installation: [mapVBVD](https://github.com/RCiHealthGroup/mapVBVD)
+
+Follow instructions in [their README](https://github.com/RCiHealthGroup/mapVBVD).
+
+### Manual installation: MRI-coils
+
+Follow instructions in [their README](https://github.com/RCiHealthGroup/Coils_Toolbox).
+
 ### Manual installation: [bart](https://github.com/mrirecon/bart)
+
+(Only required for estimating coil maps. Not required if using coils from the scanner).
 
 For example, to install bart v0.8.00:
 ```bash
@@ -37,7 +47,21 @@ export TOOLBOX_PATH=/path/to/install/bart-0.8.00:$TOOLBOX_PATH
 Find other bart versions in https://github.com/mrirecon/bart/releases.
 
 
-### Manual installation: [imagine](https://github.com/lab-midas/imagine)
+### Manual installation: [NiftyReg](https://github.com/KCL-BMEIS/niftyreg)
+
+(Only required for Non-Rigid motion correction).
+
+Follow instructions in [their wiki](https://github.com/KCL-BMEIS/niftyreg/wiki).
+
+
+### Manual installation: HD-PROST
+
+(Only required if HD-PROST is enabled).
+
+Follow instructions in [their README](https://github.com/RCiHealthGroup/HD-PROST)
+
+
+### (optional) Manual installation: [imagine](https://github.com/lab-midas/imagine)
 
 ```bash
 cd /path/to/install
@@ -46,22 +70,6 @@ git clone https://github.com/lab-midas/imagine.git
 # Export env variables before using
 export MATLABPATH=/path/to/install/imagine:$MATLABPATH
 ```
-
-### Manual installation: [NiftyReg](https://github.com/KCL-BMEIS/niftyreg)
-
-Follow instructions in [their wiki](https://github.com/KCL-BMEIS/niftyreg/wiki).
-
-### Manual installation: [mapVBVD](https://github.com/RCiHealthGroup/mapVBVD)
-
-Follow instructions in [their README](https://github.com/RCiHealthGroup/mapVBVD).
-
-### Manual installation: PROST
-
-Follow instructions in [their README](https://github.com/RCiHealthGroup/HD-PROST)
-
-### Manual installation: MRI-coils
-
-Follow instructions in [their README](https://github.com/RCiHealthGroup/Coils_Toolbox).
 
 </details>
 
@@ -119,7 +127,9 @@ acquisitions/2024-01-01_HV1_BOOST/    # Acquisition folder
 ```
 
 ### Step 1: Compute and save motion curves
-For each raw data to reconstruct you'll need to compute its motion curves. Follow these steps:
+
+(Only necessary when motion correction is enabled). For each raw data to reconstruct you'll need to compute its motion curves. Follow these steps:
+
 0. Create a JSON configuration with the motion curve parameters
    * Create a copy from the [provided example](configs/example_motion_curves.json) (see comments on each parameter)
 1. Run the `calculate_motion_curves.m` script from the MATLAB editor
