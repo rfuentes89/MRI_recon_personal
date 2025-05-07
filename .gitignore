@@ -30,3 +30,6 @@ main_DF.m
 # Config files
 **/*.json
 !configs/example_*.json
+
+# MATLAB config
+startup.m
