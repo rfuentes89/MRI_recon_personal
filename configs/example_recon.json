@@ -108,6 +108,7 @@
         "load_bin_images" : "", // name of the run from which the bin images are loaded, set as "" to calculate the bin images
             // note: reconstructed bin images are complex, but loaded bin images are real images (this is enough for DF calculation)
         "load_disp_fields" : "", // name of the run from which the displacement fields are loaded, set as "" to calculate the disp fields
+        "filter_bin_kspace_gaussian": -1, // if > 0, applies a gaussian filter to bin kspace with specified sigma
         "bin_prost_params": { // only used if bin_denoise == true, or if bin_recon_type == admm
             // Same parameters as prost_params below
             "sig": 0.055,

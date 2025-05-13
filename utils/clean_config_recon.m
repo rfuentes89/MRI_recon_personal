@@ -86,6 +86,7 @@ function config = add_backward_compat_params(config)
     if ~isfield(config.motion_correction_params, 'load_bin_images'), config.motion_correction_params.load_bin_images = ""; end
     if ~isfield(config.motion_correction_params, 'registration_params'), config.motion_correction_params.registration_params = struct(); end
     if ~isfield(config.motion_correction_params, 'it_sense_params'), config.motion_correction_params.it_sense_params = struct(); end
+    if ~isfield(config.motion_correction_params, 'filter_bin_kspace_gaussian'), config.motion_correction_params.filter_bin_kspace_gaussian = -1; end
     if ~isfield(config.coil_params, 'csm_params'), config.coil_params.csm_params = struct(bart_params="-r 20 -k 5 -c 0 -S", filename=""); end
     if ~isfield(config.coil_params.csm_params, 'filename'), config.coil_params.csm_params.filename = ""; end
     if ~isfield(config.seq_params, 'dixon'), config.seq_params.dixon = false; end
