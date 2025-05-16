@@ -168,7 +168,7 @@ function targets = get_bin_dcm_filepaths(base_recons_folder, recon_name, contras
     dcm_folder = fullfile(base_recons_folder, recon_name, "dcm");
     assert(isfolder(dcm_folder), "Recon folder does not exist: %s", dcm_folder);
 
-    prefix = string(contrast_name) + "-bin";
+    prefix = string(contrast_name) + "-binimage";
     targets = get_filepaths_with_prefix(dcm_folder, prefix);
 
     assert(numel(targets) > 0, "No DCM with prefix %s found in %s", prefix, dcm_folder);

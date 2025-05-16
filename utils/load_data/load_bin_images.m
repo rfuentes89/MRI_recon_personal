@@ -1,7 +1,7 @@
 function bin_images = load_bin_images(acq_folder, run_name, contrast_name)
 %LOAD_BIN_IMAGES Loads bin images from a previous run
     run_folder = fullfile(acq_folder, "recons", run_name);
-    prefix = fullfile(run_folder, "dcm", contrast_name + "-bin");
+    prefix = fullfile(run_folder, "dcm", contrast_name + "-binimage");
     fpaths = dir([convertStringsToChars(prefix), '*', '.dcm']);
 
     assert(numel(fpaths) > 0, "Found zero bin images with prefix: %s", prefix);
