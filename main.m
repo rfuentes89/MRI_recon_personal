@@ -85,26 +85,10 @@ if CONFIG.motion_correction_params.type ~= "none"
     end
 end
 
-%% STEP 3: Coil Rejection
-% Assume that if coils have already been specified then no further
-% rejection required since they are removed in step 1
-
-disp("step 3: rejecting coils")
-
-if CONFIG.coil_params.reject_via_ui && any(structfun(@isempty, CONFIG.selected_contrasts_for_rating))
-    % TODO: allow partial selection
-    CONFIG.selected_contrasts_for_rating = select_for_coil_rating(data);
-end
-
-if CONFIG.coil_params.reject_via_ui && isempty(CONFIG.coil_params.use_only)
-    [yes_indices, maybe_indices, no_indices] = rate_coils(data, CONFIG.selected_contrasts_for_rating);
-    data = reject_coils(data, vertcat(maybe_indices, no_indices)); % TODO include variable if use maybe or not?
-end
-
-%% STEP 3.1: Compress coils
+%% STEP 3: Compress coils
 n_coils = size(data.k_spaces{1}, 4);
 if CONFIG.coil_params.n_compressed_coils > 0 && CONFIG.coil_params.n_compressed_coils < n_coils
-    disp("step 3.1: compressing coils")
+    disp("step 3: compressing coils")
     data.k_spaces = compress_coils_wrapper(data.k_spaces, CONFIG.coil_params.n_compressed_coils);
 end
 

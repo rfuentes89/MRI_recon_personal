@@ -65,10 +65,9 @@
         "max_perc": 100,
     },
     "coil_params": {
-        "use_only": [], // pass empty list to use all coils
+        "use_only": [], // select which coils to use (pass empty list to use all coils)
         "csm_algorithm": "espirit", // one of: espirit, walsh, scanner
         "n_compressed_coils": -1, // Set to -1 to not compress coils
-        "reject_via_ui": false, // display UI to reject coils manually
         "csm_params": {
             // walsh only params:
             "smoothing" : 5,
@@ -80,13 +79,13 @@
         },
     },
     "selected_contrasts": {
-        // pass empty list to use all
+        // Which contrasts to load (pass empty list to use all)
         "echoes": [],
         "sets": [],
         "repetitions": [],
     },
     "selected_contrasts_for_rating": {
-        // select contrast to use for coil selection and sensitivities calculation
+        // which contrast to use for coil sensitivities estimation
         "echo": 1,
         "set": 1,
         "repetition": 1,
