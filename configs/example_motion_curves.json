@@ -9,12 +9,16 @@
     "twix_fname": "example_twix.dat",
 
     // Motion curve options
-    "name": "inav-heart", // custom name to save motion curve as
+    "name": "inav-heart", // custom name to save motion curve as. Set to "scanner" to use the ROI selected during planning
     "override": false, // if present, will override motion curve with same name
     "roi_padding": {
         // the selected ROI will be padded with these number of extra pixels in each dimension
         "fh": 10,
         "rl": 2,
+    },
+    // Options for the scanner ROI
+    "scanner_params": {
+        "length_factor": 1,
     },
 
     // Choose contrasts

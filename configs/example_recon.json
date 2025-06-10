@@ -24,9 +24,12 @@
 
     // Motion curve options
     "motion_curve": {
-        "name": "inav-heart", // motion curves to load
+        "name": "inav-heart", // motion curves to load. Set to "scanner" to use ROI planned in the scanner
         "zero_rl": true, // if true will ignore right-left motion
         "zero_fh": false, // if true will ignore foot-head motion
+        "scanner_params": { // used only if name == "scanner*"
+            "length_factor": 1, // multiply scanner ROI height and width by this factor
+        },
     },
 
     // Options for the sequence

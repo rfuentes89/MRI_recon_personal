@@ -66,10 +66,23 @@ data = remove_readout_oversampling(data);
 %% STEP 2: Read motion curves from file
 if CONFIG.motion_correction_params.type ~= "none"
     motion_curves_file = fullfile(CONFIG.acq_folder, "motion_curves", CONFIG.motion_curve.name + ".mat");
-    assert(isfile(motion_curves_file), "motion_curves not found: %s", motion_curves_file);
+    if isfile(motion_curves_file)
+        fprintf("Loading motion_curves from file %s\n", motion_curves_file);
+        load(motion_curves_file, 'motion_curves');
+    else
+        if startsWith(CONFIG.motion_curve.name, "scanner")
+            motion_curves = compute_scanner_motion_curve( ...
+                twix{end}, ...
+                CONFIG.selected_contrasts, ...
+                CONFIG.motion_curve.scanner_params);
 
-    disp("step 2: loading motion_curves");
-    load(motion_curves_file, 'motion_curves');
+            % Save to file
+            save(motion_curves_file, 'motion_curves');
+            fprintf("Saved scanner motion curves to file %s\n", motion_curves_file);
+        else
+            error("motion_curves not found: %s", motion_curves_file);
+        end
+    end
 
     if CONFIG.motion_curve.zero_rl
         disp("Zeroing right-left motion");

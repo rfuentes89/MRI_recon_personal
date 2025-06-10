@@ -25,21 +25,41 @@ twix = read_twix(path_to_twix);
 
 %% Read navigators from twix
 navigators = read_navigators(twix{end}, CONFIG.selected_contrasts);
-
-%% Manually select a ROI
 sum_of_navigators = sum_navigators(navigators);
-navigator_roi = plot_and_select_roi(sum_of_navigators, base_fname);
+
+%% Choose ROI
+if startsWith(CONFIG.name, "scanner")
+    fig1 = figure(1);
+    roi = get_inav_roi_from_scanner(twix{end}, size(navigators{1}), CONFIG.scanner_params);
+    plot_inav_and_roi(sum_of_navigators, roi);
+    saveas(fig1, base_fname + "_selection.png");
+else
+    % Manually select a ROI
+    roi = plot_and_select_roi(sum_of_navigators, base_fname);
+end
 
 %% Crop ROI from navigators
-roi_navigators = crop_roi(navigators, navigator_roi, CONFIG.roi_padding);
+cropped_navigators = crop_roi(navigators, roi, CONFIG.roi_padding);
 
 %% Calculate motion curves
-motion_curves = register_navigators(roi_navigators);
+motion_curves = register_navigators(cropped_navigators);
 
 %% Plot curves and save
-plot_motion_curves(motion_curves)
-saveas(gcf, base_fname + "_curve.png");
+fig2 = figure(2);
+plot_motion_curves(motion_curves);
+saveas(fig2, base_fname + "_curve.png");
 
 %% Save motion curves
 save(motion_curves_file, 'motion_curves');
 fprintf("Saved motion curves to file %s\n", motion_curves_file);
+
+%% Functions
+function plot_inav_and_roi(image, roi)
+    imshow(rescale(image, 0, 1));
+    hold on;
+
+    rl_length = roi.rl_max - roi.rl_min;
+    fh_length = roi.fh_max - roi.fh_min;
+    rectangle('Position', [roi.rl_min, roi.fh_min, rl_length, fh_length], 'EdgeColor', 'r', 'LineWidth', 2);
+    hold off;
+end
