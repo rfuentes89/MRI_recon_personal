@@ -77,6 +77,7 @@ if CONFIG.motion_correction_params.type ~= "none"
                 CONFIG.motion_curve.scanner_params);
 
             % Save to file
+            if ~exist(fullfile(CONFIG.acq_folder,'motion_curves'), "dir"), mkdir(fullfile(CONFIG.acq_folder,'motion_curves')); end
             save(motion_curves_file, 'motion_curves');
             fprintf("Saved scanner motion curves to file %s\n", motion_curves_file);
         else
