@@ -1,6 +1,15 @@
 function dicom2parrec(dicom_fname, output_basename, params)
 %DICOM2PARREC Load a DCM and write PAR/REC files
+% Args:
+%     dicom_fname: name of DCM input
+%     output_basename: name will be used to save .par and .rec files. For
+%         example, using "some_folder/example" will produce files
+%         "some_folder/example.par" and "some_folder/example.rec"
+%     params.input_par: which .PAR file to use as base configuration
+%     params.verbose
+
     % Default params
+    if nargin < 3, params = struct(); end
     params = fill_struct_values(params, struct( ...
         input_par=which("iT2prep_ZOOMED.PAR"), ...
         verbose=true));
