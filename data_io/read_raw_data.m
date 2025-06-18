@@ -144,8 +144,11 @@ function data = read_raw_data(twix, selected_contrasts, selected_coils)
 
     data.coil_IDs = coil_IDs;
 
-    % Variables in this structure are used throughout the code, and may be
-    % modified by the various stages. Any variables you add may also need
-    % to be modified accordingly.
+    % Get voxel sizes
+    fh_voxel = twix.hdr.Config.ReadFoV  / twix.hdr.Config.RawCol;
+    rl_voxel = twix.hdr.Config.PhaseFoV / twix.hdr.Config.RawLin;
+    ap_voxel = twix.hdr.Dicom.dThickness / twix.hdr.Config.RawPar;
+    data.voxel_size = [fh_voxel, rl_voxel, ap_voxel];
+    fprintf("Resolution: %d, %d, %d\n", fh_voxel, rl_voxel, ap_voxel);
 
  end

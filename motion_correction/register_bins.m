@@ -1,4 +1,4 @@
-function displacement_fields = register_bins(bin_images, ref_bin, params)
+function displacement_fields = register_bins(bin_images, ref_bin, voxel_size, params)
 % REGISTER_BINS Calculate displacement fields by register bin images to one
 % another
     if ~exist("params", "var"), params = struct(); end
@@ -17,9 +17,9 @@ function displacement_fields = register_bins(bin_images, ref_bin, params)
 
     switch params.method
         case "pairwise"
-            displacement_fields = niftyreg_pairwise(bin_images, ref_bin, params);
+            displacement_fields = niftyreg_pairwise(bin_images, ref_bin, voxel_size, params);
         case "chain"
-            displacement_fields = niftyreg_chain(bin_images, params);
+            displacement_fields = niftyreg_chain(bin_images, voxel_size, params);
         otherwise
             error("Method %s not recognized", params.method);
     end

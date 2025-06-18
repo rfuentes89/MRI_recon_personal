@@ -1,4 +1,4 @@
-function displacement_fields = niftyreg_pairwise(bin_images, ref_bin, params)
+function displacement_fields = niftyreg_pairwise(bin_images, ref_bin, voxel_size, params)
 %NIFTYREG_PAIRWISE Register images using the "pairwise" method.
 %
 % Args:
@@ -20,7 +20,7 @@ function displacement_fields = niftyreg_pairwise(bin_images, ref_bin, params)
     % Save bin images to .nii files
     for i_bin = 1:n_bins
         img = rescale(abs(bin_images{i_bin}), 0, 1);
-        save_nii(make_nii(img), build_fpath("bin_%d.nii", i_bin));
+        save_nii(make_nii(img, voxel_size), build_fpath("bin_%d.nii", i_bin));
     end
 
     % Register pairs of images

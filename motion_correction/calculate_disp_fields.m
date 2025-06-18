@@ -1,4 +1,4 @@
-function displacement_fields = calculate_disp_fields(bin_images, kspace_size, ref_bin, registration_params)
+function displacement_fields = calculate_disp_fields(bin_images, kspace_size, ref_bin, voxel_size, registration_params)
 %CALCULATE_DISP_FIELDS Calculate non-rigid displacement fields from
 %bin_images
     [n_echoes, n_sets, n_repetitions] = size(bin_images);
@@ -11,7 +11,7 @@ function displacement_fields = calculate_disp_fields(bin_images, kspace_size, re
                 if n_bins == 0, continue; end
 
                 % Calculate displacement fields
-                dfs = register_bins(bin_images{echo,set,repetition}, ref_bin, registration_params);
+                dfs = register_bins(bin_images{echo,set,repetition}, ref_bin, voxel_size, registration_params);
                 % size: n_bins, n_refs
 
                 % Post process

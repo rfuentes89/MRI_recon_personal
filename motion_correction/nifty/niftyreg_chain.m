@@ -1,4 +1,4 @@
-function dfs = niftyreg_chain(bin_images, params)
+function dfs = niftyreg_chain(bin_images, voxel_size, params)
 %NIFTYREG_CHAIN Register images using the "chain" method.
 %
 % Args:
@@ -29,7 +29,7 @@ function dfs = niftyreg_chain(bin_images, params)
     % Save bin images to NII
     for i_bin = 1:numel(bin_images)
         img = rescale(abs(bin_images{i_bin}), 0, 1);
-        save_nii(make_nii(img), build_fpath("bin_%d.nii", i_bin));
+        save_nii(make_nii(img, voxel_size), build_fpath("bin_%d.nii", i_bin));
     end
 
     % Register 1-2, 2-3, and so on
