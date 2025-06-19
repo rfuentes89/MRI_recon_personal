@@ -20,15 +20,19 @@ function dicom2parrec(dicom_fname, output_basename, params)
     % Read DCM
     image = double(squeeze(dicomread(dicom_fname)));
 
-    % Pad and resize data
-    % FIXME(pdpino): check dimensions for any input
-    % (300 is hardcoded for the typical dimensions)
-    [n_fh, n_rl, n_ap] = size(image);
-    pad_fh = (300 - n_fh) / 2;
-    pad_rl = (300 - n_rl) / 2;
-    data_padded = padarray(image, [pad_fh, pad_rl, 0]);
+    % Pad and resize to PAR size
+    % Note: data needs to be rescaled to the size from the PAR metadata,
+    % and is previously padded to avoid changing the image aspect ratio
+    pad_each_side = find_padsize(dummy_par.dim, size(image));
+    data_padded = padarray(image, pad_each_side);
     data_resized = imresize3(data_padded, dummy_par.dim);
     data_rescaled = rescale(data_resized, 0, 2048);
+
+    if params.verbose >= 2
+        fprintf("DICOM size: %s\n", num2str(size(image)));
+        fprintf("Padded size: %s\n", num2str(size(data_padded)));
+        fprintf("PAR size: %s\n", num2str(dummy_par.dim));
+    end
 
     % Write REC
     output_rec = output_basename + ".rec";
@@ -41,3 +45,19 @@ function dicom2parrec(dicom_fname, output_basename, params)
     if params.verbose, fprintf("PAR written to %s\n", output_par); end
 end
 
+function pad_each_side = find_padsize(target_size, image_size)
+% Find how much needs to be padded on each dimension to keep at least 1
+% dimension without padding (and only add padding to the other dimensions).
+    % How much resizing would each dimension need
+    enlarge_ratio = target_size ./ image_size;
+
+    % Choose dimension that would need less enlargement
+    [~, min_index] = min(enlarge_ratio);
+
+    % Calculate padded size (one of the dimensions will remain the same)
+    padded_size = floor(target_size / enlarge_ratio(min_index));
+
+    % How much pad is needed
+    pad_each_dim = padded_size - image_size;
+    pad_each_side = floor(pad_each_dim / 2);
+end
