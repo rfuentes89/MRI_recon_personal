@@ -65,6 +65,9 @@ function config = clean_config_recon(config)
     if strlength(config.coil_params.csm_params.filename) > 0
         config.coil_params.csm_params.filename = fullfile(config.acq_folder, "raw", config.coil_params.csm_params.filename);
     end
+
+    % Add use_only to csm_params for coil selection to scanner csm.
+    config.coil_params.csm_params.use_only = config.coil_params.use_only;
 end
 
 
