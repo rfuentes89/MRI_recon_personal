@@ -22,6 +22,10 @@ for i_recon = 1:numel(recons)
     img = load_final_recons(config.acq, config.recon_name, config.contrast);
     img = concat_cell_to_array(img);
 
+    % Clean data
+    img = clip_percentiles(img, 1, 99);
+    img = single(img); % NII supports mostly 32-bit floats
+
     % Prepare output folder
     output_folder = fullfile(config.acq, "recons", config.recon_name, "nii");
     if ~exist(output_folder, "dir"), mkdir(output_folder); end
@@ -29,6 +33,6 @@ for i_recon = 1:numel(recons)
 
     % Save NII
     resolution = [1.5 1.5 1.5]; % TODO(pdpino): get resolution from dcm
-    save_nii(make_nii(single(img), resolution), output_name);
+    save_nii(make_nii(img, resolution), output_name);
     fprintf("NII saved to %s\n", output_name);
 end

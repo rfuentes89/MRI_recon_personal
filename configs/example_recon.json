@@ -63,9 +63,9 @@
 
     // Output DICOM params
     "dicom_params": {
-        // clamp image values by a percentage before saving to DICOM
-        "min_perc": 10,
-        "max_perc": 100,
+        // clip image values by a percentage before saving to DICOM
+        "min_perc": 9,
+        "max_perc": 99,
     },
     "coil_params": {
         "use_only": [], // select which coils to use (pass empty list to use all coils)

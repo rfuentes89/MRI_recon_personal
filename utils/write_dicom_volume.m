@@ -1,11 +1,11 @@
 function write_dicom_volume(image, filename, info, options)
-    % Based on  
+    % Based on
     %     - DICOM Toolbox: https://uk.mathworks.com/matlabcentral/fileexchange/27941-dicom-toolbox
     %     - https://uk.mathworks.com/matlabcentral/fileexchange/23237-read-and-write-single-file-dicom-volumes
     % Check inputs
     if ~exist('options', 'var'), options = struct(); end
-    if ~isfield(options, 'min_perc'), options.min_perc = 10; end
-    if ~isfield(options, 'max_perc'), options.max_perc = 100; end
+    if ~isfield(options, 'min_perc'), options.min_perc = 9; end
+    if ~isfield(options, 'max_perc'), options.max_perc = 99; end
 
     info = clean_dicom_info(image, info);
 
@@ -18,15 +18,10 @@ function write_dicom_volume(image, filename, info, options)
     else
         max_value = (2^16 - 1);
     end
-    if ~isnumeric(options.min_perc)
-        % Remove zeros
-        options.min_perc = (sum(image(:)==0) / numel(image) * 100);
-    end
-    min_im = prctile(image(:), options.min_perc);
-    max_im = prctile(image(:), options.max_perc);
 
     % Normalize
-    image_norm = uint16( double(max_value) * (image - min_im) / (max_im - min_im) );
+    image_norm = clip_percentiles(image, options.min_perc, options.max_perc);
+    image_norm = uint16( double(max_value) * image_norm );
     sz = size(image);
     image_gray = reshape(image_norm,sz(1),sz(2),1,sz(3));
 
