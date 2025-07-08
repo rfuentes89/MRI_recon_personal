@@ -105,7 +105,7 @@
         "soft_fn": "bin_range_scaled", // choose exponential decay function, one of bins_avg, bin_range, bin_range_scaled
         "soft_decay": 1, // exponential decay for the soft binning
         "intrabin_TL_corr": true, // whether or not to apply intrabin translational correction
-        "bin_resolution_factor": 0.25, // Set it to less than 1 to reduce bin images resolution (e.g. 0.5)
+        "bin_resolution_factor": 1, // Set it to less than 1 to reduce bin images resolution (e.g. 0.5)
         "bin_denoise": false, // whether or not to apply HD PROST denoising to bin images
         "load_bin_images" : "", // name of the run from which the bin images are loaded, set as "" to calculate the bin images
             // note: reconstructed bin images are complex, but loaded bin images are real images (this is enough for DF calculation)
@@ -166,7 +166,7 @@
         "registration_params": {
             "clip_df": [-1, -1, -1],
                 // if >= 0 will clip DF magnitude in [FH, RL, AP] direction
-            "nifty_params": "--nmi -be 0.0005 -sx 14", // params given to nifty's reg_f3d
+            "nifty_params": "--nmi -be 0.0005 -sx -14 -omp 8", // params given to nifty's reg_f3d
                 // Use -omp N to choose number of threads
                 // See reg_f3d --help for more parameters
             "method": "pairwise", // one of pairwise, chain
@@ -179,8 +179,8 @@
             "repetition": -1,
         }
     },
-    "reconstruction_type": "it_SENSE", // it_SENSE, admm
-    "denoising_type": "HD_PROST", // none, HD_PROST
+    "reconstruction_type": "admm", // it_SENSE, admm
+    "denoising_type": "none", // none, HD_PROST
     "prost_params": {
         "sig": 0.055,
         "patch_sz": 5,
