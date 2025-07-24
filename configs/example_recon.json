@@ -170,7 +170,9 @@
                 // Use -omp N to choose number of threads
                 // See reg_f3d --help for more parameters
             "method": "pairwise", // one of pairwise, chain
-            "ascending": true, // only useful for method=chain
+            "orientation": "ascending",
+                // one of "ascending", "descending" or "both"
+                // only useful for method=chain
         },
         "selected_contrast_for_disp_fields": {
             // Choose a fixed contrast to use for displacement fields
