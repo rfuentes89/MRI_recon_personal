@@ -11,7 +11,6 @@ function displacement_fields = niftyreg_pairwise(bin_images, ref_bin, voxel_size
 % using one or more position as reference (as given in ref_bin).
     n_bins = numel(bin_images);
     displacement_fields = cell(n_bins, n_bins);
-    image_size = size(bin_images{1});
 
     % Prepare tmp_dir
     if ~exist(params.tmp_dir, 'dir'), mkdir(params.tmp_dir), end
@@ -29,30 +28,33 @@ function displacement_fields = niftyreg_pairwise(bin_images, ref_bin, voxel_size
 
         for i_float = 1:n_bins
             if i_float == i_ref
-                df = zeros([image_size, 3]);
-            else
-                % Do registration
-                cmd = sprintf("reg_f3d -ref %s -flo %s -res %s -cpp %s %s", ...
-                    build_fpath("bin_%d.nii", i_ref), ...
-                    build_fpath("bin_%d.nii", i_float), ...
-                    build_fpath("reg_%d_%d.nii", i_float, i_ref), ...
-                    build_fpath("cpp_%d_%d.nii", i_float, i_ref), ...
-                    params.nifty_params);
-                [~, ~] = system(cmd);
-
-                % Get DF from registration
-                cmd = sprintf("reg_transform -ref %s -disp %s %s", ...
-                    build_fpath("bin_%d.nii", i_ref), ...
-                    build_fpath("cpp_%d_%d.nii", i_float, i_ref), ...
-                    build_fpath("df_%d_%d.nii", i_float, i_ref));
-                [~, ~] = system(cmd);
-
-                % Load DF from file
-                nii = load_nii(build_fpath("df_%d_%d.nii", i_float, i_ref));
-                df = squeeze(nii.img);
-                % size: (image_size, 3)
+                continue
             end
+            % Do registration
+            cmd = sprintf("reg_f3d -ref %s -flo %s -res %s -cpp %s %s", ...
+                build_fpath("bin_%d.nii", i_ref), ...
+                build_fpath("bin_%d.nii", i_float), ...
+                build_fpath("reg_%d_%d.nii", i_float, i_ref), ...
+                build_fpath("cpp_%d_%d.nii", i_float, i_ref), ...
+                params.nifty_params);
+            [~, ~] = system(cmd);
+
+            % Get DF from registration
+            cmd = sprintf("reg_transform -ref %s -disp %s %s", ...
+                build_fpath("bin_%d.nii", i_ref), ...
+                build_fpath("cpp_%d_%d.nii", i_float, i_ref), ...
+                build_fpath("df_%d_%d.nii", i_float, i_ref));
+            [~, ~] = system(cmd);
+
+            % Load DF from file
+            nii = load_nii(build_fpath("df_%d_%d.nii", i_float, i_ref));
+            df = squeeze(nii.img);
+            % size: (image_size, 3)
+
             displacement_fields{i_float, i_ref} = df;
         end
+
+        % Zero diagonal
+        displacement_fields{i_ref, i_ref} = zeros(size(df), like=df);
     end
 end

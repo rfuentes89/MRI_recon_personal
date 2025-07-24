@@ -120,9 +120,8 @@ function dfs = niftyreg_chain(bin_images, voxel_size, params)
     end
 
     % Zero diagonal
-    image_size = size(dfs{2});
+    example_df = dfs{2};
     for i_bin = 1:n_bins
-        dfs{i_bin,i_bin} = zeros(image_size);
+        dfs{i_bin,i_bin} = zeros(size(example_df), like=example_df);
     end
 end
-
