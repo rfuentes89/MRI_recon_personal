@@ -28,16 +28,11 @@ function df = post_process_df(df, original_size)
 % POST_PROCESS_DFS Apply several post-processing to raw DFs
     if numel(df) == 0, return; end
 
-    % DFs need to be flipped for recon to work. Details:
-    % - kspace from scanner comes flipped, i.e. in the "wrong-orientation"
-    % - bin images are reconstructed from the wrong-orientation kspace
-    %   and then flipped to be in the correct-orientation
-    %   (see it_SENSE() and orcca() functions)
-    % - thus, DFs are calculated in the correct-orientation
-    % - then in the NR recon, DFs need to be in the wrong-orientation
-    %   to be multiplied with the original wrong-oriented kspace
-    % TODO(pdpino): fix this? idea: flipping once at the beginning?
-    df = flip(flip(flip(df, 1), 2), 3);
+    % DF returned transformation from reference->floating
+    % A quick and dirty way to invert the transformation,
+    % to instead transform from floating->reference is to multiply by -1.
+    % This is not the correct way to do it, will be fixed in the future.
+    df = df * -1;
 
 
     % Interpolate to correct resolution.

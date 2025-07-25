@@ -21,16 +21,10 @@ function images = reconstruct_images( ...
     % Run reconstruction
     switch lower(reconstruction_type)
         case "it_sense"
-            images_raw = reconstruct_it_SENSE(data.(target), E_operators, it_sense_params);
+            images = reconstruct_it_SENSE(data.(target), E_operators, it_sense_params);
         case "admm"
-            images_raw = reconstruct_admm(data.(target), E_operators, admm_params, prost_params);
+            images = reconstruct_admm(data.(target), E_operators, admm_params, prost_params);
         otherwise
             error("unknown reconstruction method: %s", reconstruction_type);
-    end
-
-    % Flip to account for wrong-orientation
-    images = cell(size(images_raw));
-    for i_image = 1:numel(images_raw)
-        images{i_image} = flip(flip(flip(images_raw{i_image},1),2),3);
     end
 end

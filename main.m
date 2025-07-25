@@ -309,10 +309,14 @@ function bin_images = load_bin_images_wrapper(config)
             for repetition = 1:n_repetitions
                 if ~is_chosen(echo,set,repetition), continue; end
 
-                bin_images{echo,set,repetition} = load_bin_images( ...
+                contrast_bin_images = load_bin_images( ...
                     config.acq_folder, ...
                     config.motion_correction_params.load_bin_images, ...
                     config.seq_params.contrast_names{echo,set,repetition});
+                % Flip into k-space orientation
+                contrast_bin_images = cellfun( ...
+                    @(image) flip(flip(flip(image, 1), 2), 3), contrast_bin_images, "UniformOutput", false);
+                bin_images{echo,set,repetition} = contrast_bin_images;
             end
         end
     end
@@ -320,7 +324,14 @@ function bin_images = load_bin_images_wrapper(config)
 end
 
 function save_dicom(config, image, input_info_name, contrast_name)
+    % Process params
     contrast_name = string(contrast_name);
+
+    % Flip image to account for wrong-orientation
+    image = flip(flip(flip(image, 1), 2), 3);
+
+    % Save magnitude image
+    image = abs(image);
 
     % Load or create empty info
     info_fpath = fullfile(config.acq_folder, "dcm", string(input_info_name) + ".dcm");
@@ -339,7 +350,7 @@ function save_dicom(config, image, input_info_name, contrast_name)
     folder = fullfile(config.run_folder, "dcm");
     if ~exist(folder, "dir"), mkdir(folder), end
     filename = fullfile(folder, contrast_name + ".dcm");
-    write_dicom_volume(abs(image), filename, info_base, config.dicom_params);
+    write_dicom_volume(image, filename, info_base, config.dicom_params);
 end
 
 function config = assert_contrasts_number(data, config)
