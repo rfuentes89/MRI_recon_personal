@@ -11,6 +11,6 @@ function plot_motion_curves(motion_curves)
     end
     legend();
     ylabel("pixels")
-    xlabel("time");
+    xlabel("timepoints");
     title("foot-head motion")
 end
