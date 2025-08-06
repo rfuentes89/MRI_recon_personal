@@ -109,7 +109,7 @@ end
 %% STEP 4: CSM Estimation
 
 disp("step 4: estimating coil maps")
-csm = get_csm(data, CONFIG.coil_params.csm_algorithm, CONFIG.selected_contrasts_for_rating,CONFIG.coil_params.csm_params);
+csm = get_csm(data.k_spaces, CONFIG.coil_params.csm_algorithm, CONFIG.selected_contrasts_for_rating, CONFIG.coil_params.csm_params);
 
 if CONFIG.save_csm
     filename = fullfile(CONFIG.run_folder, "csm.mat");

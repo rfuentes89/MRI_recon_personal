@@ -1,7 +1,7 @@
-function csm = get_csm(data, algorithm_name, selected,params)
+function csm = get_csm(k_spaces, algorithm_name, selected, params)
 %GET_CSM Wrapper to call csm calculation function
 
-    k_space_for_csm = data.k_spaces{selected.echo,selected.set,selected.repetition};
+    k_space_for_csm = k_spaces{selected.echo,selected.set,selected.repetition};
 
     if algorithm_name == "scanner"
         % No need to filter kspace if loading CSMs from a file
