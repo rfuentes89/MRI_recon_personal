@@ -28,14 +28,11 @@ if operator.adjoint % EH operation
         res_bin = sum(res_coils, 4);
         % size: nx, ny, nz
 
-        % Apply DF
+        % Apply DF (register floating image to reference)
         curr_mf = operator.interpolation_matrices{bin};
-        curr_mf_t = curr_mf';
-        res_bin = complex(matrix_interpolation(real(res_bin),curr_mf_t),matrix_interpolation(imag(res_bin),curr_mf_t));
+        res_bin = complex(matrix_interpolation(real(res_bin),curr_mf),matrix_interpolation(imag(res_bin),curr_mf));
 
-        % normalisation of motion fields
-        motion_norm = matrix_interpolation(ones(size(res_bin)),curr_mf_t);
-        res_bin = res_bin./motion_norm;
+        % Remove nan/inf
         res_bin(isnan(res_bin)) = 0; res_bin(isinf(res_bin)) = 0;
 
         res = res + res_bin;
@@ -53,9 +50,14 @@ else % E operation
     res = cell(n_bins, 1);
 
     for bin = 1:n_bins
-        curr_mf = operator.interpolation_matrices{bin};
+        % Un-apply DF (deform reference image to floating image)
+        curr_mf_t = operator.interpolation_matrices{bin}';
+        warp_b = complex(matrix_interpolation(real(image),curr_mf_t),matrix_interpolation(imag(image),curr_mf_t));
 
-        warp_b = complex(matrix_interpolation(real(image),curr_mf),matrix_interpolation(imag(image),curr_mf));
+        % Normalize motion fields
+        motion_norm = matrix_interpolation(ones(size(warp_b)), curr_mf_t);
+        motion_norm(motion_norm == 0) = 1;
+        warp_b = warp_b ./ motion_norm;
 
         % Coil weights
         b_sample = warp_b.*operator.coils;

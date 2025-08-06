@@ -28,13 +28,6 @@ function df = post_process_df(df, original_size)
 % POST_PROCESS_DFS Apply several post-processing to raw DFs
     if numel(df) == 0, return; end
 
-    % DF returned transformation from reference->floating
-    % A quick and dirty way to invert the transformation,
-    % to instead transform from floating->reference is to multiply by -1.
-    % This is not the correct way to do it, will be fixed in the future.
-    df = df * -1;
-
-
     % Interpolate to correct resolution.
     % bin_images can optionally be reduced in dimension (see
     % motion_correct_non_rigid() function). Here DFs need to be resized to

@@ -28,6 +28,22 @@ function interpolation_matrices = pre_compute_interpolation_matrix(displacement_
 
                     deformation_field = displacement_to_deformation(df);
                     matrices{i_bin} = resampleMatrix(img_size, deformation_field);
+                    % About the signs and directions:
+                    % - DF from niftyreg represents the deformation
+                    % required to transform the reference image to the
+                    % floating image; NOT the registration required to
+                    % transform the floating image to the reference image
+                    % (which might be counter-intuitive). Consider this 2d
+                    % example: if DF[3, 4] = (1, 2), it means that the
+                    % pixel at (3, 4) in the reference image needs to move
+                    % (1, 2) to reach the deformation observed in the
+                    % floating image.
+                    % - To register the floating image: multiply the
+                    % interpolation matrix by the floating image flattened
+                    % - To deform the reference image: transpose the
+                    % interpolation matrix, normalize making sure each row
+                    % adds up to 1, and then multiply by the reference
+                    % image flattened
                 end
                 interpolation_matrices{echo,set,repetition} = matrices;
             end
