@@ -7,15 +7,15 @@ function plot_dfs_allref(dfs, i_slice, i_dim, extra_title)
     assert(i_dim <= n_dims);
     if nargin < 4, extra_title = ""; end
 
-    n_cols = n_float;
-    n_rows = n_refs;
+    n_cols = n_refs;
+    n_rows = n_float;
+    tiledlayout(n_rows, n_cols);
 
     dim_names = ["FH", "RL", "AP"];
 
     for i_float = 1:n_float
         for i_ref = 1:n_refs
-            i_subplot = i_float + n_cols * (i_ref - 1);
-            ax = subplot(n_rows, n_cols, i_subplot);
+            ax = nexttile();
 
             df = dfs{i_float, i_ref};
             df_slice = df(:,:,i_slice,i_dim);
