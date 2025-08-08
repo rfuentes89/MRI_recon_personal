@@ -1,4 +1,24 @@
 function [res] = mtimes(operator,input)
+% Apply non-rigid operator to kspace or image data
+%
+%
+% Notes about applying displacement fields (DFs):
+% - we want image data to be corrected in the reference/fixed position,
+%   while the kspace is in non-corrected original position
+%   (different position for each bin, called floating/moving position).
+% - thus, when going from kspace to image space (adjoint operation),
+%   the DFs need to be applied to correct from the floating to the
+%   reference position, ie. registering the image from floating
+%   position to the reference position.
+% - on the other hand, when going from image to kspace (forward operation),
+%   the DFs need to be applied to go back from the corrected (reference)
+%   position to the non-corrected floating position, ie. deforming the
+%   image in reference position back to its floating position.
+% - Also note the DFs are not applied directly as vector fields,
+%   but as an "interpolation matrix", so the operation becomes
+%   simply a matrix multiplication. Read more about these matrices
+%   in the pre_compute_interpolation_matrix() function.
+
 
 n_bins = numel(operator.At);
 [n_x, n_y, n_z, ~] = size(operator.coils);
