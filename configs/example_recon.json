@@ -166,9 +166,9 @@
         "registration_params": {
             "clip_df": [-1, -1, -1],
                 // if >= 0 will clip DF magnitude in [FH, RL, AP] direction
-            "nifty_params": "--nmi -be 0.0005 -sx -14 -omp 8", // params given to nifty's reg_f3d
-                // Use -omp N to choose number of threads
+            "nifty_params": "--nmi -be 0.0005 -sx -14", // params given to nifty's reg_f3d
                 // See reg_f3d --help for more parameters
+            "n_cores": 8, // Number of threads used by niftyreg
             "method": "pairwise", // one of pairwise, chain
             "orientation": "ascending",
                 // one of "ascending", "descending" or "both"
