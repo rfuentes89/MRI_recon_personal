@@ -145,9 +145,17 @@ function data = read_raw_data(twix, selected_contrasts, selected_coils)
     data.coil_IDs = coil_IDs;
 
     % Get voxel sizes
-    fh_voxel = twix.hdr.Config.ReadFoV  / twix.hdr.Config.RawCol;
-    rl_voxel = twix.hdr.Config.PhaseFoV / twix.hdr.Config.RawLin;
-    ap_voxel = twix.hdr.Dicom.dThickness / twix.hdr.Config.RawPar;
+    n_mm_fh = try_fields(twix.hdr.Config, "ReadFoV");
+    n_lines_fh = try_fields(twix.hdr.Config, "RawCol", "N0FImageColumns");
+    fh_voxel = n_mm_fh / n_lines_fh;
+
+    n_mm_rl = try_fields(twix.hdr.Config, "PhaseFoV");
+    n_lines_rl = try_fields(twix.hdr.Config, "RawLin", "N0FImageLines");
+    rl_voxel = n_mm_rl / n_lines_rl;
+
+    n_mm_ap = try_fields(twix.hdr.Dicom, "dThickness");
+    n_lines_ap = try_fields(twix.hdr.Config, "RawPar", "N0FImagePartitions");
+    ap_voxel = n_mm_ap / n_lines_ap;
     data.voxel_size = [fh_voxel, rl_voxel, ap_voxel];
     fprintf("Resolution: %d, %d, %d\n", fh_voxel, rl_voxel, ap_voxel);
 
