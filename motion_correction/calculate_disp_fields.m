@@ -14,8 +14,8 @@ function displacement_fields = calculate_disp_fields(bin_images, kspace_size, re
                 dfs = register_bins(bin_images{echo,set,repetition}, ref_bin, voxel_size, registration_params);
                 % size: n_bins, n_refs
 
-                % Post process
-                dfs = cellfun(@(df) post_process_df(df, kspace_size), dfs, 'UniformOutput', false);
+                % Interpolate to back to original size
+                dfs = cellfun(@(df) interpolate_df_back(df, kspace_size), dfs, 'UniformOutput', false);
                 displacement_fields{echo,set,repetition} = dfs;
             end
         end
@@ -24,8 +24,8 @@ function displacement_fields = calculate_disp_fields(bin_images, kspace_size, re
     assert(exist("dfs", "var"), "no bin images found, check selected_contrast_for_disp_fields is correct");
 end
 
-function df = post_process_df(df, original_size)
-% POST_PROCESS_DFS Apply several post-processing to raw DFs
+function df = interpolate_df_back(df, original_size)
+% Interpolate DFs back to its original size
     if numel(df) == 0, return; end
 
     % Interpolate to correct resolution.
