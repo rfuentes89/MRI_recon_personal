@@ -3,12 +3,15 @@ function plot_image_as_colorfield(image, ax, params)
 %next to it.
     % Default params
     if ~exist("params", "var"), params = struct(); end
-    params = fill_struct_values(params, struct(cbar=true));
+    params = fill_struct_values(params, struct( ...
+        cbar=true, ...
+        alpha=0.8, ...
+        cmap='jet'));
 
     assert(ismatrix(image));
 
-    imagesc(ax, image, 'AlphaData', 0.8);
-    colormap(ax, 'jet');
+    imagesc(ax, image, 'AlphaData', params.alpha);
+    colormap(ax, params.cmap);
     axis off;
 
     % Set colobar limits
