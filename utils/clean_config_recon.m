@@ -87,6 +87,7 @@ function config = add_backward_compat_params(config)
     if ~isfield(config.motion_curve, 'zero_fh'), config.motion_curve.zero_fh = false; end
     if ~isfield(config.motion_curve, 'scanner_params'), config.motion_curve.scanner_params.length_factor = 1; end
     if ~isfield(config.motion_correction_params, 'load_disp_fields'), config.motion_correction_params.load_disp_fields = ""; end
+    if ~isfield(config.motion_correction_params, 'divide_dfs_by_resolution'), config.motion_correction_params.divide_dfs_by_resolution = false; end
     if ~isfield(config.motion_correction_params, 'load_bin_images'), config.motion_correction_params.load_bin_images = ""; end
     if ~isfield(config.motion_correction_params, 'registration_params'), config.motion_correction_params.registration_params = struct(); end
     if ~isfield(config.motion_correction_params.registration_params, 'orientation')

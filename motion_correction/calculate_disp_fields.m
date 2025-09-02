@@ -1,4 +1,4 @@
-function displacement_fields = calculate_disp_fields(bin_images, kspace_size, ref_bin, voxel_size, registration_params)
+function displacement_fields = calculate_disp_fields(bin_images, kspace_size, ref_bin, voxel_size, registration_params, divide_by_res)
 %CALCULATE_DISP_FIELDS Calculate non-rigid displacement fields from
 %bin_images
     [n_echoes, n_sets, n_repetitions] = size(bin_images);
@@ -13,6 +13,15 @@ function displacement_fields = calculate_disp_fields(bin_images, kspace_size, re
                 % Calculate displacement fields
                 dfs = register_bins(bin_images{echo,set,repetition}, ref_bin, voxel_size, registration_params);
                 % size: n_bins, n_refs
+
+                % Apparently, niftyreg returns the DFs in mm space, but the
+                % whole reconstruction process works in pixel space.
+                % Note: This is theoretically correct, but in practice it makes
+                % the recon worse in most cases, so we use a parameter for now
+                if divide_by_res
+                    divide_by_voxel_size = reshape(voxel_size, [1, 1, 1, 3]);
+                    dfs = cellfun(@(df) df ./ divide_by_voxel_size, dfs, 'UniformOutput', false);
+                end
 
                 % Interpolate to back to original size
                 dfs = cellfun(@(df) interpolate_df_back(df, kspace_size), dfs, 'UniformOutput', false);
