@@ -41,14 +41,14 @@ params.win = 20
 params.sharpness = 0.0
 
 #Apply HD-PROST Denoising
-denoised_image_BrB_Ax_60 = denoising_hd_prost(image, sigma=0.65, verbose=3, recon_mode=4)
-denoised_image_BrB_Ax_50 = denoising_hd_prost(image, sigma=0.65, verbose=3, recon_mode=4)
-denoised_image_BrB_Cor_60 = denoising_hd_prost(image, sigma=0.65, verbose=3, recon_mode=4)
-denoised_image_BrB_Cor_50 = denoising_hd_prost(image, sigma=0.65, verbose=3, recon_mode=4)
-denoised_image_Ref_Ax_60 = denoising_hd_prost(image, sigma=0.65, verbose=3, recon_mode=4)
-denoised_image_Ref_Ax_50 = denoising_hd_prost(image, sigma=0.65, verbose=3, recon_mode=4)
-denoised_image_Ref_Cor_60 = denoising_hd_prost(image, sigma=0.65, verbose=3, recon_mode=4)
-denoised_image_Ref_Cor_50 = denoising_hd_prost(image, sigma=0.65, verbose=3, recon_mode=4)
+denoised_image_BrB_Ax_60 = denoising_hd_prost(image, params)
+denoised_image_BrB_Ax_50 = denoising_hd_prost(image, params)
+denoised_image_BrB_Cor_60 = denoising_hd_prost(image, params)
+denoised_image_BrB_Cor_50 = denoising_hd_prost(image, params)
+denoised_image_Ref_Ax_60 = denoising_hd_prost(image, params)
+denoised_image_Ref_Ax_50 = denoising_hd_prost(image, params)
+denoised_image_Ref_Cor_60 = denoising_hd_prost(image, params)
+denoised_image_Ref_Cor_50 = denoising_hd_prost(image, params)
 
 denoised_image_BrB_Ax_60 = np.squeeze(denoised_image_BrB_Ax_60)
 denoised_image_BrB_Ax_50 = np.squeeze(denoised_image_BrB_Ax_50);
