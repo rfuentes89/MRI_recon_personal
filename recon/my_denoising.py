@@ -1,4 +1,5 @@
 
+import time
 import pydicom
 from hd_prost import denoising_hd_prost
 import numpy as np
@@ -47,16 +48,17 @@ Ref_Cor_50 = np.moveaxis(Ref_Cor_50, 0, -1)
 
 # Denoising Parameters
 params = {
-    "sigma": 0.65,
+    "sigma": 0.7,
     #"debug": 3,
     "recon_mode": 4,
-    "patch_size": 7,
+    "patch_size": 6,
     "threshold_type": 0,
     "window": 20,
     "sharpness": 0.0,
     "stride": 4,
 }
 
+start_time = time.time()
 #Apply HD-PROST Denoising
 denoised_image_BrB_Ax_60 = denoising_hd_prost(BrB_Ax_60, **params)
 denoised_image_BrB_Ax_50 = denoising_hd_prost(BrB_Ax_50, **params)
@@ -67,6 +69,8 @@ denoised_image_Ref_Ax_50 = denoising_hd_prost(Ref_Ax_50, **params)
 denoised_image_Ref_Cor_60 = denoising_hd_prost(Ref_Cor_60, **params)
 denoised_image_Ref_Cor_50 = denoising_hd_prost(Ref_Cor_50, **params)
 
+end_time = time.time()
+print(f"Denoising completed in {end_time - start_time:.2f} seconds")
 #Removing singleton dimensions
 denoised_image_BrB_Ax_60 = np.squeeze(denoised_image_BrB_Ax_60)
 denoised_image_BrB_Ax_50 = np.squeeze(denoised_image_BrB_Ax_50)
@@ -83,19 +87,30 @@ my_BB_Cor_50 = np.abs(denoised_image_Ref_Cor_50) - np.abs(denoised_image_BrB_Cor
 my_BB_Cor_60 = np.abs(denoised_image_Ref_Cor_60) - np.abs(denoised_image_BrB_Cor_60);
 my_BB_Ax_50 = np.abs(denoised_image_Ref_Ax_50) - np.abs(denoised_image_BrB_Ax_50);
 
+# Set negative values to zero
+my_BB_Ax_50[my_BB_Ax_50 < 0] = 0;
+my_BB_Cor_50[my_BB_Cor_50 < 0] = 0;
+my_BB_Cor_60[my_BB_Cor_60 < 0] = 0;
+my_BB_Ax_60[my_BB_Ax_60 < 0] = 0;
+
 ## Plot results
 #slice_idx = denoised_image.shape[2] // 2
 
-plt.ion()
+#plt.ion()
 fig, axes = plt.subplots(1, 2, figsize=(12, 6))
 
-axes[0].imshow(np.abs(my_BB_Ax_60[:, :, 42]), cmap="gray")
+axes[0].imshow(np.abs(my_BB_Ax_60[:, :, 39]), cmap="gray")
 axes[0].set_title("BB Image 60ms")
 axes[0].axis("off")
 
-axes[1].imshow(np.abs(denoised_image_BrB_Ax_60[:, :, 42]), cmap="gray")
+axes[1].imshow(np.abs(denoised_image_BrB_Ax_60[:, :, 39]), cmap="gray")
 axes[1].set_title("BrB Image 60ms")
 axes[1].axis("off")
 
 plt.tight_layout()
 plt.show()
+
+plt.figure(1)
+plt.savefig('my_BB_Ax_60ms.png', dpi=150, bbox_inches='tight')
+plt.figure(2)
+plt.savefig('my_BrB_Ax_60ms.png', dpi=150, bbox_inches='tight')
