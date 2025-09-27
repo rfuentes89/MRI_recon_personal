@@ -35,6 +35,10 @@ BrB_Cor_50 = pydicom.dcmread(fpathBrB_Cor_50).pixel_array
 BrB_Ax_50 = pydicom.dcmread(fpathBrB_Ax_50).pixel_array
 Ref_Ax_50 = pydicom.dcmread(fpathRef_Ax_50).pixel_array
 Ref_Cor_50 = pydicom.dcmread(fpathRef_Cor_50).pixel_array
+BB_Cor_50 = pydicom.dcmread(fpathBB_Cor_50).pixel_array
+BB_Ax_50 = pydicom.dcmread(fpathBB_Ax_50).pixel_array
+BB_Cor_60 = pydicom.dcmread(fpathBB_Cor_60).pixel_array
+BB_Ax_60 = pydicom.dcmread(fpathBB_Ax_60).pixel_array
 
 #Reorder dimensions to (height, width, depth)
 BrB_Cor_60 = np.moveaxis(BrB_Cor_60, 0, -1)
@@ -45,6 +49,10 @@ BrB_Cor_50 = np.moveaxis(BrB_Cor_50, 0, -1)
 BrB_Ax_50 = np.moveaxis(BrB_Ax_50, 0, -1)
 Ref_Ax_50 = np.moveaxis(Ref_Ax_50, 0, -1)
 Ref_Cor_50 = np.moveaxis(Ref_Cor_50, 0, -1)
+BB_Cor_50 = np.moveaxis(BB_Cor_50, 0, -1)
+BB_Ax_50 = np.moveaxis(BB_Ax_50, 0, -1)
+BB_Cor_60 = np.moveaxis(BB_Cor_60, 0, -1)
+BB_Ax_60 = np.moveaxis(BB_Ax_60, 0, -1)
 
 # Denoising Parameters
 params = {
@@ -68,9 +76,14 @@ denoised_image_Ref_Ax_60 = denoising_hd_prost(Ref_Ax_60, **params)
 denoised_image_Ref_Ax_50 = denoising_hd_prost(Ref_Ax_50, **params)
 denoised_image_Ref_Cor_60 = denoising_hd_prost(Ref_Cor_60, **params)
 denoised_image_Ref_Cor_50 = denoising_hd_prost(Ref_Cor_50, **params)
+denoised_image_BB_Ax_50 = denoising_hd_prost(BB_Ax_50, **params)
+denoised_image_BB_Ax_60 = denoising_hd_prost(BB_Ax_60, **params)
+denoised_image_BB_Cor_50 = denoising_hd_prost(BB_Cor_50, **params)
+denoised_image_BB_Cor_60 = denoising_hd_prost(BB_Cor_60, **params)
 
 end_time = time.time()
 print(f"Denoising completed in {end_time - start_time:.2f} seconds")
+
 #Removing singleton dimensions
 denoised_image_BrB_Ax_60 = np.squeeze(denoised_image_BrB_Ax_60)
 denoised_image_BrB_Ax_50 = np.squeeze(denoised_image_BrB_Ax_50)
@@ -80,6 +93,10 @@ denoised_image_Ref_Ax_60 = np.squeeze(denoised_image_Ref_Ax_60)
 denoised_image_Ref_Ax_50 = np.squeeze(denoised_image_Ref_Ax_50)
 denoised_image_Ref_Cor_60 = np.squeeze(denoised_image_Ref_Cor_60)
 denoised_image_Ref_Cor_50 = np.squeeze(denoised_image_Ref_Cor_50)
+denoised_image_BB_Ax_50 = np.squeeze(denoised_image_BB_Ax_50)
+denoised_image_BB_Ax_60 = np.squeeze(denoised_image_BB_Ax_60)
+denoised_image_BB_Cor_50 = np.squeeze(denoised_image_BB_Cor_50)
+denoised_image_BB_Cor_60 = np.squeeze(denoised_image_BB_Cor_60)
 
 ### Difference Images
 my_BB_Ax_60 = np.abs(denoised_image_Ref_Ax_60) - np.abs(denoised_image_BrB_Ax_60);
@@ -92,25 +109,44 @@ my_BB_Ax_50[my_BB_Ax_50 < 0] = 0;
 my_BB_Cor_50[my_BB_Cor_50 < 0] = 0;
 my_BB_Cor_60[my_BB_Cor_60 < 0] = 0;
 my_BB_Ax_60[my_BB_Ax_60 < 0] = 0;
+denoised_image_BB_Cor_60[denoised_image_BB_Cor_60 < 0] = 0;
+denoised_image_BB_Ax_60[denoised_image_BB_Ax_60 < 0] = 0;
+denoised_image_BB_Cor_50[denoised_image_BB_Cor_50 < 0] = 0;
+denoised_image_BB_Ax_50[denoised_image_BB_Ax_50 < 0] = 0;
 
 ## Plot results
-#slice_idx = denoised_image.shape[2] // 2
 
-#plt.ion()
-fig, axes = plt.subplots(1, 2, figsize=(12, 6))
+fig, axes = plt.subplots(2, 2, figsize=(10, 6))
 
-axes[0].imshow(np.abs(my_BB_Ax_60[:, :, 39]), cmap="gray")
-axes[0].set_title("BB Image 60ms")
-axes[0].axis("off")
+axes[0, 0].imshow(np.abs(denoised_image_BB_Ax_60[:, :, 39]), cmap="gray")
+axes[0, 0].set_title("BB Ax Image 60ms")
+axes[0, 0].axis("off")
 
-axes[1].imshow(np.abs(denoised_image_BrB_Ax_60[:, :, 39]), cmap="gray")
-axes[1].set_title("BrB Image 60ms")
-axes[1].axis("off")
+axes[0, 1].imshow((my_BB_Ax_60[:, :, 39]), cmap="gray")
+axes[0, 1].set_title("My BB Ax Image 60ms")
+axes[0, 1].axis("off")
+
+axes[1, 0].imshow(np.abs(denoised_image_BB_Cor_60[:, :, 39]), cmap="gray")
+axes[1, 0].set_title("BB Cor Image 60ms")
+axes[1, 0].axis("off")
+
+axes[1, 1].imshow((my_BB_Cor_60[:, :, 39]), cmap="gray")
+axes[1, 1].set_title("My BB Cor Image 60ms")
+axes[1, 1].axis("off")
 
 plt.tight_layout()
 plt.show()
+plt.savefig('my_denoising_60ms_2.png')
+#plt.tight_layout()
+#plt.show()
 
-plt.figure(1)
-plt.savefig('my_BB_Ax_60ms.png', dpi=150, bbox_inches='tight')
+""" plt.figure(1)
+plt.savefig('my_BB_Ax_60ms.png', bbox_inches='tight')
 plt.figure(2)
-plt.savefig('my_BrB_Ax_60ms.png', dpi=150, bbox_inches='tight')
+plt.savefig('my_BrB_Ax_60ms.png', bbox_inches='tight')
+plt.figure(3)
+plt.savefig('my_BB_Cor_60ms.png', bbox_inches='tight')
+plt.figure(4)
+plt.savefig('my_BrB_Cor_60ms.png', bbox_inches='tight') """
+
+#plt.close(fig)
