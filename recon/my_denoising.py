@@ -117,28 +117,29 @@ denoised_image_BB_Ax_50[denoised_image_BB_Ax_50 < 0] = 0;
 ## Plot results
 
 fig, axes = plt.subplots(2, 2, figsize=(10, 6))
-
+plt.subplot(2, 2, 1)
 axes[0, 0].imshow(np.abs(denoised_image_BB_Ax_60[:, :, 39]), cmap="gray")
 axes[0, 0].set_title("BB Ax Image 60ms")
 axes[0, 0].axis("off")
 
+plt.subplot(2, 2, 2)
 axes[0, 1].imshow((my_BB_Ax_60[:, :, 39]), cmap="gray")
 axes[0, 1].set_title("My BB Ax Image 60ms")
 axes[0, 1].axis("off")
 
+plt.subplot(2, 2, 3)
 axes[1, 0].imshow(np.abs(denoised_image_BB_Cor_60[:, :, 39]), cmap="gray")
 axes[1, 0].set_title("BB Cor Image 60ms")
 axes[1, 0].axis("off")
 
+plt.subplot(2, 2, 4)
 axes[1, 1].imshow((my_BB_Cor_60[:, :, 39]), cmap="gray")
 axes[1, 1].set_title("My BB Cor Image 60ms")
 axes[1, 1].axis("off")
 
 plt.tight_layout()
 plt.show()
-plt.savefig('my_denoising_60ms_2.png')
-#plt.tight_layout()
-#plt.show()
+#plt.savefig('my_denoising_60ms_2.png', bbox_inches='tight')
 
 """ plt.figure(1)
 plt.savefig('my_BB_Ax_60ms.png', bbox_inches='tight')
